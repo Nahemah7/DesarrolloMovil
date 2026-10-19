@@ -1,6 +1,6 @@
 package com.example.rinconsur.model
 
-enum class EstadoSesion(etiqueta: String) {
+enum class EstadoSesion(val etiqueta: String) {
     PROGRAMADA("Programada"),
     EN_CURSO("En curso"),
     FINALIZADA("Finalizada"),

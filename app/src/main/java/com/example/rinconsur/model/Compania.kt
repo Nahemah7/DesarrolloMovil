@@ -1,6 +1,6 @@
 package com.example.rinconsur.model
 
-enum class Compania(etiqueta: String) {
+enum class Compania(val etiqueta: String) {
     SOLO("Solo"),
     PAREJA("Pareja"),
     CON_NINOS("Con niños"),
