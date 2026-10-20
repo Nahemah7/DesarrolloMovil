@@ -1,10 +1,18 @@
 package com.example.rinconsur.model
 
-enum class EstadoSesion(val etiqueta: String) {
-    PROGRAMADA("Programada"),
-    EN_CURSO("En curso"),
-    FINALIZADA("Finalizada"),
-    VALIDADA("Validada"),
-    RECHAZADA("Rechazada"),
-    CANCELADA("Cancelada")
+/** Estados de una sesion de conteo (catalogo `estado_sesion`). */
+enum class EstadoSesion(val etiqueta: String, val idEstado: Long) {
+    PROGRAMADA("Programada", 1),
+    EN_CURSO("En curso", 2),
+    FINALIZADA("Finalizada", 3),
+    VALIDADA("Validada", 4),
+    RECHAZADA("Rechazada", 5),
+    CANCELADA("Cancelada", 6);
+
+    /** Las cerradas por el observador son las que el supervisor tiene que resolver. */
+    val esperaRevision: Boolean get() = this == FINALIZADA
+
+    companion object {
+        fun porId(id: Long): EstadoSesion = entries.firstOrNull { it.idEstado == id } ?: PROGRAMADA
+    }
 }
