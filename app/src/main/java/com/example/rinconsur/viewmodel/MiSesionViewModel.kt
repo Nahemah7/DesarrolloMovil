@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Lo que el observador ve antes de empezar: quien es y que sesion le toca hoy.
- * Quien esta adentro sale de la sesion guardada, igual que en el material del ramo.
+ * Quien esta adentro sale de la sesion guardada, no de la pantalla.
  */
 class MiSesionViewModel(application: Application) : AndroidViewModel(application) {
 

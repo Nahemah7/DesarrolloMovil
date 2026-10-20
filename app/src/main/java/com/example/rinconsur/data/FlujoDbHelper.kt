@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import com.example.rinconsur.model.*
 
 /**
- * Base de datos de la app, con el estilo del material del ramo: SQL escrito a mano,
+ * Base de datos de la app, SQL escrito a mano,
  * `onCreate` que crea y precarga, y metodos que devuelven modelos (no cursores).
  *
  * El esquema es el modelo C01 v2 (15 tablas y 6 vistas), el mismo que quedo validado
@@ -914,7 +914,7 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
     }
 
     /**
-     * Migrar conservando los datos: ALTER TABLE, nunca DROP (es lo que ensena el material del ramo).
+     * Migrar conservando los datos: ALTER TABLE, nunca DROP, para no borrar lo que ya esta guardado en el telefono.
      * Cada version nueva agrega su bloque, y la app que ya estaba instalada no pierde nada.
      */
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
