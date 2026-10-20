@@ -7,4 +7,7 @@ data class Acceso(
     val nombre: String,
     val ubicacion: String,
     val observacion: String
-)
+) {
+    /** Como se muestra en las listas y en los chips: "A1 Acceso Principal". */
+    val etiquetaCorta: String get() = codigo + " " + nombre
+}

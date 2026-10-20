@@ -29,6 +29,11 @@ class FlujoRepository(context: Context) {
 
     private val db = FlujoDbHelper(context)
 
+    companion object {
+        /** Minimo de registros validos para poder validar una sesion (Anexo 8). */
+        const val MINIMO_REGISTROS = FlujoDbHelper.MINIMO_REGISTROS
+    }
+
     // ---- catalogos y datos de referencia ----
 
     fun accesos(): List<Acceso> = db.listarAccesos()
