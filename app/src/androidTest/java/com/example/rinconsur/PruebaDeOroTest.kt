@@ -27,7 +27,7 @@ class PruebaDeOroTest {
     @Before
     fun abrirBaseLimpia() {
         val contexto = ApplicationProvider.getApplicationContext<android.content.Context>()
-        contexto.deleteDatabase("rincon_sur.db")     // se precarga sola en onCreate
+        contexto.deleteDatabase("rinconsur.db")     // se precarga sola en onCreate
         db = FlujoDbHelper(contexto)
     }
 

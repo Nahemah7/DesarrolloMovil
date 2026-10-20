@@ -23,7 +23,7 @@ class FlujoDbHelper(context: Context) :
     SQLiteOpenHelper(context, NOMBRE_BD, null, VERSION_BD) {
 
     companion object {
-        private const val NOMBRE_BD = "rincon_sur.db"
+        private const val NOMBRE_BD = "rinconsur.db"
         private const val VERSION_BD = 2
 
         /** Estado con el que se abre y se cierra la sesion de conteo. */
