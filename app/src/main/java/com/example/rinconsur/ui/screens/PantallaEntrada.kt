@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rinconsur.ui.components.BarraApp
@@ -73,7 +74,7 @@ fun PantallaEntrada(onCerrarSesion: () -> Unit) {
 
             Spacer(Modifier.height(Dimens.espacioMedio))
             BotonSecundario(texto = "Cerrar sesion", onClick = onCerrarSesion)
-            Spacer(Modifier.height(Dimens.espacioGrande))
+            Spacer(Modifier.height(36.dp))
         }
     }
 }

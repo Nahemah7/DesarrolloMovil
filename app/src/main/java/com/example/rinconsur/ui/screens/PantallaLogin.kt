@@ -36,7 +36,8 @@ fun PantallaLogin(onEntrar: (PerfilUsuario) -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = Dimens.espacioPantalla)
         ) {
-            Spacer(Modifier.height(18.dp))
+            // Espacio para que el encabezado no quede pegado a la barra de estado del telefono
+            Spacer(Modifier.height(36.dp))
             Text("RINCON SUR", style = MaterialTheme.typography.labelMedium, color = Burdeo)
             Text("Control de flujo\npor acceso", style = MaterialTheme.typography.titleLarge)
             Nota("Uso interno. Cada colaborador entra con su propia cuenta.")
@@ -89,7 +90,8 @@ fun PantallaLogin(onEntrar: (PerfilUsuario) -> Unit) {
                 Text("13.987.442-0 · Rodrigo Saavedra · subgerente", style = MaterialTheme.typography.bodySmall)
                 Nota("La clave de los tres es la misma en este prototipo: " + CLAVE_DE_EJEMPLO + ". La app guarda su hash, nunca la clave.")
             }
-            Spacer(Modifier.height(20.dp))
+            // Colchon final: los ultimos datos no quedan debajo de los botones del sistema
+            Spacer(Modifier.height(36.dp))
         }
     }
 }
