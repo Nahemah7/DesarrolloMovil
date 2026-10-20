@@ -13,6 +13,10 @@ enum class EstadoSesion(val etiqueta: String, val idEstado: Long) {
     val esperaRevision: Boolean get() = this == FINALIZADA
 
     companion object {
+        /** Para leer el catalogo de la base por su etiqueta. */
+        fun porNombre(nombre: String): EstadoSesion =
+            entries.firstOrNull { it.etiqueta.equals(nombre, ignoreCase = true) } ?: PROGRAMADA
+
         fun porId(id: Long): EstadoSesion = entries.firstOrNull { it.idEstado == id } ?: PROGRAMADA
     }
 }
