@@ -16,3 +16,6 @@ local.properties
 
 # Configuracion del IDE: cada uno usa el suyo, no se comparte (con tres personas da conflictos)
 .idea/
+
+# Documentacion interna de trabajo: para nosotros, no va al repositorio
+DOCUMENTACION_INTERNA.md
