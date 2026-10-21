@@ -28,7 +28,9 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
         RegistroUiState(
             codigoSesion = repositorio.resumenDeSesion(idSesion).codigo,
             resumen = repositorio.resumenDeSesion(idSesion),
-            ultimosRegistros = repositorio.ultimosRegistros(idSesion)
+            ultimosRegistros = repositorio.ultimosRegistros(idSesion),
+            accesos = repositorio.accesos(),
+            sesionEnCurso = repositorio.sesionEnCursoDe(idObservador)?.id == idSesion
         )
     )
     val uiState: StateFlow<RegistroUiState> = _uiState.asStateFlow()

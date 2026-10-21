@@ -26,6 +26,10 @@ data class RegistroUiState(
     val destino: Long? = null,
     val resumen: ResumenSesion = ResumenSesion(codigo = ""),
     val ultimosRegistros: List<Registro> = emptyList(),
+    /** Accesos de la tienda, para decir hacia donde se dirige un transito. */
+    val accesos: List<Acceso> = emptyList(),
+    /** Solo se puede anular mientras la sesion esta en curso (RN-11). */
+    val sesionEnCurso: Boolean = false,
     val mensaje: String? = null
 ) {
     /** En hora punta se registra con la plantilla y un solo toque: la rangoEtario puede venir puesta. */

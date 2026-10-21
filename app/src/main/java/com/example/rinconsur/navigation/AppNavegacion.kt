@@ -6,17 +6,23 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.rinconsur.model.PerfilUsuario
+import com.example.rinconsur.ui.screens.PantallaCierre
 import com.example.rinconsur.ui.screens.PantallaEntrada
 import com.example.rinconsur.ui.screens.PantallaLogin
+import com.example.rinconsur.ui.screens.PantallaMiSesion
+import com.example.rinconsur.ui.screens.PantallaPerfil
+import com.example.rinconsur.ui.screens.PantallaPlantilla
+import com.example.rinconsur.ui.screens.PantallaRegistro
 import com.example.rinconsur.viewmodel.LoginViewModel
 
 /**
  * Navegacion de la app. El perfil que entra decide el recorrido: el observador registra y cierra su
- * sesion; el supervisor programa, valida y mira los indicadores. Por ahora el recorrido llega hasta
- * la pantalla de sesion iniciada.
+ * sesion de conteo; el supervisor programa, valida y mira los indicadores.
  *
  * Transicion: al cambiar de pantalla entra desde la derecha y se va hacia la izquierda (y al volver,
  * al reves). 250 ms: se ve de donde viene cada pantalla en vez de un corte seco, y no alcanza a
@@ -56,9 +62,17 @@ fun AppNavegacion() {
             ) + fadeOut(animationSpec = tween(duracion))
         }
     ) {
+
         composable(Ruta.Login.ruta) {
-            PantallaLogin(onEntrar = { navController.navigate(Ruta.Entrada.ruta) })
+            PantallaLogin(
+                onEntrar = { perfil ->
+                    val destino = if (perfil == PerfilUsuario.OBSERVADOR) Ruta.MiSesion.ruta else Ruta.Entrada.ruta
+                    navController.navigate(destino) { popUpTo(Ruta.Login.ruta) { inclusive = true } }
+                }
+            )
         }
+
+        // El supervisor entra a la pantalla interina hasta que existan las suyas.
         composable(Ruta.Entrada.ruta) {
             PantallaEntrada(
                 onCerrarSesion = {
@@ -67,5 +81,47 @@ fun AppNavegacion() {
                 }
             )
         }
+
+        // ---- Colaborador observador ----
+        composable(Ruta.MiSesion.ruta) {
+            PantallaMiSesion(
+                onIniciar = { navController.navigate(Ruta.Registro.ruta) },
+                onIrA = { navController.navegar(it) }
+            )
+        }
+        composable(Ruta.Registro.ruta) {
+            PantallaRegistro(
+                onPlantilla = { navController.navigate(Ruta.Plantilla.ruta) },
+                onCerrar = { navController.navigate(Ruta.Cierre.ruta) },
+                onIrA = { navController.navegar(it) }
+            )
+        }
+        composable(Ruta.Plantilla.ruta) { PantallaPlantilla(onVolver = { navController.navigateUp() }) }
+        composable(Ruta.Cierre.ruta) {
+            PantallaCierre(
+                onEnviar = { navController.navigate(Ruta.MiSesion.ruta) { popUpTo(Ruta.MiSesion.ruta) } },
+                onIrA = { navController.navegar(it) }
+            )
+        }
+
+        // ---- Comunes ----
+        composable(Ruta.Perfil.ruta) {
+            PantallaPerfil(
+                onSalir = {
+                    loginViewModel.cerrarSesion()
+                    navController.navigate(Ruta.Login.ruta) { popUpTo(0) }
+                }
+            )
+        }
     }
+}
+
+/** La pestana de abajo se traduce a su ruta. Las del supervisor llegan con sus pantallas. */
+private fun NavHostController.navegar(pestana: String) {
+    val destino = when (pestana) {
+        "Registrar" -> Ruta.Registro.ruta
+        "Mis sesiones" -> Ruta.MiSesion.ruta
+        else -> Ruta.Perfil.ruta
+    }
+    navigate(destino) { launchSingleTop = true }
 }

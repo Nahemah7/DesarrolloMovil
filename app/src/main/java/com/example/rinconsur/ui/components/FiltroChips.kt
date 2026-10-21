@@ -12,19 +12,32 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.rinconsur.ui.theme.Burdeo
 import com.example.rinconsur.ui.theme.BurdeoSuave
 import com.example.rinconsur.ui.theme.RinconSurTheme
 
-/** Un filtro de una sola opcion (acceso, tipo de dia, periodo). */
+/**
+ * Un filtro de una sola opcion (acceso, tipo de dia, periodo).
+ * El elegido no se distingue solo por color: lleva marca y queda en negrita (RNF-07).
+ */
 @Composable
 fun Filtro(texto: String, activo: Boolean, onClick: () -> Unit) {
     FilterChip(
         selected = activo,
         onClick = onClick,
-        label = { Text(texto, style = MaterialTheme.typography.labelSmall) },
+        label = {
+            Text(
+                texto,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = if (activo) FontWeight.Bold else FontWeight.Normal
+            )
+        },
+        leadingIcon = if (activo) {
+            { Text("✓", style = MaterialTheme.typography.labelSmall, color = Burdeo, fontWeight = FontWeight.Bold) }
+        } else null,
         shape = RoundedCornerShape(50),
         colors = FilterChipDefaults.filterChipColors(
             selectedContainerColor = BurdeoSuave,
