@@ -27,7 +27,8 @@ class FlujoDbHelper(context: Context) :
         private const val VERSION_BD = 2
 
         /** Estado con el que se abre y se cierra la sesion de conteo. */
-        const val ESTADO_EN_CURSO = 2L
+        const val ESTADO_PROGRAMADA = 1L
+    const val ESTADO_EN_CURSO = 2L
         const val ESTADO_FINALIZADA = 3L
         const val ESTADO_VALIDADA = 4L
         const val ESTADO_RECHAZADA = 5L
@@ -983,6 +984,44 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
     /** Una sesion por su id, sin importar la fecha (la pantalla de rechazo la recibe por la ruta). */
     fun buscarSesion(idSesion: Long): SesionResumen? =
         consultarSesiones(SQL_SESIONES + "WHERE s.id_sesion = ?", arrayOf(idSesion.toString())).firstOrNull()
+
+    /** Los colaboradores que pueden contar: el rol de observador, sin numeros fijos. */
+    fun listarObservadores(): List<Colaborador> =
+        consultarColaboradores(
+            SQL_USUARIO + "WHERE u.id_rol = (SELECT id_rol FROM rol WHERE nombre LIKE '%observador%')",
+            arrayOf()
+        )
+
+    /**
+     * Programa una sesion de conteo. Queda en estado Programada con sus horas previstas y quien la
+     * programo; las horas reales las escribe el observador cuando la inicia.
+     */
+    fun programarSesion(
+        idAcceso: Long,
+        fecha: String,
+        horaInicio: String,
+        horaFin: String,
+        idObservador: Long,
+        idProgramador: Long
+    ): String {
+        val siguiente = readableDatabase
+            .rawQuery("SELECT COALESCE(MAX(id_sesion), 0) + 1 AS siguiente FROM sesion_observacion", null)
+            .use { c -> if (c.moveToNext()) c.long("siguiente") else 1L }
+        val codigo = "S-" + siguiente.toString().padStart(4, '0')
+        val valores = ContentValues().apply {
+            put("id_sesion", siguiente)
+            put("codigo", codigo)
+            put("id_acceso", idAcceso)
+            put("fecha", fecha)
+            put("hora_inicio_prog", horaInicio)
+            put("hora_fin_prog", horaFin)
+            put("id_estado", ESTADO_PROGRAMADA)
+            put("id_observador", idObservador)
+            put("id_programador", idProgramador)
+        }
+        writableDatabase.insert("sesion_observacion", null, valores)
+        return codigo
+    }
 
     /** Todas las sesiones cerradas que esperan revision, de cualquier fecha. */
     fun sesionesPorValidarTodas(): List<SesionResumen> =

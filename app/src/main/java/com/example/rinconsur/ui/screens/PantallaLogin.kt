@@ -83,18 +83,14 @@ fun PantallaLogin(onEntrar: (PerfilUsuario) -> Unit) {
                 }
             )
             Nota("El telefono se comparte entre turnos: la sesion se cierra al devolver el equipo.")
-            Seccion("Colaboradores de ejemplo")
-            TarjetaSeccion {
-                Text("19.876.345-4 · Tamara Rojas · observadora", style = MaterialTheme.typography.bodySmall)
-                Text("17.654.320-5 · Daniela Pizarro · supervisora", style = MaterialTheme.typography.bodySmall)
-                Text("13.987.442-0 · Rodrigo Saavedra · subgerente", style = MaterialTheme.typography.bodySmall)
-                Nota("La clave de los tres es la misma en este prototipo: " + CLAVE_DE_EJEMPLO + ". La app guarda su hash, nunca la clave.")
+            Seccion("Entrar directo (prototipo)")
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                BotonSecundario(texto = "Observadora", onClick = { vm.entrarComo(PerfilUsuario.OBSERVADOR)?.let(onEntrar) })
+                BotonSecundario(texto = "Supervisora", onClick = { vm.entrarComo(PerfilUsuario.SUPERVISOR)?.let(onEntrar) })
             }
+            Nota("Para la defensa: entran sin escribir la credencial. Valida igual contra la base, con su hash. En producción no va.")
             // Colchon final: los ultimos datos no quedan debajo de los botones del sistema
             Spacer(Modifier.height(36.dp))
         }
     }
 }
-
-/** Clave de los colaboradores de ejemplo. Se muestra porque es un prototipo: en produccion no. */
-private const val CLAVE_DE_EJEMPLO = "rincon2026"

@@ -103,6 +103,24 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         return encontrado.perfil
     }
 
+    /**
+     * Entra directo con la credencial de ejemplo de un rol: para la defensa y las pruebas, sin
+     * tipear. No se salta ninguna validacion, solo escribe por vos contra la misma base.
+     */
+    fun entrarComo(perfil: PerfilUsuario): PerfilUsuario? {
+        val credencial = CREDENCIALES_DE_EJEMPLO[perfil] ?: return null
+        _uiState.update {
+            it.copy(
+                rut = credencial.first,
+                clave = credencial.second,
+                errorRut = null,
+                errorClave = null,
+                errorGeneral = null
+            )
+        }
+        return entrar()
+    }
+
     fun cerrarSesion() {
         sesion.borrar()
         _usuario.value = null
@@ -112,5 +130,16 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     override fun onCleared() {
         repositorio.cerrar()
         super.onCleared()
+    }
+
+    private companion object {
+        /** Clave de los colaboradores de ejemplo del prototipo. En produccion no existe. */
+        const val CLAVE_DE_EJEMPLO = "rincon2026"
+
+        /** Credenciales de los dos roles de la entrega, para entrar sin tipear. */
+        val CREDENCIALES_DE_EJEMPLO = mapOf(
+            PerfilUsuario.OBSERVADOR to ("19.876.345-4" to CLAVE_DE_EJEMPLO),
+            PerfilUsuario.SUPERVISOR to ("17.654.320-5" to CLAVE_DE_EJEMPLO)
+        )
     }
 }

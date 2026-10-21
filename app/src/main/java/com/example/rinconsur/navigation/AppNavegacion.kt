@@ -16,6 +16,7 @@ import com.example.rinconsur.ui.screens.PantallaEntrada
 import com.example.rinconsur.ui.screens.PantallaLogin
 import com.example.rinconsur.ui.screens.PantallaMiSesion
 import com.example.rinconsur.ui.screens.PantallaPerfil
+import com.example.rinconsur.ui.screens.PantallaProgramar
 import com.example.rinconsur.ui.screens.PantallaPlantilla
 import com.example.rinconsur.ui.screens.PantallaRegistro
 import com.example.rinconsur.viewmodel.LoginViewModel
@@ -66,7 +67,8 @@ fun AppNavegacion() {
         composable(Ruta.Login.ruta) {
             PantallaLogin(
                 onEntrar = { perfil ->
-                    val destino = if (perfil == PerfilUsuario.OBSERVADOR) Ruta.MiSesion.ruta else Ruta.Entrada.ruta
+                    // El observador cuenta; el supervisor programa la sesion y despues la revisa.
+                    val destino = if (perfil == PerfilUsuario.OBSERVADOR) Ruta.MiSesion.ruta else Ruta.Programar.ruta
                     navController.navigate(destino) { popUpTo(Ruta.Login.ruta) { inclusive = true } }
                 }
             )
@@ -105,6 +107,9 @@ fun AppNavegacion() {
         }
 
         // ---- Comunes ----
+        // ---- Supervisor de piso ----
+        composable(Ruta.Programar.ruta) { PantallaProgramar(onIrA = { navController.navegar(it) }) }
+
         composable(Ruta.Perfil.ruta) {
             PantallaPerfil(
                 onSalir = {
@@ -121,6 +126,7 @@ private fun NavHostController.navegar(pestana: String) {
     val destino = when (pestana) {
         "Registrar" -> Ruta.Registro.ruta
         "Mis sesiones" -> Ruta.MiSesion.ruta
+        "Sesiones" -> Ruta.Programar.ruta
         else -> Ruta.Perfil.ruta
     }
     navigate(destino) { launchSingleTop = true }

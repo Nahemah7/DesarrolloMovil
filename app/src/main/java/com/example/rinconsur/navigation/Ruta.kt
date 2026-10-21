@@ -13,6 +13,9 @@ sealed class Ruta(val ruta: String) {
     /** Interina, para el supervisor, hasta que existan sus pantallas de conteo. */
     data object Entrada : Ruta("entrada")
 
+    // Supervisor de piso
+    data object Programar : Ruta("programar")
+
     // Colaborador observador
     data object MiSesion : Ruta("mi_sesion")
     data object Registro : Ruta("registro")

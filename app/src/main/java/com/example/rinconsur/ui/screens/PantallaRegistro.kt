@@ -223,10 +223,15 @@ fun PantallaRegistro(onPlantilla: () -> Unit, onCerrar: () -> Unit, onIrA: (Stri
 
             if (estado.clasificacion == Clasificacion.TRANSITO) {
                 Seccion("Hacia dónde se dirige")
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     estado.accesos.forEach { a ->
-                        Filtro(a.etiquetaCorta, estado.destino == a.id) { vm.onDestino(a.id) }
+                        // Etiqueta corta: los nombres completos no caben y el ultimo acceso quedaba
+                        // fuera de la pantalla, sin poder marcarlo.
+                        Filtro(a.codigo, estado.destino == a.id) { vm.onDestino(a.id) }
                     }
+                }
+                estado.accesos.firstOrNull { it.id == estado.destino }?.let { a ->
+                    Nota("Va a " + a.codigo + " · " + a.nombre)
                 }
             }
 

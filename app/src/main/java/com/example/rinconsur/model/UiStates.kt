@@ -108,3 +108,51 @@ data class EntradaUiState(
     val accesos: List<Acceso> = emptyList()
 )
 
+/**
+ * Programar una sesion de conteo (supervisor de piso). El acceso y el observador se eligen de las
+ * listas de la base; la duracion se calcula sola y el choque con otra sesion se avisa antes de
+ * programar.
+ */
+data class ProgramarUiState(
+    val fecha: String = "",
+    val accesos: List<Acceso> = emptyList(),
+    val observadores: List<Colaborador> = emptyList(),
+    val sesionesDeLaFecha: List<SesionResumen> = emptyList(),
+    val idAcceso: Long? = null,
+    val horaInicio: String = "13:00",
+    val horaFin: String = "13:45",
+    val idObservador: Long? = null,
+    val error: String? = null,
+    val programada: String = "",
+    val codigo: String = ""
+) {
+    /** Minutos entre las dos horas elegidas. */
+    val duracionMinutos: Int get() = minutos(horaFin) - minutos(horaInicio)
+
+    val duracionValida: Boolean get() = duracionMinutos in 30..60
+
+    /** La sesion que se cruza, si hay: mismo acceso o misma persona en horas que se pisan. */
+    val choque: SesionResumen? get() {
+        if (idAcceso == null) return null
+        return sesionesDeLaFecha.firstOrNull { s ->
+            s.idAcceso == idAcceso && seCruzan(s.horaInicioProg, s.horaFinProg, horaInicio, horaFin)
+        } ?: idObservador?.let { id ->
+            sesionesDeLaFecha.firstOrNull { s ->
+                s.idObservador == id && seCruzan(s.horaInicioProg, s.horaFinProg, horaInicio, horaFin)
+            }
+        }
+    }
+
+    val sePuedeProgramar: Boolean
+        get() = idAcceso != null && idObservador != null && duracionValida && choque == null
+
+    private companion object {
+        fun minutos(hora: String): Int {
+            val p = hora.split(":")
+            return (p.getOrNull(0)?.toIntOrNull() ?: 0) * 60 + (p.getOrNull(1)?.toIntOrNull() ?: 0)
+        }
+
+        fun seCruzan(inicioA: String, finA: String, inicioB: String, finB: String): Boolean =
+            minutos(inicioA) < minutos(finB) && minutos(inicioB) < minutos(finA)
+    }
+}

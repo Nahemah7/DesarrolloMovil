@@ -71,6 +71,16 @@ class FlujoRepository(context: Context) {
     fun resumenDeSesion(idSesion: Long): ResumenSesion = db.resumenDeSesion(idSesion)
 
     fun iniciarSesion(idSesion: Long, hora: String): Int = db.iniciarSesion(idSesion, hora)
+    fun observadores(): List<Colaborador> = db.listarObservadores()
+
+    fun programarSesion(
+        idAcceso: Long,
+        fecha: String,
+        horaInicio: String,
+        horaFin: String,
+        idObservador: Long,
+        idProgramador: Long
+    ): String = db.programarSesion(idAcceso, fecha, horaInicio, horaFin, idObservador, idProgramador)
 
     fun cerrarSesion(idSesion: Long, hora: String): Int = db.cerrarSesionReal(idSesion, hora)
 
