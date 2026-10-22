@@ -2,6 +2,7 @@ package com.example.rinconsur.ui.screens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -16,9 +17,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.rinconsur.model.Acceso
 import com.example.rinconsur.model.EstadoSesion
+import com.example.rinconsur.model.SesionResumen
 import com.example.rinconsur.ui.components.BarraApp
 import com.example.rinconsur.ui.components.BotonPrincipal
+import com.example.rinconsur.ui.components.EtiquetaEstado
 import com.example.rinconsur.ui.components.NavInferior
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
@@ -30,16 +34,28 @@ import com.example.rinconsur.ui.theme.Ok
 import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.MiSesionViewModel
 
-/** Lo que el observador ve antes de empezar: quien es y que sesion le toca. */
+private fun accesoDe(accesos: List<Acceso>, sesion: SesionResumen): String =
+    accesos.firstOrNull { it.id == sesion.idAcceso }?.let { it.codigo + " · " + it.nombre } ?: "Acceso sin asignar"
+
+private fun tipoDe(estado: EstadoSesion): String = when (estado) {
+    EstadoSesion.EN_CURSO -> "ok"
+    EstadoSesion.PROGRAMADA -> "info"
+    else -> "neutro"
+}
+
+/**
+ * Lo que el observador ve antes de empezar: quien es y todas las sesiones que tiene en el dia.
+ * Puede tener mas de una programada, asi que van en lista y cada una con su accion.
+ */
 @Composable
 fun PantallaMiSesion(onIniciar: () -> Unit, onIrA: (String) -> Unit) {
     val vm: MiSesionViewModel = viewModel()
     val usuario by vm.usuario.collectAsStateWithLifecycle()
-    val sesion by vm.sesionAsignada.collectAsStateWithLifecycle()
-    val acceso by vm.acceso.collectAsStateWithLifecycle()
-    val sinSesion by vm.sinSesionProgramada.collectAsStateWithLifecycle()
+    val sesiones by vm.sesionesDeHoy.collectAsStateWithLifecycle()
+    val accesos by vm.accesos.collectAsStateWithLifecycle()
 
-    val enCurso = sesion?.estado == EstadoSesion.EN_CURSO
+    val hayEnCurso = sesiones.any { it.estado == EstadoSesion.EN_CURSO }
+    val hayProgramada = sesiones.any { it.estado == EstadoSesion.PROGRAMADA }
 
     Scaffold(
         containerColor = Color.White,
@@ -47,14 +63,22 @@ fun PantallaMiSesion(onIniciar: () -> Unit, onIrA: (String) -> Unit) {
             BarraApp(
                 titulo = "Mi sesión",
                 subtitulo = usuario?.let { it.nombre + " · " + it.perfil.etiqueta } ?: "",
-                etiqueta = if (enCurso) "En curso" else "Programada",
-                colorEtiqueta = if (enCurso) Ok else Info
+                // Sin nada por hacer no se inventa una etiqueta: las sesiones cerradas se ven en la lista
+                etiqueta = when {
+                    hayEnCurso -> "En curso"
+                    hayProgramada -> "Programada"
+                    else -> null
+                },
+                colorEtiqueta = if (hayEnCurso) Ok else Info
             )
         },
         bottomBar = { NavInferior(listOf("Registrar", "Mis sesiones", "Perfil"), "Mis sesiones", onIrA) }
     ) { pad ->
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
-            if (sinSesion) {
+
+            // El aviso es solo cuando NO hay ninguna sesion asignada. Antes se mostraba cuando no habia
+            // nada por iniciar, asi que al enviar una sesion desaparecian las demas de la lista.
+            if (sesiones.isEmpty()) {
                 Seccion("Hoy")
                 TarjetaSeccion(acento = Burdeo) {
                     Text("No tienes una sesión de conteo asignada para hoy.",
@@ -62,16 +86,35 @@ fun PantallaMiSesion(onIniciar: () -> Unit, onIrA: (String) -> Unit) {
                     Text("Si te toca una, la vas a ver acá cuando el supervisor la programe.",
                         style = MaterialTheme.typography.bodySmall, color = Apagado)
                 }
-            } else sesion?.let { s ->
-                Seccion("Sesión de hoy")
-                TarjetaSeccion(acento = Burdeo) {
-                    Text(acceso.ifEmpty { "Acceso sin asignar" }, style = MaterialTheme.typography.titleSmall)
-                    Text(s.estado.etiqueta, style = MaterialTheme.typography.bodyMedium, color = if (enCurso) Ok else Info)
-                    Text("Hoy " + s.horaInicioCorta + " - " + s.horaFinCorta,
-                        style = MaterialTheme.typography.bodyMedium, color = Tinta)
-                    Text("Duración " + s.duracionMinutos + " min (debe estar entre 30 y 60)",
-                        style = MaterialTheme.typography.bodySmall, color = Apagado)
+            } else {
+                Seccion(if (sesiones.size > 1) "Mis sesiones de hoy (" + sesiones.size + ")" else "Sesión de hoy")
+                sesiones.forEach { s ->
+                    TarjetaSeccion(acento = if (s.estado == EstadoSesion.EN_CURSO) Ok else Burdeo) {
+                        Text(accesoDe(accesos, s), style = MaterialTheme.typography.titleSmall, color = Tinta)
+                        Text("Hoy " + s.horaInicioCorta + " - " + s.horaFinCorta + " · " + s.duracionMinutos + " min",
+                            style = MaterialTheme.typography.bodyMedium, color = Tinta)
+                        Spacer(Modifier.height(4.dp))
+                        EtiquetaEstado(s.estado.etiqueta, tipoDe(s.estado))
+
+                        when (s.estado) {
+                            EstadoSesion.EN_CURSO -> {
+                                Spacer(Modifier.height(10.dp))
+                                BotonPrincipal("Seguir registrando", onClick = onIniciar)
+                            }
+                            EstadoSesion.PROGRAMADA -> {
+                                Spacer(Modifier.height(10.dp))
+                                BotonPrincipal("Iniciar sesión de conteo", onClick = { if (vm.iniciar(s.id)) onIniciar() })
+                            }
+                            else -> {
+                                Spacer(Modifier.height(4.dp))
+                                Text("Ya cerrada: no se puede seguir registrando en ella.",
+                                    style = MaterialTheme.typography.bodySmall, color = Apagado)
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
                 }
+
                 Seccion("Qué vas a registrar")
                 TarjetaSeccion {
                     Text("Clasificación (tránsito o visita) · apariencia · compañía · compras de otra tienda · hacia dónde se dirige, solo si es tránsito.",
@@ -80,11 +123,6 @@ fun PantallaMiSesion(onIniciar: () -> Unit, onIrA: (String) -> Unit) {
                         style = MaterialTheme.typography.bodySmall, color = Apagado)
                 }
                 Nota("Se puede empezar aunque la red falle: la sesión queda y se envía después.")
-                Spacer(Modifier.height(14.dp))
-                BotonPrincipal(
-                    if (enCurso) "Seguir registrando" else "Iniciar sesión de conteo",
-                    onClick = { if (vm.iniciar() != null) onIniciar() }
-                )
             }
             Spacer(Modifier.height(20.dp))
         }

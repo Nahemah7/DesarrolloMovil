@@ -18,6 +18,8 @@ val Blanco = Color(0xFFFFFFFF)
 val Ok = Color(0xFF0F6B63)
 val OkSuave = Color(0xFFE7F2F1)
 val Aviso = Color(0xFF8A4500)
+/** Para acciones destructivas, como borrar una plantilla. */
+val Peligro = Color(0xFFB3261E)
 val AvisoSuave = Color(0xFFFFF7E8)
 val Info = Color(0xFF123F73)
 val InfoSuave = Color(0xFFE8EEF6)

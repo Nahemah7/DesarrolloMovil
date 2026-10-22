@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Vibracion: confirma que el registro quedo guardado sin mirar la pantalla (RNF-01).
+         Se otorga al instalar, no se le pregunta al usuario. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <!-- Para avisar cuando no hay red: la app no pierde nada, todo queda en la base local (RNF-03) -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 

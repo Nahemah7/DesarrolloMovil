@@ -3,6 +3,8 @@ package com.example.rinconsur.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.example.rinconsur.data.FlujoRepository
+import com.example.rinconsur.data.Plantilla
+import com.example.rinconsur.data.Plantillas
 import com.example.rinconsur.data.SesionPreferencias
 import com.example.rinconsur.model.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,15 +22,18 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
     private val sesion = SesionPreferencias(application)
 
     private val idObservador: Long = sesion.leer()
-    private val idSesion: Long = repositorio.sesionEnCursoDe(idObservador)?.id
-        ?: repositorio.sesionesDeFecha(repositorio.fechaDeTrabajo()).firstOrNull { it.idObservador == idObservador }?.id
-        ?: 0L
+    /**
+     * Solo se cuenta sobre una sesion EN CURSO. Antes, si no habia ninguna, tomaba cualquier sesion
+     * del dia: despues de enviarla se podia seguir registrando en la ya cerrada.
+     */
+    private val idSesion: Long = repositorio.sesionEnCursoDe(idObservador)?.id ?: 0L
 
     private val _uiState = MutableStateFlow(
         RegistroUiState(
             codigoSesion = repositorio.resumenDeSesion(idSesion).codigo,
             resumen = repositorio.resumenDeSesion(idSesion),
             ultimosRegistros = repositorio.ultimosRegistros(idSesion),
+            sinSesionEnCurso = idSesion == 0L,
             accesos = repositorio.accesos(),
             sesionEnCurso = repositorio.sesionEnCursoDe(idObservador)?.id == idSesion
         )
@@ -62,6 +67,10 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
 
     /** Guardar y seguir: no corta el ritmo de la observacion. */
     fun guardar(): Boolean {
+        if (idSesion == 0L) {
+            _uiState.update { it.copy(mensaje = "No tienes una sesión de conteo en curso.") }
+            return false
+        }
         val estado = _uiState.value
         val rangoEtario = estado.rangoEtario
         if (rangoEtario == null) {
@@ -81,6 +90,36 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
             seDirige = estado.destino
         )
         refrescar(mensaje = null)
+        return true
+    }
+
+    private val guardadas = Plantillas(application)
+
+    /** Las tres plantillas del telefono, para los numeros de la pantalla. */
+    private val _plantillas = MutableStateFlow<List<Plantilla?>>(listOf(null, null, null))
+    val plantillas: StateFlow<List<Plantilla?>> = _plantillas.asStateFlow()
+
+    /** Se relee al entrar a la pantalla: pueden haber cambiado en la hoja. */
+    fun recargarPlantillas() {
+        _plantillas.value = (1..3).map { guardadas.leer(it) }
+    }
+
+    /**
+     * Repetir un caso guardado, sin volver a marcarlo: cuando entran varias personas del mismo
+     * perfil se ahorra el unico toque que sobra (RNF-01).
+     */
+    fun aplicarPlantilla(numero: Int): Boolean {
+        val plantilla = _plantillas.value.getOrNull(numero - 1) ?: return false
+        _uiState.update {
+            it.copy(
+                clasificacion = plantilla.clasificacion,
+                rangoEtario = plantilla.rangoEtario,
+                compania = plantilla.compania,
+                comprasOtraTienda = plantilla.comprasOtraTienda,
+                destino = plantilla.destino,
+                mensaje = "Plantilla " + numero + ": " + plantilla.clasificacion.etiqueta + " · " + plantilla.rangoEtario.etiqueta
+            )
+        }
         return true
     }
 

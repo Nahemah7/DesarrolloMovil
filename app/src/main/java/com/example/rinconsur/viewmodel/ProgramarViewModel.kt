@@ -69,7 +69,13 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
                 error = null,
                 codigo = codigo,
                 programada = nombreDe(e, idObservador),
-                sesionesDeLaFecha = repositorio.sesionesDeFecha(e.fecha)
+                sesionesDeLaFecha = repositorio.sesionesDeFecha(e.fecha),
+                // El formulario queda limpio para la proxima: si no, la sesion recien creada
+                // aparece como choque de si misma y sigue mostrando el aviso de que se cruza.
+                idAcceso = null,
+                idObservador = null,
+                horaInicio = "13:00",
+                horaFin = "13:45"
             )
         }
         return true

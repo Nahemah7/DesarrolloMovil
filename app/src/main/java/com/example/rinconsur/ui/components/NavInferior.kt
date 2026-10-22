@@ -24,10 +24,11 @@ fun NavInferior(
     actual: String,
     onIr: (String) -> Unit
 ) {
+    // Sin altura fija: NavigationBar ya reserva el espacio de los botones del sistema. Fijarle
+    // 56dp hacia que el menu quedara debajo de ellos y no se pudiera tocar.
     NavigationBar(
         containerColor = FondoSuave,
-        tonalElevation = 0.dp,
-        modifier = Modifier.height(56.dp)
+        tonalElevation = 0.dp
     ) {
         opciones.forEach { opcion ->
             NavigationBarItem(

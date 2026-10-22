@@ -17,8 +17,11 @@ class CierreViewModel(application: Application) : AndroidViewModel(application) 
     private val sesion = SesionPreferencias(application)
 
     private val idObservador = sesion.leer()
-    private val sesionActual: SesionResumen? =
-        repositorio.sesionEnCursoDe(idObservador) ?: repositorio.sesionesDeFecha(repositorio.fechaDeTrabajo()).firstOrNull { it.idObservador == idObservador }
+    /**
+     * Solo la sesion EN CURSO. Antes, si no habia ninguna en curso, tomaba cualquier sesion del dia:
+     * al no tener sesion propia aparecia la sembrada S-0001 lista para enviar a validacion.
+     */
+    private val sesionActual: SesionResumen? = repositorio.sesionEnCursoDe(idObservador)
 
     private val _resumen = MutableStateFlow(repositorio.resumenDeSesion(sesionActual?.id ?: 0L))
     val resumen: StateFlow<ResumenSesion> = _resumen.asStateFlow()

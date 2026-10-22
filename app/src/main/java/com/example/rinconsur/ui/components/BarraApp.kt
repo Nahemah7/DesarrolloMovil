@@ -23,7 +23,9 @@ fun BarraApp(
     titulo: String,
     subtitulo: String,
     etiqueta: String? = null,
-    colorEtiqueta: Color = Burdeo
+    colorEtiqueta: Color = Burdeo,
+    /** Accion opcional a la derecha de la cabecera. Va arriba para no quedar bajo los botones del sistema. */
+    accion: (@Composable () -> Unit)? = null
 ) {
     Row(
         Modifier.fillMaxWidth().statusBarsPadding().padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 6.dp),
@@ -36,6 +38,7 @@ fun BarraApp(
         if (etiqueta != null) {
             Etiqueta(texto = etiqueta, fondo = colorEtiqueta.copy(alpha = 0.12f), textoColor = colorEtiqueta)
         }
+        accion?.invoke()
     }
 }
 

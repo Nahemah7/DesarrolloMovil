@@ -19,9 +19,12 @@ sealed class Ruta(val ruta: String) {
     // Colaborador observador
     data object MiSesion : Ruta("mi_sesion")
     data object Registro : Ruta("registro")
-    data object Plantilla : Ruta("plantilla")
+    data object Plantilla : Ruta("plantilla/{numero}")
     data object Cierre : Ruta("cierre")
 
     // Comunes
     data object Perfil : Ruta("perfil")
 }
+
+/** Ruta de la hoja de una plantilla de prerellenado, con su numero. */
+fun rutaDePlantilla(numero: Int): String = "plantilla/" + numero

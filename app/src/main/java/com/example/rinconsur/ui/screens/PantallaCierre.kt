@@ -25,6 +25,7 @@ import com.example.rinconsur.ui.components.BotonPrincipal
 import com.example.rinconsur.ui.components.NavInferior
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.TarjetaSeccion
+import com.example.rinconsur.ui.theme.Aviso
 import com.example.rinconsur.ui.theme.Apagado
 import com.example.rinconsur.ui.theme.Burdeo
 import com.example.rinconsur.ui.theme.Info
@@ -47,30 +48,42 @@ fun PantallaCierre(onEnviar: () -> Unit, onIrA: (String) -> Unit) {
         bottomBar = { NavInferior(listOf("Registrar", "Mis sesiones", "Perfil"), "Mis sesiones", onIrA) }
     ) { pad ->
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
-            TarjetaSeccion {
-                FilaTabla("Registros", "Cantidad", "%", encabezado = true)
-                FilaTabla("Tránsito", resumen.transito.toString(), pct(resumen.parteDelTotal(resumen.transito)))
-                FilaTabla("Visita", resumen.visita.toString(), pct(resumen.parteDelTotal(resumen.visita)))
-                FilaTabla("No determinado", resumen.noDeterminado.toString(), pct(resumen.parteDelTotal(resumen.noDeterminado)))
-                FilaTabla("Total", resumen.total.toString(), "100 %", total = true)
-            }
-            Spacer(Modifier.height(10.dp))
-            TarjetaSeccion(acento = Burdeo) {
-                Text("Proporción de tránsito de la sesión", style = MaterialTheme.typography.labelMedium, color = Apagado)
-                Text(
-                    resumen.transito.toString() + " ÷ (" + resumen.total + " − " + resumen.noDeterminado + ") = " + pct(resumen.pctTransito),
-                    fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Burdeo
+            if (codigo.isEmpty()) {
+                // Sin sesion en curso no hay nada que cerrar: antes se colaba la sesion sembrada
+                TarjetaSeccion(acento = Aviso) {
+                    Text("No tienes una sesión de conteo en curso.",
+                        style = MaterialTheme.typography.bodyMedium, color = Tinta)
+                    Text("Inicia una desde Mi sesión para poder cerrarla.",
+                        style = MaterialTheme.typography.bodySmall, color = Apagado)
+                }
+                Spacer(Modifier.height(12.dp))
+                BotonPrincipal("Ir a Mi sesión", onClick = { onIrA("Mis sesiones") })
+            } else {
+                TarjetaSeccion {
+                    FilaTabla("Registros", "Cantidad", "%", encabezado = true)
+                    FilaTabla("Tránsito", resumen.transito.toString(), pct(resumen.parteDelTotal(resumen.transito)))
+                    FilaTabla("Visita", resumen.visita.toString(), pct(resumen.parteDelTotal(resumen.visita)))
+                    FilaTabla("No determinado", resumen.noDeterminado.toString(), pct(resumen.parteDelTotal(resumen.noDeterminado)))
+                    FilaTabla("Total", resumen.total.toString(), "100 %", total = true)
+                }
+                Spacer(Modifier.height(10.dp))
+                TarjetaSeccion(acento = Burdeo) {
+                    Text("Proporción de tránsito de la sesión", style = MaterialTheme.typography.labelMedium, color = Apagado)
+                    Text(
+                        resumen.transito.toString() + " ÷ (" + resumen.total + " − " + resumen.noDeterminado + ") = " + pct(resumen.pctTransito),
+                        fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Burdeo
+                    )
+                    Text("Los anulados y los «no determinado» no entran en el denominador.",
+                        style = MaterialTheme.typography.bodySmall, color = Apagado)
+                }
+                Nota(
+                    if (vm.sePuedeValidar) "La sesión se puede validar."
+                    else "Con 30 registros válidos o más la sesión se puede validar. Si el teléfono está sin señal, queda por enviar y no se pierde."
                 )
-                Text("Los anulados y los «no determinado» no entran en el denominador.",
-                    style = MaterialTheme.typography.bodySmall, color = Apagado)
+                Spacer(Modifier.height(14.dp))
+                BotonPrincipal("Enviar a validación", onClick = { if (vm.cerrar()) onEnviar() })
+                Spacer(Modifier.height(20.dp))
             }
-            Nota(
-                if (vm.sePuedeValidar) "La sesión se puede validar."
-                else "Con 30 registros válidos o más la sesión se puede validar. Si el teléfono está sin señal, queda por enviar y no se pierde."
-            )
-            Spacer(Modifier.height(14.dp))
-            BotonPrincipal("Enviar a validación", onClick = { if (vm.cerrar()) onEnviar() })
-            Spacer(Modifier.height(20.dp))
         }
     }
 }

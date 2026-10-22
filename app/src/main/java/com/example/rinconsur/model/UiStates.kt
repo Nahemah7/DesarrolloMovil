@@ -30,6 +30,8 @@ data class RegistroUiState(
     val accesos: List<Acceso> = emptyList(),
     /** Solo se puede anular mientras la sesion esta en curso (RN-11). */
     val sesionEnCurso: Boolean = false,
+    /** Sin sesion en curso no se registra nada: hay que iniciar una desde Mi sesion. */
+    val sinSesionEnCurso: Boolean = false,
     val mensaje: String? = null
 ) {
     /** En hora punta se registra con la plantilla y un solo toque: la rangoEtario puede venir puesta. */

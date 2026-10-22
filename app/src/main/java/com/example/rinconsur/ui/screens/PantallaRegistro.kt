@@ -2,16 +2,21 @@ package com.example.rinconsur.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -30,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,11 +49,14 @@ import com.example.rinconsur.ui.components.BarraApp
 import com.example.rinconsur.ui.components.BotonPrincipal
 import com.example.rinconsur.ui.components.Filtro
 import com.example.rinconsur.ui.components.EtiquetaEstado
+import com.example.rinconsur.ui.components.MensajeFlotante
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaEstadistica
 import com.example.rinconsur.ui.components.TarjetaSeccion
 import com.example.rinconsur.ui.theme.Apagado
+import com.example.rinconsur.ui.theme.Aviso
+import com.example.rinconsur.ui.theme.Linea
 import com.example.rinconsur.ui.theme.Burdeo
 import com.example.rinconsur.ui.theme.EtiquetaAdulto
 import com.example.rinconsur.ui.theme.EtiquetaAdultoJoven
@@ -56,6 +65,7 @@ import com.example.rinconsur.ui.theme.EtiquetaNino
 import com.example.rinconsur.ui.theme.EtiquetaTerceraEdad
 import com.example.rinconsur.ui.theme.Ok
 import com.example.rinconsur.ui.theme.Tinta
+import com.example.rinconsur.data.Vibracion
 import com.example.rinconsur.viewmodel.RegistroViewModel
 import kotlinx.coroutines.delay
 
@@ -84,6 +94,23 @@ private fun colorDe(rango: RangoEtario): Color = when (rango) {
  * Boton de rango etario. Cuando esta elegido se rellena, se pone en blanco y lleva una marca:
  * asi se ve cual quedo registrado sin depender del color (RNF-07) y sin tener que leer.
  */
+/** Numero de plantilla: un toque la aplica, mantenerlo apretado abre su hoja para editarla. */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun BotonPlantilla(numero: Int, tiene: Boolean, alTocar: () -> Unit, alMantener: () -> Unit) {
+    Box(
+        Modifier
+            .size(48.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (tiene) com.example.rinconsur.ui.theme.BurdeoSuave else Color.White)
+            .border(1.dp, if (tiene) Burdeo else Linea, RoundedCornerShape(12.dp))
+            .combinedClickable(onClick = alTocar, onLongClick = alMantener),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(numero.toString(), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = if (tiene) Burdeo else Apagado)
+    }
+}
+
 @Composable
 private fun RowScope.BotonRango(nombre: String, rango: String, color: Color, elegido: Boolean, onClick: () -> Unit) {
     Box(
@@ -118,8 +145,10 @@ private fun RowScope.BotonRango(nombre: String, rango: String, color: Color, ele
 
 /** Registrar un acceso: todo de un toque, de pie y sin escribir (RNF-01). */
 @Composable
-fun PantallaRegistro(onPlantilla: () -> Unit, onCerrar: () -> Unit, onIrA: (String) -> Unit) {
+fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (String) -> Unit) {
     val vm: RegistroViewModel = viewModel()
+    val contexto = LocalContext.current
+    val plantillas by vm.plantillas.collectAsStateWithLifecycle()
     val estado by vm.uiState.collectAsStateWithLifecycle()
 
     var aAnular by remember { mutableStateOf<Long?>(null) }
@@ -141,6 +170,9 @@ fun PantallaRegistro(onPlantilla: () -> Unit, onCerrar: () -> Unit, onIrA: (Stri
         )
     }
 
+    // Las plantillas pueden haber cambiado si se edito una hoja y se volvio
+    LaunchedEffect(Unit) { vm.recargarPlantillas() }
+
     // El aviso se borra solo para no tapar la cuenta mientras se registra.
     LaunchedEffect(estado.mensaje) {
         if (estado.mensaje != null) { delay(2500); vm.limpiarMensaje() }
@@ -153,20 +185,42 @@ fun PantallaRegistro(onPlantilla: () -> Unit, onCerrar: () -> Unit, onIrA: (Stri
                 titulo = estado.codigoSesion.ifEmpty { "Sesión" },
                 subtitulo = "Registrando accesos",
                 etiqueta = "En curso",
-                colorEtiqueta = Ok
+                colorEtiqueta = Ok,
+                accion = if (estado.sinSesionEnCurso) null else ({
+                    // Arriba y no abajo: abajo quedaba tapado por los botones del sistema
+                    TextButton(onClick = onCerrar) {
+                        Text("Enviar sesión", color = Burdeo, style = MaterialTheme.typography.labelSmall)
+                    }
+                })
             )
         },
         bottomBar = {
-            Column(Modifier.background(Color.White).padding(horizontal = 16.dp, vertical = 8.dp)) {
-                // Boton alto y angosto: se usa de pie, con una mano.
-                BotonPrincipal("Guardar", onClick = { vm.guardar() })
-                TextButton(onClick = onCerrar, modifier = Modifier.fillMaxWidth()) {
-                    Text("Cerrar la sesión y enviar a validación", color = Burdeo, style = MaterialTheme.typography.labelSmall)
-                }
+            // Alto y angosto, al alcance del pulgar. Con navigationBarsPadding para no quedar debajo
+            // de los botones del sistema, que es lo que lo hacia inusable.
+            Column(
+                Modifier
+                    .background(Color.White)
+                    .navigationBarsPadding()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                BotonPrincipal("Guardar", onClick = { if (vm.guardar()) Vibracion.confirmarGuardado(contexto) })
             }
         }
     ) { pad ->
+        // El aviso flotante necesita un contenedor encima del formulario
+        Box(Modifier.fillMaxSize()) {
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
+            if (estado.sinSesionEnCurso) {
+                TarjetaSeccion(acento = Aviso) {
+                    Text("No tienes una sesión de conteo en curso.",
+                        style = MaterialTheme.typography.bodyMedium, color = Tinta)
+                    Text("Inicia una desde Mi sesión para poder registrar.",
+                        style = MaterialTheme.typography.bodySmall, color = Apagado)
+                }
+                Spacer(Modifier.height(12.dp))
+                BotonPrincipal("Ir a Mi sesión", onClick = { onIrA("Mis sesiones") })
+                Spacer(Modifier.height(16.dp))
+            }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 TarjetaEstadistica(estado.resumen.total.toString(), "registros")
                 TarjetaEstadistica(
@@ -176,18 +230,22 @@ fun PantallaRegistro(onPlantilla: () -> Unit, onCerrar: () -> Unit, onIrA: (Stri
                 TarjetaEstadistica(estado.resumen.transito.toString(), "en tránsito")
             }
 
-            estado.mensaje?.let {
-                TarjetaSeccion(acento = Burdeo) {
-                    Text(it, style = MaterialTheme.typography.bodyMedium, color = Burdeo)
-                }
-            }
-
+            Seccion("Plantillas de prerellenado")
             TarjetaSeccion(acento = Burdeo) {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text("¿Vas a repetir el mismo caso? Usa la plantilla.",
-                        style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
-                    TextButton(onClick = onPlantilla) { Text("Ver", style = MaterialTheme.typography.labelSmall) }
+                Text("Si entra alguien del mismo perfil, toca un número para aplicarla.",
+                    style = MaterialTheme.typography.bodySmall)
+                Spacer(Modifier.height(6.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    (1..3).forEach { n ->
+                        BotonPlantilla(
+                            numero = n,
+                            tiene = plantillas.getOrNull(n - 1) != null,
+                            alTocar = { vm.aplicarPlantilla(n) },
+                            alMantener = { onPlantilla(n) }
+                        )
+                    }
                 }
+                Nota("Mantén apretado un número para editar esa plantilla.")
             }
 
             Seccion("Clasificación")
@@ -276,6 +334,9 @@ fun PantallaRegistro(onPlantilla: () -> Unit, onCerrar: () -> Unit, onIrA: (Stri
                 )
             }
             Spacer(Modifier.height(20.dp))
+        }
+            // Encima de todo y al medio: no se va con el scroll del formulario
+            MensajeFlotante(estado.mensaje)
         }
     }
 }

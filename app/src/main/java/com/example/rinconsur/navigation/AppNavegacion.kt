@@ -93,12 +93,17 @@ fun AppNavegacion() {
         }
         composable(Ruta.Registro.ruta) {
             PantallaRegistro(
-                onPlantilla = { navController.navigate(Ruta.Plantilla.ruta) },
+                onPlantilla = { numero -> navController.navigate(rutaDePlantilla(numero)) },
                 onCerrar = { navController.navigate(Ruta.Cierre.ruta) },
                 onIrA = { navController.navegar(it) }
             )
         }
-        composable(Ruta.Plantilla.ruta) { PantallaPlantilla(onVolver = { navController.navigateUp() }) }
+        composable(Ruta.Plantilla.ruta) { entrada ->
+            PantallaPlantilla(
+                numero = entrada.arguments?.getString("numero")?.toIntOrNull() ?: 1,
+                onVolver = { navController.navigateUp() }
+            )
+        }
         composable(Ruta.Cierre.ruta) {
             PantallaCierre(
                 onEnviar = { navController.navigate(Ruta.MiSesion.ruta) { popUpTo(Ruta.MiSesion.ruta) } },
