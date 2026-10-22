@@ -80,6 +80,6 @@ fun BotonPrincipal(
 @Composable
 private fun BotonPrincipalPreview() {
     RinconSurTheme {
-        BotonPrincipal(texto = "Iniciar sesion", onClick = {})
+        BotonPrincipal(texto = "Iniciar sesión", onClick = {})
     }
 }

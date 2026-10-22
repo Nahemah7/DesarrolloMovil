@@ -24,7 +24,7 @@ class FlujoDbHelper(context: Context) :
 
     companion object {
         private const val NOMBRE_BD = "rinconsur.db"
-        private const val VERSION_BD = 2
+        private const val VERSION_BD = 4
 
         /** Estado con el que se abre y se cierra la sesion de conteo. */
         const val ESTADO_PROGRAMADA = 1L
@@ -235,6 +235,21 @@ class FlujoDbHelper(context: Context) :
     CONSTRAINT ck_meta_porcentaje CHECK (porcentaje BETWEEN 0 AND 100),
     CONSTRAINT fk_meta_usuario FOREIGN KEY (id_usuario_registra) REFERENCES usuario (id_usuario)
 );""",
+        """CREATE TABLE pregunta_seguridad (
+    id_pregunta INTEGER PRIMARY KEY AUTOINCREMENT,
+    texto       VARCHAR(120) NOT NULL,
+    activa      BOOLEAN      NOT NULL DEFAULT 1,
+    CONSTRAINT uq_pregunta_texto UNIQUE (texto)
+);""",
+        """CREATE TABLE respuesta_seguridad (
+    id_usuario     INT          NOT NULL,
+    id_pregunta    INT          NOT NULL,
+    respuesta_hash VARCHAR(255) NOT NULL,
+    CONSTRAINT pk_respuesta_seguridad PRIMARY KEY (id_usuario, id_pregunta),
+    CONSTRAINT fk_respuesta_usuario FOREIGN KEY (id_usuario) REFERENCES usuario (id_usuario),
+    CONSTRAINT fk_respuesta_pregunta FOREIGN KEY (id_pregunta) REFERENCES pregunta_seguridad (id_pregunta)
+);""",
+
         )
 
         private val SQL_VISTAS: List<String> = listOf(
@@ -268,7 +283,7 @@ SELECT ci.fecha, td.tipo_dia, a.codigo AS acceso, bh.id_bloque, bh.hora_inicio, 
        ROUND(AVG(CASE WHEN sv.fecha < ci.fecha THEN sv.pct_transito END), 1) AS pct_promedio,
        CASE WHEN MAX(CASE WHEN sv.fecha = ci.fecha THEN sv.pct_transito END) IS NOT NULL THEN 'medido'
             WHEN AVG(CASE WHEN sv.fecha < ci.fecha THEN sv.pct_transito END) IS NOT NULL THEN 'estimado'
-            ELSE 'sin informacion' END AS origen,
+            ELSE 'sin información' END AS origen,
        ROUND(ci.cantidad * COALESCE(MAX(CASE WHEN sv.fecha = ci.fecha THEN sv.pct_transito END),
                                     AVG(CASE WHEN sv.fecha < ci.fecha THEN sv.pct_transito END)) / 100) AS transito_estimado
 FROM conteo_ingreso ci
@@ -295,7 +310,7 @@ JOIN (SELECT fecha, COUNT(*) AS bloques, COUNT(DISTINCT id_acceso) AS accesos FR
 LEFT JOIN (SELECT fecha, COUNT(*) AS bloques_tx FROM transaccion_bloque GROUP BY fecha) tb ON tb.fecha = i.fecha
 LEFT JOIN (SELECT fecha, SUM(transito_estimado) AS transito,
                   SUM(origen = 'medido') AS medidos, SUM(origen = 'estimado') AS estimados,
-                  SUM(origen = 'sin informacion') AS sin_informacion
+                  SUM(origen = 'sin información') AS sin_informacion
            FROM v_transito_bloque GROUP BY fecha) tr ON tr.fecha = i.fecha
 LEFT JOIN v_tipo_dia td ON td.fecha = i.fecha;""",
         """CREATE VIEW v_perfil_transito AS
@@ -347,7 +362,7 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
   (1, 'A1', 'Acceso Principal', 'Frente al pasillo central del mall', 'Entrada natural de quienes vienen del mall'),
   (2, 'A2', 'Acceso Lateral', 'Costado del sector patio de comidas', 'Flujo alto a la hora de almuerzo'),
   (3, 'A3', 'Acceso Estacionamiento', 'Conecta con el estacionamiento subterraneo', 'Zona con senal de red debil'),
-  (4, 'A4', 'Acceso Conexion', 'Comunica con la tienda vecina de mejoramiento del hogar', 'Principal punto de transito entre la tienda vecina y el mall');""",
+  (4, 'A4', 'Acceso Conexión', 'Comunica con la tienda vecina de mejoramiento del hogar', 'Principal punto de transito entre la tienda vecina y el mall');""",
         """INSERT INTO bloque_horario (id_bloque, hora_inicio, hora_fin) VALUES
   (1, '10:00:00', '10:59:59'),
   (2, '11:00:00', '11:59:59'),
@@ -900,6 +915,14 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
         """UPDATE usuario SET password_hash = '3be196465177bea9d42580f65fd1b71b26aca25fed5e2346470148c727bcbd00' WHERE rut = '18.322.904-4';""",
         """UPDATE usuario SET password_hash = 'e1553d2b50bf5930127ad34bc182803cf351ae61de120a71d85da0fa2a1c78f1' WHERE rut = '19.876.345-4';""",
         """UPDATE usuario SET password_hash = '640c5d498a480b562da0e3bd40334b2df49a24ddca1b41f9e52449534668d5ee' WHERE rut = '20.145.678-9';""",
+        """INSERT INTO pregunta_seguridad (id_pregunta, texto) VALUES
+  (1, '¿Cuál es el nombre de tu primera mascota?'),
+  (2, '¿En qué ciudad nació tu madre?'),
+  (3, '¿Cuál fue tu primer colegio?'),
+  (4, '¿Cuál fue tu primer trabajo?'),
+  (5, '¿Cuál es tu comida favorita?'),
+  (6, '¿Cómo se llamaba tu mejor amigo de la infancia?');""",
+
         )
     }
 
@@ -922,6 +945,35 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
         if (oldVersion < 2) {
             // Version 2: la foto de evidencia del evento (recurso nativo de camara y galeria)
             db.execSQL("ALTER TABLE evento_dia ADD COLUMN foto BLOB")
+        }
+        if (oldVersion < 4) {
+            db.execSQL("ALTER TABLE usuario ADD COLUMN foto BLOB")
+        }
+        if (oldVersion < 3) {
+            // Version 3: preguntas de seguridad para recuperar la clave sin correo. Se crean y se
+            // siembran aca porque una base que ya existe no vuelve a pasar por onCreate.
+            db.execSQL("""CREATE TABLE pregunta_seguridad (
+    id_pregunta INTEGER PRIMARY KEY AUTOINCREMENT,
+    texto       VARCHAR(120) NOT NULL,
+    activa      BOOLEAN      NOT NULL DEFAULT 1,
+    foto BLOB,
+    CONSTRAINT uq_pregunta_texto UNIQUE (texto)
+)""")
+            db.execSQL("""CREATE TABLE respuesta_seguridad (
+    id_usuario     INT          NOT NULL,
+    id_pregunta    INT          NOT NULL,
+    respuesta_hash VARCHAR(255) NOT NULL,
+    CONSTRAINT pk_respuesta_seguridad PRIMARY KEY (id_usuario, id_pregunta),
+    CONSTRAINT fk_respuesta_usuario FOREIGN KEY (id_usuario) REFERENCES usuario (id_usuario),
+    CONSTRAINT fk_respuesta_pregunta FOREIGN KEY (id_pregunta) REFERENCES pregunta_seguridad (id_pregunta)
+)""")
+            db.execSQL("""INSERT INTO pregunta_seguridad (id_pregunta, texto) VALUES
+  (1, '¿Cuál es el nombre de tu primera mascota?'),
+  (2, '¿En qué ciudad nació tu madre?'),
+  (3, '¿Cuál fue tu primer colegio?'),
+  (4, '¿Cuál fue tu primer trabajo?'),
+  (5, '¿Cuál es tu comida favorita?'),
+  (6, '¿Cómo se llamaba tu mejor amigo de la infancia?')""")
         }
     }
 
@@ -986,6 +1038,103 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
         consultarSesiones(SQL_SESIONES + "WHERE s.id_sesion = ?", arrayOf(idSesion.toString())).firstOrNull()
 
     /** Los colaboradores que pueden contar: el rol de observador, sin numeros fijos. */
+    // ==================== seguridad de la clave ====================
+
+    /** Preguntas del catalogo, para que cada persona elija dos en su perfil. */
+    fun listarPreguntas(): List<PreguntaSeguridad> {
+        val lista = mutableListOf<PreguntaSeguridad>()
+        readableDatabase.rawQuery(
+            "SELECT id_pregunta, texto FROM pregunta_seguridad WHERE activa = 1 ORDER BY id_pregunta", null
+        ).use { c -> while (c.moveToNext()) lista.add(PreguntaSeguridad(id = c.getLong(0), texto = c.getString(1))) }
+        return lista
+    }
+
+    /** Las preguntas que esa persona ya tiene guardadas, para mostrarlas al recuperar la clave. */
+    fun listarPreguntasDe(idUsuario: Long): List<PreguntaSeguridad> {
+        val lista = mutableListOf<PreguntaSeguridad>()
+        readableDatabase.rawQuery(
+            """SELECT p.id_pregunta, p.texto FROM respuesta_seguridad r
+               JOIN pregunta_seguridad p ON p.id_pregunta = r.id_pregunta
+               WHERE r.id_usuario = ? ORDER BY p.id_pregunta""",
+            arrayOf(idUsuario.toString())
+        ).use { c -> while (c.moveToNext()) lista.add(PreguntaSeguridad(id = c.getLong(0), texto = c.getString(1))) }
+        return lista
+    }
+
+    /** Si ya eligio sus preguntas: sin esto no puede recuperar la clave. */
+    fun tienePreguntas(idUsuario: Long): Boolean =
+        readableDatabase.rawQuery(
+            "SELECT COUNT(*) FROM respuesta_seguridad WHERE id_usuario = ?", arrayOf(idUsuario.toString())
+        ).use { c -> c.moveToFirst() && c.getInt(0) >= 1 }
+
+    /**
+     * Guarda las respuestas elegidas: se guarda el hash, nunca el texto. La respuesta se normaliza
+     * (sin espacios al borde, en minusculas) para que "Firulais" y "firulais" valgan igual.
+     */
+    fun guardarRespuestas(idUsuario: Long, rut: String, respuestas: List<Pair<Long, String>>) {
+        writableDatabase.beginTransaction()
+        try {
+            writableDatabase.delete("respuesta_seguridad", "id_usuario = ?", arrayOf(idUsuario.toString()))
+            respuestas.forEach { (idPregunta, respuesta) ->
+                val valores = ContentValues().apply {
+                    put("id_usuario", idUsuario)
+                    put("id_pregunta", idPregunta)
+                    put("respuesta_hash", Clave.hash(rut, normalizarRespuesta(respuesta)))
+                }
+                writableDatabase.insert("respuesta_seguridad", null, valores)
+            }
+            writableDatabase.setTransactionSuccessful()
+        } finally {
+            writableDatabase.endTransaction()
+        }
+    }
+
+    /** Las respuestas coinciden con las guardadas. */
+    fun verificarRespuestas(idUsuario: Long, rut: String, respuestas: List<Pair<Long, String>>): Boolean {
+        if (respuestas.isEmpty()) return false
+        var correctas = 0
+        respuestas.forEach { (idPregunta, respuesta) ->
+            readableDatabase.rawQuery(
+                "SELECT respuesta_hash FROM respuesta_seguridad WHERE id_usuario = ? AND id_pregunta = ?",
+                arrayOf(idUsuario.toString(), idPregunta.toString())
+            ).use { c ->
+                if (c.moveToFirst() && c.getString(0) == Clave.hash(rut, normalizarRespuesta(respuesta))) correctas++
+            }
+        }
+        return correctas == respuestas.size
+    }
+
+    /** Cambia la clave. Recibe el hash ya calculado: la clave en texto no pasa por aca. */
+    /** Guarda la foto de perfil ya recortada y reducida. Pasar null la borra. */
+    fun guardarFoto(idUsuario: Long, foto: ByteArray?): Boolean {
+        val valores = ContentValues().apply {
+            if (foto == null || foto.isEmpty()) putNull("foto") else put("foto", foto)
+        }
+        return writableDatabase.update(
+            "usuario", valores, "id_usuario = ?", arrayOf(idUsuario.toString())
+        ) == 1
+    }
+
+    /** La foto de perfil guardada, o null si esa persona no tiene. */
+    fun fotoDe(idUsuario: Long): ByteArray? {
+        readableDatabase.query(
+            "usuario", arrayOf("foto"), "id_usuario = ?", arrayOf(idUsuario.toString()),
+            null, null, null
+        ).use { c ->
+            if (c.moveToFirst() && !c.isNull(0)) return c.getBlob(0)
+        }
+        return null
+    }
+
+    fun cambiarClave(idUsuario: Long, nuevoHash: String): Boolean =
+        writableDatabase.update(
+            "usuario", ContentValues().apply { put("password_hash", nuevoHash) },
+            "id_usuario = ?", arrayOf(idUsuario.toString())
+        ) == 1
+
+    /** Normalizacion de una respuesta, igual al guardar que al verificar. */
+    private fun normalizarRespuesta(respuesta: String): String = respuesta.trim().lowercase()
+
     fun listarObservadores(): List<Colaborador> =
         consultarColaboradores(
             SQL_USUARIO + "WHERE u.id_rol = (SELECT id_rol FROM rol WHERE nombre LIKE '%observador%')",
@@ -1161,7 +1310,7 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
             "SELECT acceso, SUM(ingresos) AS ingresos, SUM(transito_estimado) AS transito, " +
                 "CASE WHEN SUM(CASE WHEN origen = 'medido' THEN 1 ELSE 0 END) > 0 THEN 'medido' " +
                 "     WHEN SUM(CASE WHEN origen = 'estimado' THEN 1 ELSE 0 END) > 0 THEN 'estimado' " +
-                "     ELSE 'sin informacion' END AS origen " +
+                "     ELSE 'sin información' END AS origen " +
                 "FROM v_transito_bloque WHERE fecha = ? GROUP BY acceso ORDER BY acceso",
             arrayOf(fecha)
         ).use { c ->

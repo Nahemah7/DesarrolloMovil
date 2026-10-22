@@ -63,7 +63,7 @@ class RechazarViewModel(application: Application) : AndroidViewModel(application
         val estado = _uiState.value
         val errorMotivos = if (estado.motivos.isEmpty()) "Elige al menos un motivo" else null
         val errorOtro = if (estado.exigeOtro && estado.otroMotivo.trim().length < 10)
-            "Cuenta el motivo (10 caracteres minimo)" else null
+            "Cuenta el motivo (10 caracteres mínimo)" else null
 
         if (errorMotivos != null || errorOtro != null) {
             _uiState.update { it.copy(errorMotivos = errorMotivos, errorOtro = errorOtro) }

@@ -16,7 +16,7 @@ data class IndicadoresDia(
     val bloquesSinInformacion: Int
 ) {
     val coberturaTexto: String
-        get() = "$bloquesMedidos medidos · $bloquesEstimados estimados · $bloquesSinInformacion sin informacion"
+        get() = "$bloquesMedidos medidos · $bloquesEstimados estimados · $bloquesSinInformacion sin información"
 
     val conversionSinTransitoTexto: String
         get() = conversionSinTransito?.let { "${formato(it)} %" } ?: "no disponible"

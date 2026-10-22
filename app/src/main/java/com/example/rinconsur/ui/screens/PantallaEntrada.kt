@@ -42,9 +42,9 @@ fun PantallaEntrada(onCerrarSesion: () -> Unit) {
         containerColor = Hueso,
         topBar = {
             BarraApp(
-                titulo = "Rincon Sur",
+                titulo = "Rincón Sur",
                 subtitulo = estado.perfil.etiqueta,
-                etiqueta = "Sesion iniciada",
+                etiqueta = "Sesión iniciada",
                 colorEtiqueta = com.example.rinconsur.ui.theme.Info
             )
         }
@@ -55,7 +55,7 @@ fun PantallaEntrada(onCerrarSesion: () -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = Dimens.espacioPantalla)
         ) {
-            Seccion("Quien usa el telefono")
+            Seccion("Quien usa el teléfono")
             TarjetaSeccion {
                 Text(estado.nombre, style = MaterialTheme.typography.titleSmall)
                 Text(
@@ -63,7 +63,7 @@ fun PantallaEntrada(onCerrarSesion: () -> Unit) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = Apagado
                 )
-                Nota("El telefono se comparte entre turnos: al cerrar sesion se borra quien estaba adentro.")
+                Nota("El teléfono se comparte entre turnos: al cerrar sesión se borra quien estaba adentro.")
             }
 
             Seccion("Accesos de la tienda")
@@ -74,7 +74,7 @@ fun PantallaEntrada(onCerrarSesion: () -> Unit) {
             }
 
             Spacer(Modifier.height(Dimens.espacioMedio))
-            BotonSecundario(texto = "Cerrar sesion", onClick = onCerrarSesion)
+            BotonSecundario(texto = "Cerrar sesión", onClick = onCerrarSesion)
             Spacer(Modifier.height(36.dp))
         }
     }

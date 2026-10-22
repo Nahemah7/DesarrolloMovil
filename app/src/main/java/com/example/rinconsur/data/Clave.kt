@@ -22,3 +22,26 @@ object Clave {
             .digest((rut + "|" + clave).toByteArray(Charsets.UTF_8))
             .joinToString("") { byte -> "%02x".format(byte) }
 }
+
+/**
+ * Requisitos de la clave, decididos para esta app: 8 caracteres como minimo, con mayuscula,
+ * minuscula y numero. Devuelve la lista de lo que le falta, vacia si esta bien: la pantalla
+ * necesita el detalle para poder decir que falta, no un si/no.
+ */
+fun problemasDeClave(clave: String): List<String> {
+    val faltas = mutableListOf<String>()
+    if (clave.length < 8) faltas.add("al menos 8 caracteres")
+    if (clave.none { it.isUpperCase() }) faltas.add("una mayúscula")
+    if (clave.none { it.isLowerCase() }) faltas.add("una minúscula")
+    if (clave.none { it.isDigit() }) faltas.add("un número")
+    return faltas
+}
+
+/** La clave cumple los requisitos. */
+fun esClaveValida(clave: String): Boolean = problemasDeClave(clave).isEmpty()
+
+/** Mensaje para mostrar cuando la clave no cumple, con lo que falta. */
+fun mensajeDeClave(clave: String): String? {
+    val faltas = problemasDeClave(clave)
+    return if (faltas.isEmpty()) null else "La clave necesita " + faltas.joinToString(", ") + "."
+}

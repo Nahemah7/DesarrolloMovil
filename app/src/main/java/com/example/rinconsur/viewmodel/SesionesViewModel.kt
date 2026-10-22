@@ -24,7 +24,7 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
     private val _uiState = MutableStateFlow(SesionesUiState())
     val uiState: StateFlow<SesionesUiState> = _uiState.asStateFlow()
 
-    /** Catalogo de accesos: la pantalla lo usa para escribir "A4 Conexion" y no "4". */
+    /** Catalogo de accesos: la pantalla lo usa para escribir "A4 Conexión" y no "4". */
     val accesos: List<Acceso> = repositorio.accesos()
 
     init {

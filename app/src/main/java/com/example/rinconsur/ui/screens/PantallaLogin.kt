@@ -1,5 +1,11 @@
 package com.example.rinconsur.ui.screens
 
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -27,6 +33,12 @@ import com.example.rinconsur.viewmodel.*
 /** Inicio de sesion: valida el RUT contra la base y recuerda quien entro. */
 @Composable
 fun PantallaLogin(onEntrar: (PerfilUsuario) -> Unit) {
+    // La recuperacion de clave vive dentro del login: es el mismo formulario, en tres pasos.
+    var recuperando by rememberSaveable { mutableStateOf(false) }
+    if (recuperando) {
+        PantallaRecuperar(onVolver = { recuperando = false })
+        return
+    }
     val vm: LoginViewModel = viewModel()
     val estado by vm.uiState.collectAsStateWithLifecycle()
 
@@ -39,7 +51,7 @@ fun PantallaLogin(onEntrar: (PerfilUsuario) -> Unit) {
         ) {
             // Espacio para que el encabezado no quede pegado a la barra de estado del telefono
             Spacer(Modifier.height(36.dp))
-            Text("RINCON SUR", style = MaterialTheme.typography.labelMedium, color = Burdeo)
+            Text("RINCÓN SUR", style = MaterialTheme.typography.labelMedium, color = Burdeo)
             Text("Control de flujo\npor acceso", style = MaterialTheme.typography.titleLarge)
             Nota("Uso interno. Cada colaborador entra con su propia cuenta.")
             Seccion("RUT")
@@ -51,11 +63,11 @@ fun PantallaLogin(onEntrar: (PerfilUsuario) -> Unit) {
                 marcador = "19.876.345-4",
                 icono = Icons.Filled.Person
             )
-            Seccion("Contrasena")
+            Seccion("Contraseña")
             CampoContrasena(
                 valor = estado.clave,
                 onValorCambia = vm::onClaveCambia,
-                etiqueta = "Contrasena",
+                etiqueta = "Contraseña",
                 visible = estado.claveVisible,
                 onAlternarVisibilidad = vm::onAlternarClave,
                 error = estado.errorClave
@@ -83,7 +95,10 @@ fun PantallaLogin(onEntrar: (PerfilUsuario) -> Unit) {
                     if (rol != null) onEntrar(rol)
                 }
             )
-            Nota("El telefono se comparte entre turnos: la sesion se cierra al devolver el equipo.")
+            TextButton(onClick = { recuperando = true }) {
+                Text("¿Olvidaste tu clave?", color = Burdeo, style = MaterialTheme.typography.labelSmall)
+            }
+            Nota("El teléfono se comparte entre turnos: la sesión se cierra al devolver el equipo.")
             Seccion("Entrar directo (prototipo)")
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 BotonSecundario(texto = "Observadora", onClick = { vm.entrarComo(PerfilUsuario.OBSERVADOR)?.let(onEntrar) })

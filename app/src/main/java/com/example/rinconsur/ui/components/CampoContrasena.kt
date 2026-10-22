@@ -50,7 +50,7 @@ fun CampoContrasena(
             IconButton(onClick = onAlternarVisibilidad) {
                 Icon(
                     imageVector = if (visible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                    contentDescription = if (visible) "Ocultar la contrasena" else "Mostrar la contrasena"
+                    contentDescription = if (visible) "Ocultar la contraseña" else "Mostrar la contraseña"
                 )
             }
         },
@@ -66,7 +66,7 @@ private fun CampoContrasenaPreview() {
         CampoContrasena(
             valor = "1234",
             onValorCambia = {},
-            etiqueta = "Contrasena",
+            etiqueta = "Contraseña",
             visible = false,
             onAlternarVisibilidad = {}
         )

@@ -79,7 +79,7 @@ class EventoViewModel(application: Application) : AndroidViewModel(application) 
         }
         val errorDescripcion = when {
             estado.descripcion.isBlank() -> "Cuenta que paso"
-            estado.descripcion.trim().length < 10 -> "Un poco mas de detalle (10 caracteres)"
+            estado.descripcion.trim().length < 10 -> "Un poco más de detalle (10 caracteres)"
             estado.descripcion.length > 200 -> "Maximo 200 caracteres"
             else -> null
         }

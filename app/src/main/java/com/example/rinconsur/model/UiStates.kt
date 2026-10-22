@@ -1,5 +1,7 @@
 package com.example.rinconsur.model
 
+import com.example.rinconsur.model.PreguntaSeguridad
+
 /** Estado de la pantalla de inicio de sesion. */
 data class LoginUiState(
     val rut: String = "",
@@ -158,3 +160,51 @@ data class ProgramarUiState(
             minutos(inicioA) < minutos(finB) && minutos(inicioB) < minutos(finA)
     }
 }
+
+/** Paso del formulario para recuperar la clave sin correo. */
+enum class PasoRecuperar { RUT, PREGUNTAS, CLAVE, LISTO }
+
+/**
+ * Estado de la recuperacion de clave. El error general es a proposito generico, por la misma razon
+ * que en el login: no se dice si el RUT existe ni si esa persona tiene preguntas guardadas.
+ */
+data class RecuperarUiState(
+    val paso: PasoRecuperar = PasoRecuperar.RUT,
+    val rut: String = "",
+    val preguntas: List<PreguntaSeguridad> = emptyList(),
+    val respuestas: List<String> = listOf("", ""),
+    val clave: String = "",
+    val repetir: String = "",
+    val claveVisible: Boolean = false,
+    val errorRut: String? = null,
+    val errorRespuestas: String? = null,
+    val errorClave: String? = null,
+    val errorRepetir: String? = null,
+    val errorGeneral: String? = null
+)
+
+/** Estado del perfil: los datos de quien entro y la seguridad de su cuenta. */
+data class PerfilUiState(
+    val nombre: String = "",
+    val rut: String = "",
+    val cargo: String = "",
+    val perfil: String = "",
+    val foto: ByteArray? = null,
+    // Cambio de clave
+    val claveActual: String = "",
+    val claveNueva: String = "",
+    val repetirNueva: String = "",
+    val claveVisible: Boolean = false,
+    val errorActual: String? = null,
+    val errorNueva: String? = null,
+    val errorRepetir: String? = null,
+    val avisoClave: String? = null,
+    // Preguntas de seguridad
+    val catalogo: List<PreguntaSeguridad> = emptyList(),
+    val elegidas: List<Long> = emptyList(),
+    val respuestas: Map<Long, String> = emptyMap(),
+    val tienePreguntas: Boolean = false,
+    val avisoFoto: String? = null,
+    val errorPreguntas: String? = null,
+    val avisoPreguntas: String? = null
+)

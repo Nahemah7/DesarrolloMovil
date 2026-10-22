@@ -1,6 +1,7 @@
 package com.example.rinconsur.data
 
 import android.content.Context
+import com.example.rinconsur.model.PreguntaSeguridad
 import com.example.rinconsur.model.Acceso
 import com.example.rinconsur.model.BloqueHorario
 import com.example.rinconsur.model.Clasificacion
@@ -125,6 +126,21 @@ class FlujoRepository(context: Context) {
     fun contarEventos(fecha: String): Int = db.contarEventos(fecha)
 
     fun contarTodosLosEventos(): Int = db.contarTodosLosEventos()
+
+    // Seguridad de la clave: catalogo de preguntas y respuestas (recuperar sin correo)
+    fun preguntas(): List<PreguntaSeguridad> = db.listarPreguntas()
+    fun preguntasDe(idUsuario: Long): List<PreguntaSeguridad> = db.listarPreguntasDe(idUsuario)
+    fun tienePreguntas(idUsuario: Long): Boolean = db.tienePreguntas(idUsuario)
+    fun guardarRespuestas(idUsuario: Long, rut: String, respuestas: List<Pair<Long, String>>) =
+        db.guardarRespuestas(idUsuario, rut, respuestas)
+    fun verificarRespuestas(idUsuario: Long, rut: String, respuestas: List<Pair<Long, String>>): Boolean =
+        db.verificarRespuestas(idUsuario, rut, respuestas)
+    fun cambiarClave(idUsuario: Long, nuevoHash: String): Boolean = db.cambiarClave(idUsuario, nuevoHash)
+
+    /** La foto de perfil de esa persona, ya recortada y reducida, o null si no tiene. */
+    fun fotoDe(idUsuario: Long): ByteArray? = db.fotoDe(idUsuario)
+
+    fun guardarFoto(idUsuario: Long, foto: ByteArray?): Boolean = db.guardarFoto(idUsuario, foto)
 
     fun cerrar() = db.close()
 }

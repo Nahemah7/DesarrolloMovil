@@ -58,7 +58,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
      *  2. Todo lo que se compara con la base (el RUT no existe, la cuenta esta desactivada o la clave
      *     no coincide) responde con **un solo mensaje generico**. Si la app dijera "ese RUT no esta
      *     registrado", cualquiera podria probar RUTs y sacar la lista del personal; y si dijera
-     *     "la contrasena no coincide" confirmaria que el RUT existe y que solo falta la clave.
+     *     "la contraseña no coincide" confirmaria que el RUT existe y que solo falta la clave.
      */
     fun entrar(): PerfilUsuario? {
         val rutEscrito = _uiState.value.rut
@@ -68,7 +68,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         if (Rut.validar(rutEscrito) != null) {
             _uiState.update {
                 it.copy(
-                    errorRut = "El RUT no es valido. Revisalo y escribelo de nuevo.",
+                    errorRut = "El RUT no es válido. Revísalo y escríbelo de nuevo.",
                     errorClave = null,
                     errorGeneral = null
                 )
@@ -77,7 +77,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
         if (clave.isBlank()) {
             _uiState.update {
-                it.copy(errorClave = "Escribe tu contrasena", errorGeneral = null)
+                it.copy(errorClave = "Escribe tu contraseña", errorGeneral = null)
             }
             return null
         }
@@ -92,7 +92,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 it.copy(
                     errorRut = null,
                     errorClave = null,
-                    errorGeneral = "RUT o contrasena incorrectos."
+                    errorGeneral = "RUT o contraseña incorrectos."
                 )
             }
             return null
@@ -134,12 +134,15 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     private companion object {
         /** Clave de los colaboradores de ejemplo del prototipo. En produccion no existe. */
-        const val CLAVE_DE_EJEMPLO = "rincon2026"
+        const val CLAVE_DE_EJEMPLO = "Rinconsur2026"
+
+    /** Daniela no cambio su clave: sigue con la del anexo, y su boton entra con esa. */
+    const val CLAVE_DE_LA_SUPERVISORA = "rincon2026"
 
         /** Credenciales de los dos roles de la entrega, para entrar sin tipear. */
         val CREDENCIALES_DE_EJEMPLO = mapOf(
             PerfilUsuario.OBSERVADOR to ("19.876.345-4" to CLAVE_DE_EJEMPLO),
-            PerfilUsuario.SUPERVISOR to ("17.654.320-5" to CLAVE_DE_EJEMPLO)
+            PerfilUsuario.SUPERVISOR to ("17.654.320-5" to CLAVE_DE_LA_SUPERVISORA)
         )
     }
 }

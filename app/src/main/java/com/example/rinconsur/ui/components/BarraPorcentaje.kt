@@ -90,6 +90,6 @@ fun BarraPorcentaje(
 @Composable
 private fun BarraPorcentajePreview() {
     RinconSurTheme {
-        BarraPorcentaje(etiqueta = "A4 Conexion", valor = 41f, textoValor = "41 %")
+        BarraPorcentaje(etiqueta = "A4 Conexión", valor = 41f, textoValor = "41 %")
     }
 }

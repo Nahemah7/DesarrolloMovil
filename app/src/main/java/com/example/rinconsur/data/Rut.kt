@@ -42,7 +42,7 @@ object Rut {
         val limpio = limpiar(valor)
         if (limpio.isEmpty()) return "Escribe tu RUT"
         if (limpio.length < 8 || limpio.length > 9) return "El RUT debe tener 8 o 9 caracteres"
-        val (cuerpo, digito) = partes(limpio) ?: return "Revisa el RUT: solo numeros y el digito verificador"
+        val (cuerpo, digito) = partes(limpio) ?: return "Revisa el RUT: solo números y el dígito verificador"
         return if (digitoVerificador(cuerpo) == digito) null else "El digito verificador no corresponde"
     }
 

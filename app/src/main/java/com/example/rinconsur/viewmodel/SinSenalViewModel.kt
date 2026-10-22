@@ -41,9 +41,9 @@ class SinSenalViewModel(application: Application) : AndroidViewModel(application
     fun enviar() {
         revisarRed()
         _mensaje.value = if (_conectado.value) {
-            "Sesion enviada. Queda por validar el supervisor."
+            "Sesión enviada. Queda por validar el supervisor."
         } else {
-            "Sin conexion: la sesion sigue guardada en este telefono."
+            "Sin conexión: la sesión sigue guardada en este teléfono."
         }
     }
 
