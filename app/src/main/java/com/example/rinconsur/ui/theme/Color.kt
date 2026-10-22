@@ -10,8 +10,12 @@ val TerracotaSuave = Color(0xFFFBF0E9)
 
 val Tinta = Color(0xFF16202B)
 val Apagado = Color(0xFF55636F)
-val Linea = Color(0xFFD8DDE2)
-val FondoSuave = Color(0xFFF4F5F7)
+val Linea = Color(0xFFE9E7E2)      // linea calida, coherente con el fondo hueso
+val FondoSuave = Color(0xFFF3F1EC)   // neutro calido, para menu, barras y pildoras
+/** Fondo hueso cálido y su linea, medidos en la referencia (diseno del registro). */
+val Hueso = Color(0xFFF8F7F3)
+val HuesoLinea = Color(0xFFE9E7E2)
+val HuesoApagado = Color(0xFF6E6A61)
 val GrisDeshabilitado = Color(0xFFBDBAC7)
 val Blanco = Color(0xFFFFFFFF)
 

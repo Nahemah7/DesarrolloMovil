@@ -25,6 +25,7 @@ import com.example.rinconsur.ui.components.BotonPrincipal
 import com.example.rinconsur.ui.components.NavInferior
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.TarjetaSeccion
+import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.ui.theme.Aviso
 import com.example.rinconsur.ui.theme.Apagado
 import com.example.rinconsur.ui.theme.Burdeo
@@ -43,14 +44,14 @@ fun PantallaCierre(onEnviar: () -> Unit, onIrA: (String) -> Unit) {
     val codigo by vm.codigo.collectAsStateWithLifecycle()
 
     Scaffold(
-        containerColor = Color.White,
+        containerColor = Hueso,
         topBar = { BarraApp(codigo.ifEmpty { "Cerrar sesión" }, "Resumen de lo registrado", "Finalizada", Info) },
         bottomBar = { NavInferior(listOf("Registrar", "Mis sesiones", "Perfil"), "Mis sesiones", onIrA) }
     ) { pad ->
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             if (codigo.isEmpty()) {
                 // Sin sesion en curso no hay nada que cerrar: antes se colaba la sesion sembrada
-                TarjetaSeccion(acento = Aviso) {
+                TarjetaSeccion {
                     Text("No tienes una sesión de conteo en curso.",
                         style = MaterialTheme.typography.bodyMedium, color = Tinta)
                     Text("Inicia una desde Mi sesión para poder cerrarla.",
@@ -67,7 +68,7 @@ fun PantallaCierre(onEnviar: () -> Unit, onIrA: (String) -> Unit) {
                     FilaTabla("Total", resumen.total.toString(), "100 %", total = true)
                 }
                 Spacer(Modifier.height(10.dp))
-                TarjetaSeccion(acento = Burdeo) {
+                TarjetaSeccion {
                     Text("Proporción de tránsito de la sesión", style = MaterialTheme.typography.labelMedium, color = Apagado)
                     Text(
                         resumen.transito.toString() + " ÷ (" + resumen.total + " − " + resumen.noDeterminado + ") = " + pct(resumen.pctTransito),

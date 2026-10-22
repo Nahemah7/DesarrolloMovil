@@ -1,5 +1,6 @@
 package com.example.rinconsur.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.rinconsur.ui.styles.EstilosTarjeta
+import com.example.rinconsur.ui.theme.HuesoLinea
 import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.RinconSurTheme
 import com.example.rinconsur.ui.theme.Tinta
@@ -24,7 +26,6 @@ import com.example.rinconsur.ui.theme.Tinta
 @Composable
 fun TarjetaSeccion(
     titulo: String? = null,
-    acento: Color? = null,
     modifier: Modifier = Modifier,
     contenido: @Composable ColumnScope.() -> Unit
 ) {
@@ -33,12 +34,11 @@ fun TarjetaSeccion(
         shape = EstilosTarjeta.forma,
         colors = EstilosTarjeta.colores(),
         elevation = EstilosTarjeta.elevacion(),
-        border = EstilosTarjeta.borde()
+        border = BorderStroke(1.dp, HuesoLinea)
     ) {
         Column(
             Modifier
                 .fillMaxWidth()
-                .let { if (acento != null) it.acentoLateral(acento) else it }
                 .padding(Dimens.espacioMedio - 6.dp)
         ) {
             if (titulo != null) {
@@ -64,6 +64,3 @@ private fun TarjetaSeccionPreview() {
 }
 
 /** Franja de color a la izquierda de la tarjeta: marca la tarjeta importante sin gritar. */
-private fun Modifier.acentoLateral(color: Color): Modifier = this.drawBehind {
-    drawRect(color, size = Size(4.dp.toPx(), size.height))
-}

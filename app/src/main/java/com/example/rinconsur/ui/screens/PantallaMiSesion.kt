@@ -27,6 +27,7 @@ import com.example.rinconsur.ui.components.NavInferior
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaSeccion
+import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.ui.theme.Apagado
 import com.example.rinconsur.ui.theme.Burdeo
 import com.example.rinconsur.ui.theme.Info
@@ -58,7 +59,7 @@ fun PantallaMiSesion(onIniciar: () -> Unit, onIrA: (String) -> Unit) {
     val hayProgramada = sesiones.any { it.estado == EstadoSesion.PROGRAMADA }
 
     Scaffold(
-        containerColor = Color.White,
+        containerColor = Hueso,
         topBar = {
             BarraApp(
                 titulo = "Mi sesión",
@@ -80,7 +81,7 @@ fun PantallaMiSesion(onIniciar: () -> Unit, onIrA: (String) -> Unit) {
             // nada por iniciar, asi que al enviar una sesion desaparecian las demas de la lista.
             if (sesiones.isEmpty()) {
                 Seccion("Hoy")
-                TarjetaSeccion(acento = Burdeo) {
+                TarjetaSeccion {
                     Text("No tienes una sesión de conteo asignada para hoy.",
                         style = MaterialTheme.typography.bodyMedium, color = Tinta)
                     Text("Si te toca una, la vas a ver acá cuando el supervisor la programe.",
@@ -89,7 +90,7 @@ fun PantallaMiSesion(onIniciar: () -> Unit, onIrA: (String) -> Unit) {
             } else {
                 Seccion(if (sesiones.size > 1) "Mis sesiones de hoy (" + sesiones.size + ")" else "Sesión de hoy")
                 sesiones.forEach { s ->
-                    TarjetaSeccion(acento = if (s.estado == EstadoSesion.EN_CURSO) Ok else Burdeo) {
+                    TarjetaSeccion {
                         Text(accesoDe(accesos, s), style = MaterialTheme.typography.titleSmall, color = Tinta)
                         Text("Hoy " + s.horaInicioCorta + " - " + s.horaFinCorta + " · " + s.duracionMinutos + " min",
                             style = MaterialTheme.typography.bodyMedium, color = Tinta)

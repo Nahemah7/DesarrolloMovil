@@ -11,7 +11,10 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,15 +34,18 @@ fun Filtro(texto: String, activo: Boolean, onClick: () -> Unit) {
         label = {
             Text(
                 texto,
-                style = MaterialTheme.typography.labelSmall,
+                // El elegido crece: la seleccion se percibe por tamano y peso, no solo por color (RNF-07)
+                style = if (activo) MaterialTheme.typography.titleSmall else MaterialTheme.typography.labelMedium,
                 fontWeight = if (activo) FontWeight.Bold else FontWeight.Normal
             )
         },
-        leadingIcon = if (activo) {
-            { Text("✓", style = MaterialTheme.typography.labelSmall, color = Burdeo, fontWeight = FontWeight.Bold) }
-        } else null,
+        leadingIcon = null,
         shape = RoundedCornerShape(50),
+        // La caja del elegido tambien crece: si solo crece el texto, el ojo no lo registra
+        modifier = Modifier.height(if (activo) 38.dp else 32.dp),
         colors = FilterChipDefaults.filterChipColors(
+            // Sobre el fondo hueso el chip sin elegir necesita superficie: si no, queda plano
+            containerColor = Color.White,
             selectedContainerColor = BurdeoSuave,
             selectedLabelColor = Burdeo
         )
@@ -58,6 +64,7 @@ fun FilaFiltros(
         modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState()),
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         opciones.forEach { opcion ->

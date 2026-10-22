@@ -20,6 +20,7 @@ import com.example.rinconsur.ui.components.BarraApp
 import com.example.rinconsur.ui.components.BotonPrincipal
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaSeccion
+import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.ui.theme.Apagado
 import com.example.rinconsur.ui.theme.Burdeo
 import com.example.rinconsur.ui.theme.Info
@@ -35,7 +36,7 @@ fun PantallaPerfil(onSalir: () -> Unit) {
     val estado by vm.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
-        containerColor = Color.White,
+        containerColor = Hueso,
         topBar = {
             BarraApp(
                 titulo = estado.nombre.ifEmpty { "Mi perfil" },
@@ -52,7 +53,7 @@ fun PantallaPerfil(onSalir: () -> Unit) {
                 .padding(horizontal = 16.dp)
         ) {
             Seccion("Mis datos")
-            TarjetaSeccion(acento = Burdeo) {
+            TarjetaSeccion {
                 Text(estado.nombre, style = MaterialTheme.typography.titleSmall)
                 Text(estado.perfil.etiqueta, style = MaterialTheme.typography.bodyMedium)
                 Text(estado.rut, style = MaterialTheme.typography.bodySmall, color = Apagado)

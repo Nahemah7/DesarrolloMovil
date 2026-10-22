@@ -43,6 +43,7 @@ import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaSeccion
 import com.example.rinconsur.ui.styles.EstilosBoton
 import com.example.rinconsur.ui.styles.estiloAltoBoton
+import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.ui.theme.Apagado
 import com.example.rinconsur.ui.theme.Burdeo
 import com.example.rinconsur.ui.theme.Info
@@ -61,7 +62,7 @@ fun PantallaPlantilla(numero: Int, onVolver: () -> Unit) {
     val estado by vm.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
-        containerColor = Color.White,
+        containerColor = Hueso,
         topBar = {
             BarraApp(
                 titulo = "Plantilla " + numero,
@@ -82,7 +83,7 @@ fun PantallaPlantilla(numero: Int, onVolver: () -> Unit) {
                 .verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)
         ) {
             Seccion("Clasificación")
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Clasificacion.entries.forEach { c ->
                     Filtro(c.etiqueta, estado.clasificacion == c) { vm.onClasificacion(c) }
                 }
@@ -91,7 +92,7 @@ fun PantallaPlantilla(numero: Int, onVolver: () -> Unit) {
             Seccion("Apariencia (la edad no se pregunta)")
             RangoEtario.entries.chunked(3).forEachIndexed { fila, tramos ->
                 if (fila > 0) Spacer(Modifier.height(6.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     tramos.forEach { r ->
                         Filtro(r.etiqueta, estado.rangoEtario == r) { vm.onRango(r) }
                     }
@@ -99,21 +100,21 @@ fun PantallaPlantilla(numero: Int, onVolver: () -> Unit) {
             }
 
             Seccion("Compañía")
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Compania.entries.forEach { c ->
                     Filtro(c.etiqueta, estado.compania == c) { vm.onCompania(c) }
                 }
             }
 
             Seccion("Compras en otra tienda")
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Filtro("Sí", estado.comprasOtraTienda) { vm.onCompras(true) }
                 Filtro("No", !estado.comprasOtraTienda) { vm.onCompras(false) }
             }
 
             if (estado.clasificacion == Clasificacion.TRANSITO) {
                 Seccion("Hacia dónde se dirige")
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     estado.accesos.forEach { a ->
                         Filtro(a.codigo, estado.destino == a.id) { vm.onDestino(a.id) }
                     }

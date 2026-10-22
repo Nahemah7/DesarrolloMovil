@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rinconsur.model.*
 import com.example.rinconsur.ui.components.*
+import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.ui.theme.*
 import com.example.rinconsur.viewmodel.*
 
@@ -29,7 +30,7 @@ fun PantallaLogin(onEntrar: (PerfilUsuario) -> Unit) {
     val vm: LoginViewModel = viewModel()
     val estado by vm.uiState.collectAsStateWithLifecycle()
 
-    Scaffold(containerColor = Color.White) { pad ->
+    Scaffold(containerColor = Hueso) { pad ->
         Column(
             Modifier
                 .padding(pad)
@@ -61,7 +62,7 @@ fun PantallaLogin(onEntrar: (PerfilUsuario) -> Unit) {
             )
             // El error de autenticacion va arriba del boton y es uno solo, sin decir cual campo fallo
             if (estado.errorGeneral != null) {
-                TarjetaSeccion(acento = Aviso, modifier = Modifier.padding(top = Dimens.espacioChico)) {
+                TarjetaSeccion(modifier = Modifier.padding(top = Dimens.espacioChico)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Filled.Warning, contentDescription = null, tint = Aviso)
                         Text(

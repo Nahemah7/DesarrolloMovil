@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.Linea
@@ -14,6 +15,9 @@ object EstilosCampo {
 
     @Composable
     fun colores(): TextFieldColors = OutlinedTextFieldDefaults.colors(
+        // Sin esto el campo queda del color del fondo y se ve plano (Silvio: "mismo fondo plano de hueso")
+        focusedContainerColor = Color.White,
+        unfocusedContainerColor = Color.White,
         focusedBorderColor = MaterialTheme.colorScheme.primary,
         unfocusedBorderColor = Linea,
         focusedLabelColor = MaterialTheme.colorScheme.primary,

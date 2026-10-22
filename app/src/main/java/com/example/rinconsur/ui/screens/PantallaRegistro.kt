@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -64,6 +65,10 @@ import com.example.rinconsur.ui.theme.EtiquetaJoven
 import com.example.rinconsur.ui.theme.EtiquetaNino
 import com.example.rinconsur.ui.theme.EtiquetaTerceraEdad
 import com.example.rinconsur.ui.theme.Ok
+import com.example.rinconsur.ui.theme.Hueso
+import com.example.rinconsur.ui.theme.HuesoLinea
+import com.example.rinconsur.ui.theme.HuesoApagado
+import androidx.compose.foundation.layout.ColumnScope
 import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.data.Vibracion
 import com.example.rinconsur.viewmodel.RegistroViewModel
@@ -113,34 +118,58 @@ private fun BotonPlantilla(numero: Int, tiene: Boolean, alTocar: () -> Unit, alM
 
 @Composable
 private fun RowScope.BotonRango(nombre: String, rango: String, color: Color, elegido: Boolean, onClick: () -> Unit) {
+    // El color del tramo es una RESPUESTA, no decoracion: sin elegir solo queda un punto que lo
+    // identifica; el relleno pleno aparece al elegir. Antes los seis iban tintados a la vez y la
+    // pantalla tenia ocho matices compitiendo con las cifras.
     Box(
         Modifier
             .weight(1f)
-            .height(54.dp)
+            .height(if (elegido) 62.dp else 54.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(if (elegido) color else color.copy(alpha = 0.12f))
-            .border(if (elegido) 0.dp else 1.dp, color.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
+            .background(if (elegido) color else Color.White)
+            .border(1.dp, if (elegido) color else HuesoLinea, RoundedCornerShape(10.dp))
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            // El punto reserva su espacio tambien al estar elegido: asi el texto queda centrado en
+            // las dos cajas y el boton no se ve corrido al crecer.
+            Box(
+                Modifier.size(7.dp).clip(RoundedCornerShape(99.dp))
+                    .background(if (elegido) Color.Transparent else color)
+            )
+            Spacer(Modifier.height(3.dp))
             Text(
-                text = if (elegido) "✓ " + nombre else nombre,
+                text = nombre,
                 color = if (elegido) Color.White else Tinta,
-                fontSize = 13.sp,
+                fontSize = if (elegido) 17.5.sp else 14.5.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
                 lineHeight = 15.sp
             )
             Text(
                 text = rango,
-                color = if (elegido) Color.White.copy(alpha = 0.9f) else Apagado,
-                fontSize = 9.sp,
+                color = if (elegido) Color.White.copy(alpha = 0.9f) else HuesoApagado,
+                fontSize = if (elegido) 12.sp else 10.5.sp,
                 textAlign = TextAlign.Center,
-                lineHeight = 11.sp
+                lineHeight = 12.sp
             )
         }
     }
+}
+
+/** Superficie de la propuesta: blanca sobre el fondo hueso, sin borde. */
+@Composable
+private fun Bloque(modifier: Modifier = Modifier, contenido: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color.White)
+            .border(1.dp, HuesoLinea, RoundedCornerShape(14.dp))
+            .padding(horizontal = 12.dp, vertical = 11.dp),
+        content = contenido
+    )
 }
 
 /** Registrar un acceso: todo de un toque, de pie y sin escribir (RNF-01). */
@@ -179,7 +208,7 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
     }
 
     Scaffold(
-        containerColor = Color.White,
+        containerColor = Hueso,
         topBar = {
             BarraApp(
                 titulo = estado.codigoSesion.ifEmpty { "Sesión" },
@@ -211,7 +240,7 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
         Box(Modifier.fillMaxSize()) {
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             if (estado.sinSesionEnCurso) {
-                TarjetaSeccion(acento = Aviso) {
+                TarjetaSeccion {
                     Text("No tienes una sesión de conteo en curso.",
                         style = MaterialTheme.typography.bodyMedium, color = Tinta)
                     Text("Inicia una desde Mi sesión para poder registrar.",
@@ -221,17 +250,38 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
                 BotonPrincipal("Ir a Mi sesión", onClick = { onIrA("Mis sesiones") })
                 Spacer(Modifier.height(16.dp))
             }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                TarjetaEstadistica(estado.resumen.total.toString(), "registros")
-                TarjetaEstadistica(
-                    estado.resumen.pctTransito?.let { String.format("%.1f", it).replace('.', ',') + " %" } ?: "—",
-                    "tránsito", Burdeo
+            // Los datos son el fuerte: la cifra manda y el resto se subordina
+            Bloque {
+                val pct = estado.resumen.pctTransito?.let {
+                    String.format("%.1f", it).replace('.', ',') + " %"
+                } ?: "—"
+                Text(
+                    estado.resumen.total.toString(),
+                    fontSize = 34.sp, fontWeight = FontWeight.ExtraBold,
+                    color = Tinta, letterSpacing = (-1).sp, lineHeight = 36.sp
                 )
-                TarjetaEstadistica(estado.resumen.transito.toString(), "en tránsito")
+                Text("registros en esta sesión", style = MaterialTheme.typography.labelSmall, color = HuesoApagado)
+                Spacer(Modifier.height(10.dp))
+                Box(
+                    Modifier.fillMaxWidth().height(9.dp)
+                        .clip(RoundedCornerShape(99.dp)).background(HuesoLinea)
+                ) {
+                    Box(
+                        Modifier.fillMaxHeight()
+                            .fillMaxWidth(fraction = ((estado.resumen.pctTransito ?: 0.0) / 100.0).toFloat().coerceIn(0.02f, 1f))
+                            .clip(RoundedCornerShape(99.dp)).background(Burdeo)
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Proporción de tránsito", style = MaterialTheme.typography.labelSmall, color = HuesoApagado)
+                    Text(pct + " · " + estado.resumen.transito + " en tránsito",
+                        style = MaterialTheme.typography.labelSmall, color = Burdeo)
+                }
             }
 
             Seccion("Plantillas de prerellenado")
-            TarjetaSeccion(acento = Burdeo) {
+            Bloque {
                 Text("Si entra alguien del mismo perfil, toca un número para aplicarla.",
                     style = MaterialTheme.typography.bodySmall)
                 Spacer(Modifier.height(6.dp))
@@ -249,7 +299,7 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
             }
 
             Seccion("Clasificación")
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Clasificacion.entries.forEach { c ->
                     Filtro(c.etiqueta, estado.clasificacion == c) { vm.onClasificacion(c) }
                 }
@@ -258,7 +308,7 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
             Seccion("Apariencia (la edad no se pregunta)")
             RangoEtario.entries.chunked(3).forEachIndexed { fila, tramos ->
                 if (fila > 0) Spacer(Modifier.height(6.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     tramos.forEach { r ->
                         BotonRango(nombreDe(r), r.etiqueta, colorDe(r), estado.rangoEtario == r) { vm.onRangoEtario(r) }
                     }
@@ -267,21 +317,21 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
             Nota("Se estima de un vistazo y nunca se le pregunta a la persona.")
 
             Seccion("Compañía")
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Compania.entries.forEach { c ->
                     Filtro(c.etiqueta, estado.compania == c) { vm.onCompania(c) }
                 }
             }
 
             Seccion("Compras en otra tienda")
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Filtro("Sí", estado.comprasOtraTienda) { vm.onCompras(true) }
                 Filtro("No", !estado.comprasOtraTienda) { vm.onCompras(false) }
             }
 
             if (estado.clasificacion == Clasificacion.TRANSITO) {
                 Seccion("Hacia dónde se dirige")
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     estado.accesos.forEach { a ->
                         // Etiqueta corta: los nombres completos no caben y el ultimo acceso quedaba
                         // fuera de la pantalla, sin poder marcarlo.
@@ -296,13 +346,13 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
 
             if (estado.ultimosRegistros.isNotEmpty()) {
                 Seccion("Últimos registros")
-                TarjetaSeccion {
+                Bloque {
                     estado.ultimosRegistros.take(3).forEach { r ->
                         Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 r.hora + " · " + r.clasificacion.etiqueta + " · " + r.rangoEtario.etiqueta +
                                     " · " + r.compania.etiqueta,
-                                style = MaterialTheme.typography.bodySmall,
+                                style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.weight(1f)
                             )
                             if (r.anulado) {
@@ -321,17 +371,11 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
                 }
             }
 
-            Seccion("Cuenta rápida de la sesión")
-            TarjetaSeccion {
-                val r = estado.resumen
-                Text(
-                    "Llevas " + r.total + " registros · " +
-                        (r.pctTransito?.let { String.format("%.1f", it).replace('.', ',') + " %" } ?: "—") +
-                        " de tránsito. " +
-                        if (r.sePuedeValidar) "La sesión ya se puede validar."
-                        else "Desde 30 registros válidos la sesión se puede validar.",
-                    style = MaterialTheme.typography.bodySmall
-                )
+            // La cifra de arriba ya dice el total y la proporcion: aca solo va lo que aporta algo
+            if (estado.resumen.sePuedeValidar) {
+                Nota("La sesión ya se puede validar.")
+            } else {
+                Nota("Desde 30 registros válidos la sesión se puede validar.")
             }
             Spacer(Modifier.height(20.dp))
         }

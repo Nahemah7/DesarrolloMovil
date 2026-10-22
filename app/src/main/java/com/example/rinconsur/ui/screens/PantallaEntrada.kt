@@ -21,6 +21,7 @@ import com.example.rinconsur.ui.components.BotonSecundario
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaSeccion
+import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.ui.theme.Apagado
 import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.viewmodel.EntradaViewModel
@@ -38,7 +39,7 @@ fun PantallaEntrada(onCerrarSesion: () -> Unit) {
     val estado by vm.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
-        containerColor = Color.White,
+        containerColor = Hueso,
         topBar = {
             BarraApp(
                 titulo = "Rincon Sur",

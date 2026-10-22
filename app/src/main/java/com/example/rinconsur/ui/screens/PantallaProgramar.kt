@@ -30,6 +30,7 @@ import com.example.rinconsur.ui.components.NavInferior
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaSeccion
+import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.ui.theme.Apagado
 import com.example.rinconsur.ui.theme.Aviso
 import com.example.rinconsur.ui.theme.Burdeo
@@ -54,13 +55,13 @@ fun PantallaProgramar(onIrA: (String) -> Unit) {
     val estado by vm.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
-        containerColor = Color.White,
+        containerColor = Hueso,
         topBar = { BarraApp("Programar sesión", "Nueva sesión de conteo", "Supervisor", Info) },
         bottomBar = { NavInferior(listOf("Sesiones", "Medir", "Indicadores", "Más"), "Sesiones", onIrA) }
     ) { pad ->
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             Seccion("Acceso")
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 estado.accesos.forEach { a ->
                     // Etiqueta corta (A1..A4): los nombres completos no caben los cuatro y el ultimo
                     // quedaba fuera de la pantalla.
@@ -105,7 +106,7 @@ fun PantallaProgramar(onIrA: (String) -> Unit) {
 
             estado.choque?.let { choque ->
                 Spacer(Modifier.height(8.dp))
-                TarjetaSeccion(acento = Aviso) {
+                TarjetaSeccion {
                     Text("Se cruza", style = MaterialTheme.typography.labelMedium, color = Aviso)
                     Text(
                         (estado.accesos.firstOrNull { it.id == choque.idAcceso }?.nombre ?: "Ese acceso") +
@@ -118,12 +119,12 @@ fun PantallaProgramar(onIrA: (String) -> Unit) {
 
             estado.error?.let {
                 Spacer(Modifier.height(8.dp))
-                TarjetaSeccion(acento = Aviso) { Text(it, style = MaterialTheme.typography.bodyMedium, color = Aviso) }
+                TarjetaSeccion { Text(it, style = MaterialTheme.typography.bodyMedium, color = Aviso) }
             }
 
             if (estado.programada.isNotEmpty()) {
                 Spacer(Modifier.height(8.dp))
-                TarjetaSeccion(acento = Ok) {
+                TarjetaSeccion {
                     Text(
                         "Sesión " + estado.codigo + " programada para " + estado.programada + ".",
                         style = MaterialTheme.typography.bodyMedium, color = Tinta, fontWeight = FontWeight.Bold
