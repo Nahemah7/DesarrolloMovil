@@ -212,3 +212,4 @@ private fun pedirFotoEvento(
         == PackageManager.PERMISSION_GRANTED
     ) disparar() else permiso.launch(Manifest.permission.CAMERA)
 }
+
