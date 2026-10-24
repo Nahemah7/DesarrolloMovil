@@ -13,12 +13,15 @@ import androidx.navigation.compose.rememberNavController
 import com.example.rinconsur.model.PerfilUsuario
 import com.example.rinconsur.ui.screens.PantallaCierre
 import com.example.rinconsur.ui.screens.PantallaEntrada
+import com.example.rinconsur.ui.screens.PantallaEvento
 import com.example.rinconsur.ui.screens.PantallaLogin
 import com.example.rinconsur.ui.screens.PantallaMiSesion
 import com.example.rinconsur.ui.screens.PantallaPerfil
 import com.example.rinconsur.ui.screens.PantallaProgramar
 import com.example.rinconsur.ui.screens.PantallaPlantilla
+import com.example.rinconsur.ui.screens.PantallaRechazar
 import com.example.rinconsur.ui.screens.PantallaRegistro
+import com.example.rinconsur.ui.screens.PantallaSinSenal
 import com.example.rinconsur.viewmodel.LoginViewModel
 
 /**
@@ -106,14 +109,28 @@ fun AppNavegacion() {
         }
         composable(Ruta.Cierre.ruta) {
             PantallaCierre(
-                onEnviar = { navController.navigate(Ruta.MiSesion.ruta) { popUpTo(Ruta.MiSesion.ruta) } },
+                onEnviar = { navController.navigate(Ruta.SinSenal.ruta) },
                 onIrA = { navController.navegar(it) }
+            )
+        }
+
+        // Estado de la red y sesiones por enviar: se llega despues de cerrar una sesion
+        composable(Ruta.SinSenal.ruta) {
+            PantallaSinSenal(
+                onVolver = { navController.navigate(Ruta.MiSesion.ruta) { popUpTo(Ruta.MiSesion.ruta) } }
             )
         }
 
         // ---- Comunes ----
         // ---- Supervisor de piso ----
         composable(Ruta.Programar.ruta) { PantallaProgramar(onIrA = { navController.navegar(it) }) }
+        composable(Ruta.Evento.ruta) { PantallaEvento(onVolver = { navController.navigateUp() }) }
+        composable(Ruta.Rechazar.ruta) { entrada ->
+            PantallaRechazar(
+                idSesion = entrada.arguments?.getString("idSesion")?.toLongOrNull() ?: 0L,
+                onVolver = { navController.navigateUp() }
+            )
+        }
 
         composable(Ruta.Perfil.ruta) {
             PantallaPerfil(
@@ -132,6 +149,7 @@ private fun NavHostController.navegar(pestana: String) {
         "Registrar" -> Ruta.Registro.ruta
         "Mis sesiones" -> Ruta.MiSesion.ruta
         "Sesiones" -> Ruta.Programar.ruta
+        "Medir" -> Ruta.Evento.ruta
         else -> Ruta.Perfil.ruta
     }
     navigate(destino) { launchSingleTop = true }
