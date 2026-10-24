@@ -15,12 +15,15 @@ sealed class Ruta(val ruta: String) {
 
     // Supervisor de piso
     data object Programar : Ruta("programar")
+    data object Rechazar : Ruta("rechazar/{idSesion}")
+    data object Evento : Ruta("evento")
 
     // Colaborador observador
     data object MiSesion : Ruta("mi_sesion")
     data object Registro : Ruta("registro")
     data object Plantilla : Ruta("plantilla/{numero}")
     data object Cierre : Ruta("cierre")
+    data object SinSenal : Ruta("sin_senal")
 
     // Comunes
     data object Perfil : Ruta("perfil")
@@ -28,3 +31,6 @@ sealed class Ruta(val ruta: String) {
 
 /** Ruta de la hoja de una plantilla de prerellenado, con su numero. */
 fun rutaDePlantilla(numero: Int): String = "plantilla/" + numero
+
+/** Ruta del formulario de rechazo, con el id de la sesion que se rechaza. */
+fun rutaDeRechazar(idSesion: Long): String = "rechazar/" + idSesion
