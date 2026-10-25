@@ -14,6 +14,7 @@ sealed class Ruta(val ruta: String) {
     data object Entrada : Ruta("entrada")
 
     // Supervisor de piso
+    data object Sesiones : Ruta("sesiones")
     data object Programar : Ruta("programar")
     data object Rechazar : Ruta("rechazar/{idSesion}")
     data object Evento : Ruta("evento")

@@ -32,6 +32,7 @@ import com.example.rinconsur.ui.screens.PantallaProgramar
 import com.example.rinconsur.ui.screens.PantallaPlantilla
 import com.example.rinconsur.ui.screens.PantallaRechazar
 import com.example.rinconsur.ui.screens.PantallaRegistro
+import com.example.rinconsur.ui.screens.PantallaSesiones
 import com.example.rinconsur.ui.screens.PantallaSinSenal
 import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.viewmodel.EncabezadoViewModel
@@ -137,7 +138,7 @@ fun AppNavegacion() {
                     onEntrar = { perfil ->
                         // El observador cuenta; el supervisor programa la sesion y despues la revisa.
                         val destino =
-                            if (perfil == PerfilUsuario.OBSERVADOR) Ruta.MiSesion.ruta else Ruta.Programar.ruta
+                            if (perfil == PerfilUsuario.OBSERVADOR) Ruta.MiSesion.ruta else Ruta.Sesiones.ruta
                         navController.navigate(destino) { popUpTo(Ruta.Login.ruta) { inclusive = true } }
                     }
                 )
@@ -191,6 +192,12 @@ fun AppNavegacion() {
 
             // ---- Comunes ----
             // ---- Supervisor de piso ----
+            composable(Ruta.Sesiones.ruta) {
+                PantallaSesiones(
+                    onRechazar = { idSesion -> navController.navigate(rutaDeRechazar(idSesion)) },
+                    onProgramar = { navController.navigate(Ruta.Programar.ruta) }
+                )
+            }
             composable(Ruta.Programar.ruta) { PantallaProgramar(onIrA = { navController.navegar(it) }) }
             composable(Ruta.Evento.ruta) { PantallaEvento(onVolver = { navController.navigateUp() }) }
             composable(Ruta.Rechazar.ruta) { entrada ->
@@ -219,7 +226,7 @@ private fun NavHostController.navegar(pestana: String) {
     val destino = when (pestana) {
         "Registrar" -> Ruta.Registro.ruta
         "Mis sesiones" -> Ruta.MiSesion.ruta
-        "Sesiones" -> Ruta.Programar.ruta
+        "Sesiones" -> Ruta.Sesiones.ruta
         "Medir" -> Ruta.Evento.ruta
         else -> Ruta.Perfil.ruta
     }

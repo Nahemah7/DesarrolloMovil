@@ -81,7 +81,7 @@ fun menuDe(perfil: PerfilUsuario): List<OpcionMenu> = when (perfil) {
     // La pantalla de indicadores todavia no existe; su icono entra a Perfil, que es donde caia
     // antes desde la barra inferior, y se conecta a su ruta cuando la pantalla exista.
     else -> listOf(
-        OpcionMenu("Sesiones", Ruta.Programar.ruta, Icons.Outlined.List, Icons.Filled.List),
+        OpcionMenu("Sesiones", Ruta.Sesiones.ruta, Icons.Outlined.List, Icons.Filled.List),
         OpcionMenu("Medir", Ruta.Evento.ruta, Icons.Outlined.Edit, Icons.Filled.Edit),
         OpcionMenu("Indicadores", Ruta.Perfil.ruta, Icons.Outlined.BarChart, Icons.Filled.BarChart),
         OpcionMenu("Más", Ruta.Perfil.ruta, Icons.Outlined.MoreHoriz, Icons.Filled.MoreHoriz)
@@ -98,10 +98,10 @@ private fun esLaActiva(opcion: OpcionMenu, rutaActual: String): Boolean {
     return when {
         // Pasos del registro del observador: la hoja de plantilla y el cierre de su sesion.
         rutaActual.startsWith("plantilla") || rutaActual.startsWith("cierre") ||
-            rutaActual.startsWith("sin_senal") -> opcion.etiqueta == "Registrar"
+                rutaActual.startsWith("sin_senal") -> opcion.etiqueta == "Registrar"
 
         // El rechazo se hace sobre una sesion, que es lo que muestra Sesiones.
-        rutaActual.startsWith("rechazar") -> opcion.etiqueta == "Sesiones"
+        rutaActual.startsWith("rechazar") || rutaActual.startsWith("programar") -> opcion.etiqueta == "Sesiones"
 
         else -> false
     }
@@ -112,8 +112,8 @@ private fun esLaActiva(opcion: OpcionMenu, rutaActual: String): Boolean {
  * moverse y volver atras no corresponde a ninguna de ellas.
  */
 fun esRaiz(ruta: String): Boolean =
-    ruta.startsWith("mi_sesion") || ruta.startsWith("registro") || ruta.startsWith("programar") ||
-        ruta.startsWith("evento") || ruta.startsWith("perfil")
+    ruta.startsWith("mi_sesion") || ruta.startsWith("registro") || ruta.startsWith("sesiones") ||
+            ruta.startsWith("evento") || ruta.startsWith("perfil")
 
 @Composable
 fun BarraNavegacion(

@@ -61,7 +61,7 @@ class EncabezadoViewModel(application: Application) : AndroidViewModel(applicati
 
             ruta.startsWith("registro") ->
                 (sesion?.codigo ?: "Sesión") to
-                    listOf("Registrando accesos", acceso).filter { it.isNotEmpty() }.joinToString(" · ")
+                        listOf("Registrando accesos", acceso).filter { it.isNotEmpty() }.joinToString(" · ")
 
             ruta.startsWith("plantilla") -> "Plantilla " + (numeroPlantilla ?: "") to "Prerellenado del registro"
 
@@ -71,7 +71,9 @@ class EncabezadoViewModel(application: Application) : AndroidViewModel(applicati
             ruta.startsWith("sin_senal") ->
                 "Envío de sesiones" to red.medioDeConexion().etiqueta
 
-            ruta.startsWith("programar") -> "Sesiones" to "Programar · validar · rechazar"
+            ruta.startsWith("sesiones") -> "Sesiones" to "Validar · rechazar"
+
+            ruta.startsWith("programar") -> "Programar sesión" to "Nueva sesión de conteo"
 
             ruta.startsWith("evento") -> "Evento del día" to repositorio.fechaDeTrabajo()
 
