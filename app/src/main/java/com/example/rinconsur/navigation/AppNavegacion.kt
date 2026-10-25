@@ -205,7 +205,9 @@ fun AppNavegacion() {
                     onSalir = {
                         loginViewModel.cerrarSesion()
                         navController.navigate(Ruta.Login.ruta) { popUpTo(0) }
-                    }
+                    },
+                    // El nombre es un dato vivo: al guardarlo se relee el encabezado de la barra.
+                    onDatosCambiados = { encabezado.actualizar(rutaActual) }
                 )
             }
         }

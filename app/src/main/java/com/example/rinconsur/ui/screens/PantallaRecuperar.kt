@@ -38,7 +38,7 @@ import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.viewmodel.RecuperarViewModel
 
 /**
- * Recuperar la clave sin correo, en tres pasos: RUT, las dos preguntas de seguridad y la clave
+ * Recuperar la clave sin correo, en tres pasos: RUT, la pregunta de seguridad y la clave
  * nueva. Es un formulario con validacion por campo y su mensaje en cada paso.
  */
 @Composable
@@ -73,7 +73,7 @@ fun PantallaRecuperar(onVolver: () -> Unit) {
                 }
 
                 PasoRecuperar.PREGUNTAS -> {
-                    Seccion("Tus preguntas de seguridad")
+                    Seccion("Tu pregunta de seguridad")
                     estado.preguntas.forEachIndexed { i, p ->
                         Text(p.texto, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(Dimens.espacioMini))
@@ -84,7 +84,6 @@ fun PantallaRecuperar(onVolver: () -> Unit) {
                             error = if (i == 0) estado.errorRespuestas else null
                         )
                     }
-                    BloqueAviso(if (estado.preguntas.size > 1) null else estado.errorRespuestas)
                     Spacer(Modifier.height(Dimens.espacioMedio))
                     BotonPrincipal("Continuar", onClick = { if (!vm.verificar()) Unit })
                     Spacer(Modifier.height(Dimens.espacioChico))

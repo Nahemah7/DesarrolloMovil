@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 /**
- * Recuperar la clave sin correo: RUT, las dos preguntas de seguridad de esa persona y una clave
+ * Recuperar la clave sin correo: RUT, la pregunta de seguridad de esa persona y una clave
  * nueva. La persona se guarda en memoria entre pasos, no en el estado: la pantalla no la necesita.
  */
 class RecuperarViewModel(application: Application) : AndroidViewModel(application) {
@@ -78,12 +78,12 @@ class RecuperarViewModel(application: Application) : AndroidViewModel(applicatio
         val estado = _uiState.value
         val persona = persona ?: return false
         if (estado.respuestas.any { it.isBlank() }) {
-            _uiState.update { it.copy(errorRespuestas = "Responde las dos preguntas.") }
+            _uiState.update { it.copy(errorRespuestas = "Responde tu pregunta.") }
             return false
         }
         val pares = estado.preguntas.mapIndexed { i, p -> p.id to estado.respuestas[i] }
         if (!repositorio.verificarRespuestas(persona.id, persona.rut, pares)) {
-            _uiState.update { it.copy(errorRespuestas = "Alguna respuesta no coincide. Revísalas.") }
+            _uiState.update { it.copy(errorRespuestas = "La respuesta no coincide. Revísala.") }
             return false
         }
         _uiState.update { it.copy(paso = PasoRecuperar.CLAVE, errorRespuestas = null) }

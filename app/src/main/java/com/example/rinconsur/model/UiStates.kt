@@ -186,6 +186,9 @@ data class RecuperarUiState(
 /** Estado del perfil: los datos de quien entro y la seguridad de su cuenta. */
 data class PerfilUiState(
     val nombre: String = "",
+    val apellido: String = "",
+    val errorNombre: String? = null,
+    val avisoNombre: String? = null,
     val rut: String = "",
     val cargo: String = "",
     val perfil: String = "",

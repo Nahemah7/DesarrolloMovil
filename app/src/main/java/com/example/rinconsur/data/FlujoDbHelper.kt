@@ -1027,6 +1027,19 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
     fun buscarColaboradorPorId(id: Long): Colaborador? =
         consultarColaboradores(SQL_USUARIO + "WHERE u.id_usuario = ?", arrayOf(id.toString())).firstOrNull()
 
+    /**
+     * Cambia el nombre de la persona. Son los dos campos que la app muestra: el nombre en la barra,
+     * en el perfil y en la lista de observadores, y el apellido junto al nombre en la lista de
+     * sesiones del supervisor. El RUT y el rol no se tocan: identifican la cuenta.
+     */
+    fun cambiarNombre(idUsuario: Long, nombres: String, apellidoPaterno: String): Int {
+        val valores = ContentValues().apply {
+            put("nombres", nombres)
+            put("apellido_paterno", apellidoPaterno)
+        }
+        return writableDatabase.update("usuario", valores, "id_usuario = ?", arrayOf(idUsuario.toString()))
+    }
+
     fun sesionEnCursoDe(idObservador: Long): SesionResumen? =
         consultarSesiones(SQL_SESIONES + "WHERE s.id_observador = ? AND s.id_estado = ?", arrayOf(idObservador.toString(), ESTADO_EN_CURSO.toString())).firstOrNull()
 
@@ -1401,6 +1414,7 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
                         id = c.long("id_usuario"),
                         rut = c.texto("rut"),
                         nombre = c.texto("nombres"),
+                        apellido = c.texto("apellido_paterno"),
                         cargo = c.texto("cargo"),
                         perfil = PerfilUsuario.porCodigo(c.texto("rol_codigo")) ?: PerfilUsuario.OBSERVADOR,
                         activo = c.entero("activo") == 1,

@@ -23,16 +23,20 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Checkbox
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +56,7 @@ import com.example.rinconsur.ui.components.BarraApp
 import com.example.rinconsur.ui.components.BotonPrincipal
 import com.example.rinconsur.ui.components.BotonSecundario
 import com.example.rinconsur.ui.components.CampoContrasena
+import com.example.rinconsur.ui.components.CampoLista
 import com.example.rinconsur.ui.components.CampoTexto
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
@@ -68,14 +73,16 @@ import com.example.rinconsur.viewmodel.PerfilViewModel
 import java.io.File
 
 /**
- * Perfil de quien esta usando el telefono: sus datos, la seguridad de su cuenta (cambiar la clave y
- * elegir las dos preguntas con las que la recupera).
+ * Perfil de quien esta usando el telefono: sus datos —el nombre y el apellido son lo unico
+ * editable, el RUT identifica la cuenta—, la foto y la seguridad de la cuenta (cambiar la clave y
+ * elegir la pregunta con la que la recupera).
  */
 @Composable
-fun PantallaPerfil(onSalir: () -> Unit) {
+fun PantallaPerfil(onSalir: () -> Unit, onDatosCambiados: () -> Unit = {}) {
     val vm: PerfilViewModel = viewModel()
     val estado by vm.uiState.collectAsStateWithLifecycle()
     val contexto = LocalContext.current
+    var cambiandoNombre by remember { mutableStateOf(false) }
 
     // La camara: primero el permiso y despues el disparo. La foto vuelve ya recortada y reducida.
     val tomarFoto = rememberLauncherForActivityResult(
@@ -109,13 +116,23 @@ fun PantallaPerfil(onSalir: () -> Unit) {
             Seccion("Mis datos")
             TarjetaSeccion {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Avatar(estado.nombre, estado.foto)
+                    Avatar(estado.nombre + " " + estado.apellido, estado.foto)
                     Column(Modifier.padding(start = 16.dp)) {
-                        Text(estado.nombre, style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            (estado.nombre + " " + estado.apellido).trim(),
+                            style = MaterialTheme.typography.titleSmall
+                        )
                         Text(estado.perfil, style = MaterialTheme.typography.bodyMedium)
                         Text(estado.rut, style = MaterialTheme.typography.bodySmall, color = Apagado)
                     }
                 }
+                Spacer(Modifier.height(Dimens.espacioChico))
+                BotonSecundario(
+                    texto = "Cambiar nombre",
+                    icono = Icons.Filled.Edit,
+                    onClick = { cambiandoNombre = true }
+                )
+                if (estado.avisoNombre != null) AvisoBueno(estado.avisoNombre!!)
                 Spacer(Modifier.height(Dimens.espacioChico))
                 BotonSecundario(
                     texto = if (estado.foto == null) "Agregar una foto" else "Cambiar la foto",
@@ -157,41 +174,85 @@ fun PantallaPerfil(onSalir: () -> Unit) {
                 BotonPrincipal("Cambiar la clave", onClick = { if (!vm.cambiarClave()) Unit })
             }
 
-            Seccion("Seguridad: tus dos preguntas")
+            val idElegida = estado.elegidas.firstOrNull()
+            val textoElegido = estado.catalogo.firstOrNull { it.id == idElegida }?.texto ?: ""
+            val respuestaElegida = idElegida?.let { estado.respuestas[it] } ?: ""
+
+            Seccion("Seguridad: tu pregunta")
             TarjetaSeccion {
                 Text(
-                    if (estado.tienePreguntas) "Estas son tus preguntas. Puedes cambiarlas."
-                    else "Elige dos preguntas y escribelas: con ellas recuperas tu clave si se te olvida.",
+                    if (estado.tienePreguntas) "Esta es tu pregunta. Puedes cambiarla."
+                    else "Elige una pregunta y escríbela: con ella recuperas tu clave si se te olvida.",
                     style = MaterialTheme.typography.bodySmall, color = Apagado
                 )
                 Spacer(Modifier.height(Dimens.espacioChico))
-                estado.catalogo.forEach { pregunta ->
-                    val elegida = estado.elegidas.contains(pregunta.id)
-                    Row(
-                        Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(checked = elegida, onCheckedChange = { vm.onAlternarPregunta(pregunta.id) })
-                        Text(pregunta.texto, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-                    }
-                    if (elegida) {
-                        CampoTexto(
-                            valor = estado.respuestas[pregunta.id] ?: "",
-                            onValorCambia = { vm.onRespuestaCambia(pregunta.id, it) },
-                            etiqueta = "Tu respuesta",
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
+                CampoLista(
+                    etiqueta = "Pregunta",
+                    textoElegido = textoElegido,
+                    opciones = estado.catalogo.map { it.texto },
+                    alElegir = { indice -> vm.onElegirPregunta(estado.catalogo[indice].id) }
+                )
+                Spacer(Modifier.height(Dimens.espacioChico))
+                CampoTexto(
+                    valor = respuestaElegida,
+                    onValorCambia = { vm.onRespuestaCambia(idElegida ?: 0L, it) },
+                    etiqueta = "Tu respuesta",
+                    modifier = Modifier.fillMaxWidth()
+                )
                 if (estado.errorPreguntas != null) AvisoMal(estado.errorPreguntas!!)
                 if (estado.avisoPreguntas != null) AvisoBueno(estado.avisoPreguntas!!)
                 Spacer(Modifier.height(Dimens.espacioChico))
-                BotonPrincipal("Guardar las preguntas", onClick = { if (!vm.guardarPreguntas()) Unit })
+                BotonPrincipal("Guardar la pregunta", onClick = { if (!vm.guardarPreguntas()) Unit })
             }
 
             Spacer(Modifier.height(14.dp))
             BotonPrincipal("Cerrar sesión", onClick = onSalir)
             Spacer(Modifier.height(36.dp))
         }
+    }
+
+    // El nombre se cambia como accion y no con un campo siempre abierto: asi no se edita sin querer.
+    if (cambiandoNombre) {
+        AlertDialog(
+            onDismissRequest = {
+                cambiandoNombre = false
+                vm.cancelarCambioNombre()
+            },
+            title = { Text("Cambiar nombre") },
+            text = {
+                Column {
+                    CampoTexto(
+                        valor = estado.nombre,
+                        onValorCambia = vm::onNombreCambia,
+                        etiqueta = "Nombre",
+                        error = estado.errorNombre,
+                        etiquetaArriba = true
+                    )
+                    Spacer(Modifier.height(Dimens.espacioMedio))
+                    CampoTexto(
+                        valor = estado.apellido,
+                        onValorCambia = vm::onApellidoCambia,
+                        etiqueta = "Apellido",
+                        etiquetaArriba = true
+                    )
+                    Nota("El RUT no se cambia: identifica tu cuenta.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (vm.guardarNombre()) {
+                        cambiandoNombre = false
+                        onDatosCambiados()
+                    }
+                }) { Text("Guardar") }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    cambiandoNombre = false
+                    vm.cancelarCambioNombre()
+                }) { Text("Cancelar") }
+            }
+        )
     }
 }
 

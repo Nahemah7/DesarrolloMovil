@@ -14,14 +14,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 /**
- * Perfil de quien esta usando el telefono: sus datos y la seguridad de su cuenta —cambiar la clave
- * y elegir las dos preguntas con las que la recupera si se le olvida.
+ * Perfil de quien esta usando el telefono: sus datos (el nombre es lo unico editable, el RUT
+ * identifica la cuenta), la foto, y la seguridad —cambiar la clave y elegir la pregunta con la que
+ * la recupera si se le olvida.
  */
 class PerfilViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = FlujoRepository(application)
     private val sesion = SesionPreferencias(application)
     private val persona: Colaborador? = repositorio.colaboradorPorId(sesion.leer())
+
+    /** Lo que hay guardado, para volver atras si el cambio de nombre se cancela. */
+    private var nombreOriginal: String = persona?.nombre ?: ""
+    private var apellidoOriginal: String = persona?.apellido ?: ""
 
     private val _uiState = MutableStateFlow(PerfilUiState())
     val uiState: StateFlow<PerfilUiState> = _uiState.asStateFlow()
@@ -35,17 +40,73 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
             _uiState.update {
                 it.copy(
                     nombre = p.nombre,
+                    apellido = p.apellido,
                     rut = p.rut,
                     cargo = p.cargo,
                     perfil = p.perfil.etiqueta,
                     foto = repositorio.fotoDe(p.id),
                     catalogo = repositorio.preguntas(),
-                    elegidas = guardadas.map { q -> q.id },
+                    // La app usa una sola pregunta: si venia con dos guardadas se toma la primera.
+                    elegidas = guardadas.take(1).map { q -> q.id },
                     tienePreguntas = guardadas.isNotEmpty()
                 )
             }
         }
     }
+
+    // ---------- nombre y apellido ----------
+
+    fun onNombreCambia(valor: String) {
+        _uiState.update { it.copy(nombre = valor, errorNombre = null, avisoNombre = null) }
+    }
+
+    fun onApellidoCambia(valor: String) {
+        _uiState.update { it.copy(apellido = valor, errorNombre = null, avisoNombre = null) }
+    }
+
+    /**
+     * Guarda el nombre. Es un dato vivo: el resto de la app lo lee de la base al abrir cada
+     * pantalla, asi que el cambio se ve en la barra, en el perfil y en las pantallas del supervisor
+     * sin copias por ningun lado.
+     */
+    fun guardarNombre(): Boolean {
+        val p = persona ?: return false
+        val e = _uiState.value
+        val nombre = e.nombre.trim()
+        val apellido = e.apellido.trim()
+        if (!textoDeNombreValido(nombre)) {
+            _uiState.update { it.copy(errorNombre = "Escribe el nombre con letras, de 2 a 40.") }
+            return false
+        }
+        if (apellido.isNotEmpty() && !textoDeNombreValido(apellido)) {
+            _uiState.update { it.copy(errorNombre = "Escribe el apellido con letras, de 2 a 40.") }
+            return false
+        }
+        if (!repositorio.cambiarNombre(p.id, nombre, apellido)) {
+            _uiState.update { it.copy(errorNombre = "No se pudo guardar el nombre.") }
+            return false
+        }
+        nombreOriginal = nombre
+        apellidoOriginal = apellido
+        _uiState.update { it.copy(nombre = nombre, apellido = apellido, errorNombre = null, avisoNombre = "Tu nombre quedó guardado.") }
+        return true
+    }
+
+    /** Se cerro el cambio sin guardar: los campos vuelven a lo que hay en la base. */
+    fun cancelarCambioNombre() {
+        _uiState.update {
+            it.copy(
+                nombre = nombreOriginal,
+                apellido = apellidoOriginal,
+                errorNombre = null,
+                avisoNombre = null
+            )
+        }
+    }
+
+    /** Letras (con tildes y enie), espacios, guion y apostrofo: lo que lleva un nombre de persona. */
+    private fun textoDeNombreValido(texto: String): Boolean =
+        texto.length in 2..40 && texto.all { it.isLetter() || it == ' ' || it == '-' || it == '\'' }
 
     // ---------- foto de perfil ----------
 
@@ -107,18 +168,11 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
 
     // ---------- preguntas de seguridad ----------
 
-    /** Marca o desmarca una pregunta. El caso pide dos: no deja elegir una tercera. */
-    fun onAlternarPregunta(idPregunta: Long): String? {
-        val e = _uiState.value
-        val nuevas = e.elegidas.toMutableList()
-        if (nuevas.contains(idPregunta)) {
-            nuevas.remove(idPregunta)
-        } else {
-            if (nuevas.size >= 2) return "Elige solo dos preguntas."
-            nuevas.add(idPregunta)
+    /** La pregunta elegida reemplaza a la anterior: la cuenta usa una sola. */
+    fun onElegirPregunta(idPregunta: Long) {
+        _uiState.update {
+            it.copy(elegidas = listOf(idPregunta), errorPreguntas = null, avisoPreguntas = null)
         }
-        _uiState.update { it.copy(elegidas = nuevas, errorPreguntas = null, avisoPreguntas = null) }
-        return null
     }
 
     fun onRespuestaCambia(idPregunta: Long, valor: String) {
@@ -127,22 +181,25 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    /** Guarda las dos respuestas. Se guardan hasheadas, con el RUT como sal, igual que la clave. */
+    /**
+     * Guarda la respuesta de la pregunta elegida. Se guarda hasheada, con el RUT como sal: lo que
+     * queda en la base no es la respuesta escrita.
+     */
     fun guardarPreguntas(): Boolean {
         val p = persona ?: return false
         val e = _uiState.value
-        if (e.elegidas.size != 2) {
-            _uiState.update { it.copy(errorPreguntas = "Elige dos preguntas.") }
+        if (e.elegidas.size != 1) {
+            _uiState.update { it.copy(errorPreguntas = "Elige una pregunta.") }
             return false
         }
         val pares = e.elegidas.map { id -> id to (e.respuestas[id] ?: "") }
         if (pares.any { (_, r) -> r.isBlank() }) {
-            _uiState.update { it.copy(errorPreguntas = "Responde las dos preguntas.") }
+            _uiState.update { it.copy(errorPreguntas = "Responde la pregunta.") }
             return false
         }
         repositorio.guardarRespuestas(p.id, p.rut, pares)
         _uiState.update {
-            it.copy(tienePreguntas = true, respuestas = emptyMap(), avisoPreguntas = "Tus preguntas quedaron guardadas.")
+            it.copy(tienePreguntas = true, respuestas = emptyMap(), avisoPreguntas = "Tu pregunta quedó guardada.")
         }
         return true
     }

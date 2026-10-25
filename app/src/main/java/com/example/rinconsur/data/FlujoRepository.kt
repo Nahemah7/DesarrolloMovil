@@ -54,6 +54,10 @@ class FlujoRepository(context: Context) {
 
     fun colaboradorPorId(id: Long): Colaborador? = db.buscarColaboradorPorId(id)
 
+    /** Cambia el nombre y el apellido. Devuelve true si la base acepto el cambio. */
+    fun cambiarNombre(idUsuario: Long, nombres: String, apellidoPaterno: String): Boolean =
+        db.cambiarNombre(idUsuario, nombres, apellidoPaterno) > 0
+
     // ---- sesiones de conteo ----
 
     fun sesionEnCursoDe(idObservador: Long): SesionResumen? = db.sesionEnCursoDe(idObservador)
