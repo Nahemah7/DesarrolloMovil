@@ -1,0 +1,94 @@
+package com.example.rinconsur.viewmodel
+
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import com.example.rinconsur.data.EstadoRed
+import com.example.rinconsur.data.FlujoRepository
+import com.example.rinconsur.data.SesionPreferencias
+import com.example.rinconsur.model.Colaborador
+import com.example.rinconsur.model.PerfilUsuario
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+/**
+ * El encabezado de la barra: el titulo y el dato corto de cada pantalla, armados desde los datos
+ * (quien entro, que sesion tiene en curso, como esta la red) y no desde la pantalla.
+ *
+ * La barra vive en el contenedor, asi que este ViewModel es el que decide que se lee arriba: las
+ * pantallas no arman su propio encabezado y por eso no puede quedar distinto entre una y otra.
+ */
+class EncabezadoViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val repositorio = FlujoRepository(application)
+    private val preferencias = SesionPreferencias(application)
+    private val red = EstadoRed(application)
+
+    private val _perfil = MutableStateFlow(PerfilUsuario.OBSERVADOR)
+    val perfil: StateFlow<PerfilUsuario> = _perfil.asStateFlow()
+
+    private val _titulo = MutableStateFlow("Rincón Sur")
+    val titulo: StateFlow<String> = _titulo.asStateFlow()
+
+    private val _subtitulo = MutableStateFlow("")
+    val subtitulo: StateFlow<String> = _subtitulo.asStateFlow()
+
+    /**
+     * Quien esta adentro se lee en cada pantalla y no una sola vez: el telefono se comparte entre
+     * turnos, y si no se relee, el encabezado y el menu quedan con el colaborador anterior.
+     */
+    private fun usuarioActual(): Colaborador? {
+        val id = preferencias.leer()
+        return if (id > 0) repositorio.colaboradorPorId(id) else null
+    }
+
+    /**
+     * Lee el encabezado que corresponde a la ruta que se esta mostrando.
+     * Los datos que van en la ruta (la plantilla, la sesion que se rechaza) llegan como argumentos:
+     * la ruta de navegacion es el patron, no el valor.
+     */
+    fun actualizar(ruta: String, numeroPlantilla: String? = null, idSesion: String? = null) {
+        val usuario = usuarioActual()
+        _perfil.value = usuario?.perfil ?: PerfilUsuario.OBSERVADOR
+        val quien = usuario?.let { it.nombre + " · " + it.perfil.etiqueta } ?: ""
+        val sesion = usuario?.let { repositorio.sesionEnCursoDe(it.id) }
+        val acceso = sesion?.let { s ->
+            repositorio.accesos().firstOrNull { it.id == s.idAcceso }?.etiquetaCorta
+        } ?: ""
+
+        val (titulo, subtitulo) = when {
+            ruta.startsWith("mi_sesion") -> "Mi sesión" to quien
+
+            ruta.startsWith("registro") ->
+                (sesion?.codigo ?: "Sesión") to
+                    listOf("Registrando accesos", acceso).filter { it.isNotEmpty() }.joinToString(" · ")
+
+            ruta.startsWith("plantilla") -> "Plantilla " + (numeroPlantilla ?: "") to "Prerellenado del registro"
+
+            ruta.startsWith("cierre") ->
+                (sesion?.codigo ?: "Cerrar sesión") to "Resumen de lo registrado"
+
+            ruta.startsWith("sin_senal") ->
+                "Envío de sesiones" to red.medioDeConexion().etiqueta
+
+            ruta.startsWith("programar") -> "Sesiones" to "Programar · validar · rechazar"
+
+            ruta.startsWith("evento") -> "Evento del día" to repositorio.fechaDeTrabajo()
+
+            ruta.startsWith("rechazar") ->
+                "Rechazar sesión" to (repositorio.sesion(idSesion?.toLongOrNull() ?: 0L)?.codigo ?: "")
+
+            ruta.startsWith("perfil") -> "Mi perfil" to quien
+
+            else -> "Rincón Sur" to "Acceso al sistema"
+        }
+
+        _titulo.value = titulo
+        _subtitulo.value = subtitulo
+    }
+
+    override fun onCleared() {
+        repositorio.cerrar()
+        super.onCleared()
+    }
+}

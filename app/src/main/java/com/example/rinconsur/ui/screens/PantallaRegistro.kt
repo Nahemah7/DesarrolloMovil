@@ -209,20 +209,6 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
 
     Scaffold(
         containerColor = Hueso,
-        topBar = {
-            BarraApp(
-                titulo = estado.codigoSesion.ifEmpty { "Sesión" },
-                subtitulo = "Registrando accesos",
-                etiqueta = "En curso",
-                colorEtiqueta = Ok,
-                accion = if (estado.sinSesionEnCurso) null else ({
-                    // Arriba y no abajo: abajo quedaba tapado por los botones del sistema
-                    TextButton(onClick = onCerrar) {
-                        Text("Enviar sesión", color = Burdeo, style = MaterialTheme.typography.labelSmall)
-                    }
-                })
-            )
-        },
         bottomBar = {
             // Alto y angosto, al alcance del pulgar. Con navigationBarsPadding para no quedar debajo
             // de los botones del sistema, que es lo que lo hacia inusable.
@@ -277,6 +263,21 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
                     Text("Proporción de tránsito", style = MaterialTheme.typography.labelSmall, color = HuesoApagado)
                     Text(pct + " · " + estado.resumen.transito + " en tránsito",
                         style = MaterialTheme.typography.labelSmall, color = Burdeo)
+                }
+                // La sesion en curso y su envio viven aca, junto al dato que los justifica:
+                // la barra de arriba quedo solo para navegar.
+                if (!estado.sinSesionEnCurso) {
+                    Spacer(Modifier.height(10.dp))
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        EtiquetaEstado("En curso", "ok")
+                        TextButton(onClick = onCerrar) {
+                            Text("Enviar sesión", color = Burdeo, style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
                 }
             }
 

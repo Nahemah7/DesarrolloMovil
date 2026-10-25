@@ -45,8 +45,6 @@ fun PantallaCierre(onEnviar: () -> Unit, onIrA: (String) -> Unit) {
 
     Scaffold(
         containerColor = Hueso,
-        topBar = { BarraApp(codigo.ifEmpty { "Cerrar sesión" }, "Resumen de lo registrado", "Finalizada", Info) },
-        bottomBar = { NavInferior(listOf("Registrar", "Mis sesiones", "Perfil"), "Mis sesiones", onIrA) }
     ) { pad ->
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             if (codigo.isEmpty()) {

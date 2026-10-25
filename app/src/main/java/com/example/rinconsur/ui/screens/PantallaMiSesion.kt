@@ -60,20 +60,6 @@ fun PantallaMiSesion(onIniciar: () -> Unit, onIrA: (String) -> Unit) {
 
     Scaffold(
         containerColor = Hueso,
-        topBar = {
-            BarraApp(
-                titulo = "Mi sesión",
-                subtitulo = usuario?.let { it.nombre + " · " + it.perfil.etiqueta } ?: "",
-                // Sin nada por hacer no se inventa una etiqueta: las sesiones cerradas se ven en la lista
-                etiqueta = when {
-                    hayEnCurso -> "En curso"
-                    hayProgramada -> "Programada"
-                    else -> null
-                },
-                colorEtiqueta = if (hayEnCurso) Ok else Info
-            )
-        },
-        bottomBar = { NavInferior(listOf("Registrar", "Mis sesiones", "Perfil"), "Mis sesiones", onIrA) }
     ) { pad ->
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
 

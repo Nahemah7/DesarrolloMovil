@@ -45,7 +45,6 @@ fun PantallaSinSenal(onVolver: () -> Unit) {
 
     Scaffold(
         containerColor = Hueso,
-        topBar = { BarraApp("Envío de sesiones", medio.etiqueta, "Observador") }
     ) { pad ->
         Column(
             Modifier
@@ -113,15 +112,6 @@ fun PantallaSinSenal(onVolver: () -> Unit) {
             BotonSecundario(
                 texto = "Reintentar conexión",
                 onClick = { vm.revisarRed() },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(8.dp))
-            BotonSecundario(
-                texto = "Volver",
-                onClick = {
-                    vm.limpiarMensaje()
-                    onVolver()
-                },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(20.dp))

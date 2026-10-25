@@ -97,14 +97,6 @@ fun PantallaPerfil(onSalir: () -> Unit) {
 
     Scaffold(
         containerColor = Hueso,
-        topBar = {
-            BarraApp(
-                titulo = estado.nombre.ifEmpty { "Mi perfil" },
-                subtitulo = estado.perfil,
-                etiqueta = "Mi perfil",
-                colorEtiqueta = Info
-            )
-        }
     ) { pad ->
         Column(
             Modifier

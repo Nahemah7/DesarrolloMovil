@@ -58,7 +58,6 @@ fun PantallaRechazar(idSesion: Long, onVolver: () -> Unit) {
 
     Scaffold(
         containerColor = Hueso,
-        topBar = { BarraApp("Rechazar sesión", estado.codigo, "Supervisor", Info) }
     ) { pad ->
         Column(
             Modifier

@@ -56,8 +56,6 @@ fun PantallaProgramar(onIrA: (String) -> Unit) {
 
     Scaffold(
         containerColor = Hueso,
-        topBar = { BarraApp("Programar sesión", "Nueva sesión de conteo", "Supervisor", Info) },
-        bottomBar = { NavInferior(listOf("Sesiones", "Medir", "Indicadores", "Más"), "Sesiones", onIrA) }
     ) { pad ->
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             Seccion("Acceso")

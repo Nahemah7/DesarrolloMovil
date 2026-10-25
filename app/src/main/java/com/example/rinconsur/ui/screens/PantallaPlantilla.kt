@@ -63,19 +63,6 @@ fun PantallaPlantilla(numero: Int, onVolver: () -> Unit) {
 
     Scaffold(
         containerColor = Hueso,
-        topBar = {
-            BarraApp(
-                titulo = "Plantilla " + numero,
-                subtitulo = "Prerellenado del registro",
-                etiqueta = if (estado.tenia) "Guardada" else "Nueva",
-                colorEtiqueta = if (estado.tenia) Ok else Info,
-                accion = {
-                    TextButton(onClick = onVolver) {
-                        Text("Volver", color = Burdeo, style = MaterialTheme.typography.labelSmall)
-                    }
-                }
-            )
-        },
     ) { pad ->
         Box(Modifier.fillMaxSize()) {
         Column(

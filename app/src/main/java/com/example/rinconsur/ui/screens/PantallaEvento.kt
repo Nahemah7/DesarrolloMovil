@@ -91,9 +91,6 @@ fun PantallaEvento(onVolver: () -> Unit) {
 
     Scaffold(
         containerColor = Hueso,
-        topBar = {
-            BarraApp("Evento del día", estado.eventosDelDia.toString() + " eventos hoy", "Supervisor", Info)
-        }
     ) { pad ->
         Column(
             Modifier
@@ -190,7 +187,6 @@ fun PantallaEvento(onVolver: () -> Unit) {
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(8.dp))
-            BotonSecundario("Volver", onClick = onVolver, modifier = Modifier.fillMaxWidth())
             Spacer(Modifier.height(20.dp))
         }
     }
