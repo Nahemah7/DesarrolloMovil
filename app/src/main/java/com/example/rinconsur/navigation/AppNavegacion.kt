@@ -37,6 +37,7 @@ import com.example.rinconsur.ui.screens.PantallaSinSenal
 import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.viewmodel.EncabezadoViewModel
 import com.example.rinconsur.viewmodel.LoginViewModel
+import com.example.rinconsur.ui.screens.PantallaIndicadores
 
 /**
  * Navegacion de la app. El perfil que entra decide el recorrido: el observador registra y cierra su
@@ -207,6 +208,12 @@ fun AppNavegacion() {
                 )
             }
 
+            composable(Ruta.Indicadores.ruta) {
+                PantallaIndicadores(
+                    onIrA = { navController.navegar(it) }
+                )
+            }
+
             composable(Ruta.Perfil.ruta) {
                 PantallaPerfil(
                     onSalir = {
@@ -226,6 +233,7 @@ private fun NavHostController.navegar(pestana: String) {
     val destino = when (pestana) {
         "Registrar" -> Ruta.Registro.ruta
         "Mis sesiones" -> Ruta.MiSesion.ruta
+        "Indicadores" -> Ruta.Indicadores.ruta
         "Sesiones" -> Ruta.Sesiones.ruta
         "Medir" -> Ruta.Evento.ruta
         else -> Ruta.Perfil.ruta

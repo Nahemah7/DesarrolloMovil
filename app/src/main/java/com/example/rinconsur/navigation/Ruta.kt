@@ -27,6 +27,7 @@ sealed class Ruta(val ruta: String) {
     data object SinSenal : Ruta("sin_senal")
 
     // Comunes
+    data object Indicadores : Ruta("indicadores")
     data object Perfil : Ruta("perfil")
 }
 
