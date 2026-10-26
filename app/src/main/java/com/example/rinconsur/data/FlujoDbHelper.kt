@@ -1013,7 +1013,14 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
 
     fun listarCompanias(): List<Compania> = Compania.entries
 
-    /** El dia con el que trabaja la app: la ultima fecha con ingresos cargados. */
+    /**
+     * La fecha de hoy en el telefono. Con esta se fechan las sesiones y los eventos: el trabajo se
+     * hace el dia que se hace, no el ultimo dia que alguien cargo ingresos.
+     */
+    fun fechaHoy(): String =
+        java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
+
+    /** El dia con datos de ingresos (el anexo): es el que usan los indicadores. */
     fun fechaDeTrabajo(): String =
         readableDatabase.rawQuery("SELECT MAX(fecha) AS fecha FROM conteo_ingreso", null).use { c ->
             if (c.moveToNext()) c.texto("fecha") else ""
@@ -1341,10 +1348,11 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
         return lista
     }
 
-    fun bloquesPendientes(): List<String> {
+    fun bloquesPendientes(fecha: String): List<String> {
         val lista = mutableListOf<String>()
         readableDatabase.rawQuery(
-            "SELECT acceso, hora_inicio, fecha FROM v_pendiente_medir ORDER BY fecha, hora_inicio", null
+            "SELECT acceso, hora_inicio, fecha FROM v_pendiente_medir WHERE fecha = ? ORDER BY hora_inicio",
+            arrayOf(fecha)
         ).use { c ->
             while (c.moveToNext()) {
                 lista.add(c.texto("acceso") + " · " + c.texto("hora_inicio").take(5) + " · " + c.texto("fecha"))

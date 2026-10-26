@@ -24,7 +24,8 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
     val uiState: StateFlow<ProgramarUiState> = _uiState.asStateFlow()
 
     init {
-        val fecha = repositorio.fechaDeTrabajo()
+        // La sesion se programa para hoy: el conteo se hace el dia que se hace.
+        val fecha = repositorio.fechaHoy()
         _uiState.update {
             it.copy(
                 fecha = fecha,

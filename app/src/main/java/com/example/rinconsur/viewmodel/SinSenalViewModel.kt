@@ -53,7 +53,7 @@ class SinSenalViewModel(application: Application) : AndroidViewModel(application
 
     /** Las sesiones que ya se cerraron y todavia no estan validadas: lo que falta enviar. */
     private fun porEnviar(): List<SesionResumen> =
-        repositorio.sesionesDeFecha(repositorio.fechaDeTrabajo()).filter { it.estado == EstadoSesion.FINALIZADA }
+        repositorio.sesionesDeFecha(repositorio.fechaHoy()).filter { it.estado == EstadoSesion.FINALIZADA }
 
     override fun onCleared() {
         repositorio.cerrar()

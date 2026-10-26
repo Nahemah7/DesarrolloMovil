@@ -51,13 +51,16 @@ data class SesionesUiState(
     val deLaSemana: List<SesionResumen> = emptyList(),
     val bloquesPendientes: Int = 0,
     val pendienteMasAtrasado: String = "",
-    val filtro: String = "Hoy"
+    val filtro: String = "Día",
+    /** Dia que se esta mirando, en yyyy-MM-dd. */
+    val fecha: String = "",
+    /** El mismo dia escrito para leerlo: "martes 15 de septiembre". */
+    val fechaLarga: String = ""
 ) {
     /** Lo que se muestra segun el filtro elegido. */
     val visibles: List<SesionResumen>
         get() = when (filtro) {
             "Por validar" -> porValidar
-            "Semana" -> deLaSemana
             else -> sesiones
         }
 }

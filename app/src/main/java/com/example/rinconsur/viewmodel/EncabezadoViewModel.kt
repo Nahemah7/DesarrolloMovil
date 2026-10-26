@@ -77,7 +77,7 @@ class EncabezadoViewModel(application: Application) : AndroidViewModel(applicati
 
             ruta.startsWith("programar") -> "Programar sesión" to "Nueva sesión de conteo"
 
-            ruta.startsWith("evento") -> "Evento del día" to repositorio.fechaDeTrabajo()
+            ruta.startsWith("evento") -> "Evento del día" to repositorio.fechaHoy()
 
             ruta.startsWith("rechazar") ->
                 "Rechazar sesión" to (repositorio.sesion(idSesion?.toLongOrNull() ?: 0L)?.codigo ?: "")

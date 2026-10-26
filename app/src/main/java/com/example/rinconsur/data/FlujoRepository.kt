@@ -46,6 +46,8 @@ class FlujoRepository(context: Context) {
     fun companias(): List<Compania> = db.listarCompanias()
 
     /** El dia con el que trabaja la app (la ultima fecha con ingresos cargados). */
+    fun fechaHoy(): String = db.fechaHoy()
+
     fun fechaDeTrabajo(): String = db.fechaDeTrabajo()
 
     // ---- personas ----
@@ -119,7 +121,7 @@ class FlujoRepository(context: Context) {
 
     fun transitoPorAcceso(fecha: String): List<TransitoPorAcceso> = db.transitoPorAcceso(fecha)
 
-    fun bloquesPendientes(): List<String> = db.bloquesPendientes()
+    fun bloquesPendientes(fecha: String): List<String> = db.bloquesPendientes(fecha)
 
     // ---- eventos del dia ----
 

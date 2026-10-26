@@ -20,7 +20,7 @@ class EventoViewModel(application: Application) : AndroidViewModel(application) 
 
     private val repositorio = FlujoRepository(application)
     private val sesion = SesionPreferencias(application)
-    private val fechaDeTrabajo = repositorio.fechaDeTrabajo()
+    private val fechaDeTrabajo = repositorio.fechaHoy()
 
     /** Catalogos para la pantalla. */
     val accesos: List<Acceso> = repositorio.accesos()

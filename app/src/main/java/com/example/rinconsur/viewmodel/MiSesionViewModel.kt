@@ -46,7 +46,8 @@ class MiSesionViewModel(application: Application) : AndroidViewModel(application
         val id = sesion.leer()
         if (id > 0) {
             _usuario.value = repositorio.colaboradorPorId(id)
-            val fecha = repositorio.fechaDeTrabajo()
+            // El observador ve las sesiones de hoy, no las del ultimo dia con ingresos cargados.
+            val fecha = repositorio.fechaHoy()
             val propias = repositorio.sesionesDeFecha(fecha).filter { it.idObservador == id }
             val elegida = propias.firstOrNull { it.estado == EstadoSesion.PROGRAMADA }
                 ?: propias.firstOrNull { it.estado == EstadoSesion.EN_CURSO }
