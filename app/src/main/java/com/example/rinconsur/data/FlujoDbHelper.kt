@@ -24,7 +24,7 @@ class FlujoDbHelper(context: Context) :
 
     companion object {
         private const val NOMBRE_BD = "rinconsur.db"
-        private const val VERSION_BD = 4
+        private const val VERSION_BD = 5
 
         /** Estado con el que se abre y se cierra la sesion de conteo. */
         const val ESTADO_PROGRAMADA = 1L
@@ -218,6 +218,10 @@ class FlujoDbHelper(context: Context) :
     id_usuario_registra INT      NOT NULL,
     fecha_registro  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
         foto                BLOB         NULL,
+    anulado             INTEGER      NOT NULL DEFAULT 0,
+    motivo_anulacion    VARCHAR(200) NULL,
+    id_usuario_anula    INT          NULL,
+    fecha_anulacion     DATETIME     NULL,
     CONSTRAINT uq_evento_codigo UNIQUE (codigo),
     CONSTRAINT ck_evento_fechas CHECK (fecha_fin >= fecha_inicio),
     CONSTRAINT fk_evento_tipo FOREIGN KEY (id_tipo_evento) REFERENCES tipo_evento (id_tipo_evento),
@@ -259,7 +263,7 @@ SELECT d.fecha,
        CASE WHEN (CAST(strftime('%w', d.fecha) AS INTEGER) + 1) IN (1, 7)
                  OR EXISTS (SELECT 1 FROM evento_dia e
                             JOIN tipo_evento t ON t.id_tipo_evento = e.id_tipo_evento
-                            WHERE t.nombre = 'Feriado'
+                            WHERE t.nombre = 'Feriado' AND e.anulado = 0
                               AND d.fecha BETWEEN e.fecha_inicio AND e.fecha_fin)
             THEN 'Fin de semana' ELSE 'Habil' END AS tipo_dia
 FROM (SELECT fecha FROM conteo_ingreso UNION SELECT fecha FROM sesion_observacion) d;""",
@@ -942,6 +946,16 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
      * Cada version nueva agrega su bloque, y la app que ya estaba instalada no pierde nada.
      */
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        if (oldVersion < 5) {
+            // Version 5: el evento no se borra, se anula con motivo y queda el rastro
+            db.execSQL("ALTER TABLE evento_dia ADD COLUMN anulado INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE evento_dia ADD COLUMN motivo_anulacion VARCHAR(200)")
+            db.execSQL("ALTER TABLE evento_dia ADD COLUMN id_usuario_anula INT")
+            db.execSQL("ALTER TABLE evento_dia ADD COLUMN fecha_anulacion DATETIME")
+            // La vista del tipo de dia se rehace para que no cuente los eventos anulados
+            db.execSQL("DROP VIEW IF EXISTS v_tipo_dia")
+            db.execSQL(SQL_VISTAS.first())
+        }
         if (oldVersion < 2) {
             // Version 2: la foto de evidencia del evento (recurso nativo de camara y galeria)
             db.execSQL("ALTER TABLE evento_dia ADD COLUMN foto BLOB")
@@ -1378,6 +1392,19 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
         )
 
     /** Todos los eventos de la base: sirve para dar el codigo correlativo (E-07, E-08...). */
+    /** Anular un evento no lo borra: queda con su motivo y quien lo anulo. */
+    fun anularEvento(idEvento: Long, motivo: String, idColaborador: Long): Int =
+        writableDatabase.update(
+            "evento_dia",
+            ContentValues().apply {
+                put("anulado", 1)
+                put("motivo_anulacion", motivo)
+                put("id_usuario_anula", idColaborador)
+                put("fecha_anulacion", ahora())
+            },
+            "id_evento = ?", arrayOf(idEvento.toString())
+        )
+
     fun contarTodosLosEventos(): Int =
         readableDatabase.rawQuery("SELECT COUNT(*) AS n FROM evento_dia", null).use { c ->
             if (c.moveToNext()) c.entero("n") else 0
@@ -1385,31 +1412,47 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
 
     /** Cuantos eventos hay registrados en una fecha: la pantalla lo muestra al guardar. */
     fun contarEventos(fecha: String): Int =
-        readableDatabase.rawQuery("SELECT COUNT(*) AS n FROM evento_dia WHERE ? BETWEEN fecha_inicio AND fecha_fin", arrayOf(fecha)).use { c ->
+        readableDatabase.rawQuery(
+            "SELECT COUNT(*) AS n FROM evento_dia WHERE anulado = 0 AND ? BETWEEN fecha_inicio AND fecha_fin",
+            arrayOf(fecha)
+        ).use { c ->
             if (c.moveToNext()) c.entero("n") else 0
         }
 
-    fun eventosDeFecha(fecha: String): List<EventoDia> {
+    /**
+     * Todos los eventos, del mas reciente al mas viejo. La lista no se filtra por el dia: un evento
+     * de otra fecha se tiene que poder ver igual, si no desaparece apenas se registra.
+     */
+    fun eventosRegistrados(): List<EventoDia> {
         val lista = mutableListOf<EventoDia>()
-        readableDatabase.rawQuery("SELECT * FROM evento_dia WHERE ? BETWEEN fecha_inicio AND fecha_fin", arrayOf(fecha)).use { c ->
+        readableDatabase.rawQuery(
+            "SELECT e.*, u.nombres AS nombre_registra FROM evento_dia e " +
+                "LEFT JOIN usuario u ON u.id_usuario = e.id_usuario_registra " +
+                "ORDER BY e.fecha_inicio DESC, e.id_evento DESC",
+            null
+        ).use { c ->
             while (c.moveToNext()) {
-                lista.add(
-                    EventoDia(
-                        id = c.long("id_evento"),
-                        codigo = c.texto("codigo"),
-                        fechaInicio = c.texto("fecha_inicio"),
-                        fechaFin = c.texto("fecha_fin"),
-                        tipo = TipoEvento.entries.firstOrNull { it.idTipo == c.long("id_tipo_evento") } ?: TipoEvento.OTRO,
-                        idAcceso = c.longOpcional("id_acceso"),
-                        descripcion = c.texto("descripcion"),
-                        idUsuarioRegistra = c.long("id_usuario_registra"),
-                        foto = c.blobOpcional("foto")
-                    )
-                )
+                lista.add(aEvento(c))
             }
         }
         return lista
     }
+
+    private fun aEvento(c: Cursor): EventoDia =
+        EventoDia(
+            id = c.long("id_evento"),
+            codigo = c.texto("codigo"),
+            fechaInicio = c.texto("fecha_inicio"),
+            fechaFin = c.texto("fecha_fin"),
+            tipo = TipoEvento.entries.firstOrNull { it.idTipo == c.long("id_tipo_evento") } ?: TipoEvento.OTRO,
+            idAcceso = c.longOpcional("id_acceso"),
+            descripcion = c.texto("descripcion"),
+            idUsuarioRegistra = c.long("id_usuario_registra"),
+            foto = c.blobOpcional("foto"),
+            nombreRegistra = c.texto("nombre_registra"),
+            anulado = c.entero("anulado") == 1,
+            motivoAnulacion = c.textoOpcional("motivo_anulacion")
+        )
 
     // ==================== lecturas internas ====================
 

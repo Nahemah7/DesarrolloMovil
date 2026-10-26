@@ -70,7 +70,11 @@ data class IndicadoresUiState(
     val indicadores: IndicadoresDia? = null,
     val porAcceso: List<TransitoPorAcceso> = emptyList(),
     val periodo: String = "Hoy",
-    val tipoDia: String = "Habil"
+    val tipoDia: String = "Habil",
+    /** La fecha que se esta mirando: hoy, no el ultimo dia con ingresos cargados. */
+    val fecha: String = "",
+    /** Las sesiones de hoy: es lo unico que se puede mostrar cuando la tienda aun no cargo el dia. */
+    val sesionesHoy: List<SesionResumen> = emptyList()
 )
 
 /** Estado del registro de un evento del dia (formulario con validacion por campo). */
@@ -84,6 +88,8 @@ data class EventoUiState(
     val errorDescripcion: String? = null,
     val errorAcceso: String? = null,
     val eventosDelDia: Int = 0,
+    /** Los eventos del dia, con su foto y si estan anulados. */
+    val eventos: List<EventoDia> = emptyList(),
     val guardado: Boolean = false,
     val mensaje: String? = null
 ) {

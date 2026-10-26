@@ -127,7 +127,10 @@ class FlujoRepository(context: Context) {
 
     fun registrarEvento(evento: EventoDia): Long = db.registrarEvento(evento)
 
-    fun eventosDeFecha(fecha: String): List<EventoDia> = db.eventosDeFecha(fecha)
+    fun eventosRegistrados(): List<EventoDia> = db.eventosRegistrados()
+
+    fun anularEvento(idEvento: Long, motivo: String, idColaborador: Long): Int =
+        db.anularEvento(idEvento, motivo, idColaborador)
 
     fun contarEventos(fecha: String): Int = db.contarEventos(fecha)
 

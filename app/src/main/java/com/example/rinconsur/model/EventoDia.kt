@@ -11,7 +11,11 @@ data class EventoDia(
     val descripcion: String,
     val idUsuarioRegistra: Long = 0,
     /** Foto de evidencia (camara o galeria). Va como bytes en la base; null = sin foto. */
-    val foto: ByteArray? = null
+    val foto: ByteArray? = null,
+    /** Quien lo registro, para la lista: el evento no se borra, se anula. */
+    val nombreRegistra: String = "",
+    val anulado: Boolean = false,
+    val motivoAnulacion: String? = null
 ) {
     val tieneFoto: Boolean get() = foto != null && foto.isNotEmpty()
 }

@@ -35,6 +35,15 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import com.example.rinconsur.model.EventoDia
+import com.example.rinconsur.ui.components.EtiquetaEstado
+import com.example.rinconsur.ui.theme.Tinta
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -66,6 +75,9 @@ fun PantallaEvento(onVolver: () -> Unit) {
     val vm: EventoViewModel = viewModel()
     val estado by vm.uiState.collectAsStateWithLifecycle()
     val contexto = LocalContext.current
+
+    // Evento que se esta anulando: el dialogo pide el motivo y el evento no se borra.
+    var eventoAAnular by remember { mutableStateOf<EventoDia?>(null) }
 
     // Cámara: primero el permiso y después el disparo. La foto se reduce antes de guardarla.
     val tomarFoto = rememberLauncherForActivityResult(
@@ -214,9 +226,130 @@ fun PantallaEvento(onVolver: () -> Unit) {
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(8.dp))
+
+            // ---- Lo registrado hoy: el evento no desaparece al guardarlo ----
+            Spacer(Modifier.height(20.dp))
+            Seccion("Eventos registrados · " + estado.eventos.size)
+            if (estado.eventos.isEmpty()) {
+                TarjetaSeccion { Nota("Todavía no hay eventos registrados.") }
+            }
+
+            val hoy = hoyIso()
+            estado.eventos.forEach { evento ->
+                Spacer(Modifier.height(8.dp))
+                TarjetaSeccion {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                evento.codigo + " · " + evento.tipo.etiqueta,
+                                style = MaterialTheme.typography.titleSmall,
+                                color = Tinta
+                            )
+
+                            val acceso = evento.idAcceso
+                                ?.let { id -> vm.accesos.firstOrNull { it.id == id }?.etiquetaCorta }
+                            val fechas = if (evento.fechaInicio == evento.fechaFin) fechaCorta(evento.fechaInicio)
+                                else fechaCorta(evento.fechaInicio) + " a " + fechaCorta(evento.fechaFin)
+                            Nota(
+                                listOf(fechas, acceso, evento.nombreRegistra)
+                                    .filterNotNull()
+                                    .filter { it.isNotBlank() }
+                                    .joinToString(" · ")
+                            )
+                            Spacer(Modifier.height(2.dp))
+                            Text(
+                                evento.descripcion,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Tinta
+                            )
+
+                            // Anulado manda; si no, la etiqueta dice si el evento ya paso o esta por venir
+                            val etiqueta = when {
+                                evento.anulado -> "Anulado" to "aviso"
+                                evento.fechaFin < hoy -> "Finalizado" to "neutro"
+                                else -> "Programado" to "info"
+                            }
+                            Spacer(Modifier.height(4.dp))
+                            EtiquetaEstado(etiqueta.first, etiqueta.second)
+                            if (evento.anulado) {
+                                Nota("Motivo: " + (evento.motivoAnulacion ?: "sin detalle"))
+                            }
+                        }
+
+                        // La foto de evidencia, chica: se ve que esta sin abrir el evento
+                        val miniatura = remember(evento.id, evento.anulado) {
+                            evento.foto?.let { ConvertidorImagen.aBitmap(it) }
+                        }
+                        miniatura?.let { img ->
+                            Spacer(Modifier.height(0.dp))
+                            Image(
+                                bitmap = img.asImageBitmap(),
+                                contentDescription = "Foto del evento " + evento.codigo,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .padding(start = 10.dp)
+                                    .size(64.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                            )
+                        }
+                    }
+
+                    if (!evento.anulado) {
+                        Spacer(Modifier.height(8.dp))
+                        BotonSecundario(
+                            "Anular con motivo",
+                            onClick = { eventoAAnular = evento },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+            }
+
             Spacer(Modifier.height(20.dp))
         }
     }
+
+    // Anular: pide el motivo; el evento queda en la lista con el motivo y su rastro.
+    eventoAAnular?.let { evento ->
+        var motivo by remember(evento.id) { mutableStateOf("") }
+
+        AlertDialog(
+            onDismissRequest = { eventoAAnular = null },
+            title = { Text("Anular " + evento.codigo) },
+            text = {
+                Column {
+                    Nota("El evento no se borra: queda en la lista con el motivo y sale del conteo del día.")
+                    Spacer(Modifier.height(10.dp))
+                    CampoTexto(
+                        valor = motivo,
+                        onValorCambia = { motivo = it },
+                        etiqueta = "Motivo de la anulación",
+                        etiquetaArriba = true
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (vm.anular(evento.id, motivo)) {
+                        eventoAAnular = null
+                    }
+                }) { Text("Anular") }
+            },
+            dismissButton = {
+                TextButton(onClick = { eventoAAnular = null }) { Text("Cancelar") }
+            }
+        )
+    }
+}
+
+/** La fecha de hoy como se guarda en la base: sirve para saber si el evento ya paso. */
+private fun hoyIso(): String =
+    java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
+
+/** 2026-10-26 -> 26-10-2026: la fecha como se lee en el resto de la app. */
+private fun fechaCorta(iso: String): String {
+    val partes = iso.split("-")
+    return if (partes.size == 3) partes[2] + "-" + partes[1] + "-" + partes[0] else iso
 }
 
 /** Pide el permiso de cámara si falta; si ya lo hay, abre la cámara. */

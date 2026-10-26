@@ -27,8 +27,22 @@ class EventoViewModel(application: Application) : AndroidViewModel(application) 
     val tipos: List<TipoEvento> = TipoEvento.entries
 
     private val _uiState = MutableStateFlow(
-        EventoUiState(fecha = fechaDeTrabajo, eventosDelDia = repositorio.contarEventos(fechaDeTrabajo))
+        EventoUiState(
+            fecha = fechaDeTrabajo,
+            eventosDelDia = repositorio.contarEventos(fechaDeTrabajo),
+            eventos = repositorio.eventosRegistrados()
+        )
     )
+
+    /** Relee la lista del dia: se llama al entrar, al guardar y al anular. */
+    private fun recargarEventos() {
+        _uiState.update {
+            it.copy(
+                eventos = repositorio.eventosRegistrados(),
+                eventosDelDia = repositorio.contarEventos(fechaDeTrabajo)
+            )
+        }
+    }
     val uiState: StateFlow<EventoUiState> = _uiState.asStateFlow()
 
     fun onFecha(valor: String) {
@@ -111,6 +125,7 @@ class EventoViewModel(application: Application) : AndroidViewModel(application) 
         val total = repositorio.contarEventos(estado.fecha)
         _uiState.update {
             it.copy(
+                eventos = repositorio.eventosRegistrados(),
                 eventosDelDia = total,
                 guardado = true,
                 fotoBytes = null,
@@ -118,6 +133,22 @@ class EventoViewModel(application: Application) : AndroidViewModel(application) 
                 mensaje = "Evento " + codigo + " guardado" + (if (estado.tieneFoto) " con la foto de evidencia." else ".")
             )
         }
+        return true
+    }
+
+    /**
+     * Anular un evento no lo borra: pide el motivo, guarda quien lo anula y sale del conteo del dia.
+     * El evento se conserva en la lista con su motivo, porque cambia el tipo de dia de los indicadores.
+     */
+    fun anular(idEvento: Long, motivo: String): Boolean {
+        if (motivo.trim().length < 5) {
+            _uiState.update { it.copy(mensaje = "Escribe el motivo de la anulación (al menos 5 letras).") }
+            return false
+        }
+
+        repositorio.anularEvento(idEvento, motivo.trim(), sesion.leer().coerceAtLeast(1L))
+        recargarEventos()
+        _uiState.update { it.copy(mensaje = "Evento anulado. Queda en la lista con su motivo.") }
         return true
     }
 
