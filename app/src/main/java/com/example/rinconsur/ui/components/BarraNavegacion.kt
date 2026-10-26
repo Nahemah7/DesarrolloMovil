@@ -83,7 +83,7 @@ fun menuDe(perfil: PerfilUsuario): List<OpcionMenu> = when (perfil) {
     else -> listOf(
         OpcionMenu("Sesiones", Ruta.Sesiones.ruta, Icons.Outlined.List, Icons.Filled.List),
         OpcionMenu("Medir", Ruta.Evento.ruta, Icons.Outlined.Edit, Icons.Filled.Edit),
-        OpcionMenu("Indicadores", Ruta.Perfil.ruta, Icons.Outlined.BarChart, Icons.Filled.BarChart),
+        OpcionMenu("Indicadores", Ruta.Indicadores.ruta, Icons.Outlined.BarChart, Icons.Filled.BarChart),
         OpcionMenu("Más", Ruta.Perfil.ruta, Icons.Outlined.MoreHoriz, Icons.Filled.MoreHoriz)
     )
 }
@@ -113,7 +113,7 @@ private fun esLaActiva(opcion: OpcionMenu, rutaActual: String): Boolean {
  */
 fun esRaiz(ruta: String): Boolean =
     ruta.startsWith("mi_sesion") || ruta.startsWith("registro") || ruta.startsWith("sesiones") ||
-            ruta.startsWith("evento") || ruta.startsWith("perfil")
+            ruta.startsWith("evento") || ruta.startsWith("perfil") || ruta.startsWith("indicadores")
 
 @Composable
 fun BarraNavegacion(

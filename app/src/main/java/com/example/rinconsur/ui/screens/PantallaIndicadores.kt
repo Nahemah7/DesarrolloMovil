@@ -16,9 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rinconsur.model.IndicadoresDia
-import com.example.rinconsur.ui.components.BarraApp
 import com.example.rinconsur.ui.components.BarraPorcentaje
-import com.example.rinconsur.ui.components.NavInferior
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaEstadistica
@@ -37,16 +35,9 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
 
     val maxIngresosAcceso = porAcceso.maxOfOrNull { it.ingresos }?.takeIf { it > 0 } ?: 1
 
-    Scaffold(
-        containerColor = Hueso,
-        topBar = {
-            BarraApp(
-                titulo = "Indicadores del día",
-                subtitulo = ind?.let { "${it.fecha} · ${it.tipoDia}" } ?: "Sin datos de fecha"
-            )
-        },
-        bottomBar = { NavInferior(listOf("Registrar", "Mis sesiones", "Perfil"), "Indicadores", onIrA) }
-    ) { pad ->
+    // La barra la dibuja el contenedor: esta pantalla no arma su propio encabezado ni un menu
+    // inferior, que era lo que la dejaba con dos cabeceras y con los iconos duplicados abajo.
+    Scaffold(containerColor = Hueso) { pad ->
         Column(
             modifier = Modifier
                 .padding(pad)
@@ -63,6 +54,10 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                     )
                 }
             } else {
+                ind.fecha?.let { fecha ->
+                    Nota(fecha + (ind.tipoDia?.let { " · " + it } ?: ""))
+                }
+
                 Seccion("Resumen general")
                 TarjetaSeccion {
                     TarjetaEstadistica(

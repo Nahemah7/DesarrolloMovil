@@ -25,7 +25,6 @@ import com.example.rinconsur.ui.components.BarraApp
 import com.example.rinconsur.ui.components.BotonPrincipal
 import com.example.rinconsur.ui.components.EtiquetaEstado
 import com.example.rinconsur.ui.components.FilaFiltros
-import com.example.rinconsur.ui.components.NavInferior
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaSeccion
@@ -81,7 +80,6 @@ fun PantallaMiSesion(onIniciar: () -> Unit, onIrA: (String) -> Unit) {
                 colorEtiqueta = if (hayEnCurso) Ok else Info
             )
         },
-        bottomBar = { NavInferior(listOf("Registrar", "Mis sesiones", "Perfil"), "Mis sesiones", onIrA) }
     ) { pad ->
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
 
