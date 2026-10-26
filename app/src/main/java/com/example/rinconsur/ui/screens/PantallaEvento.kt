@@ -7,6 +7,11 @@ import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -148,19 +153,33 @@ fun PantallaEvento(onVolver: () -> Unit) {
                 val imagen = remember(estado.fotoBytes) {
                     estado.fotoBytes?.let { ConvertidorImagen.aBitmap(it) }
                 }
-                if (imagen != null) {
-                    Image(
-                        bitmap = imagen.asImageBitmap(),
-                        contentDescription = "Foto de evidencia del evento",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    BotonSecundario("Quitar foto", onClick = { vm.quitarFoto() }, modifier = Modifier.fillMaxWidth())
-                } else {
+                AnimatedVisibility(
+                    visible = imagen != null,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    imagen?.let { img ->
+                        Column {
+                            Image(
+                                bitmap = img.asImageBitmap(),
+                                contentDescription = "Foto de evidencia del evento",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(180.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            BotonSecundario("Quitar foto", onClick = { vm.quitarFoto() }, modifier = Modifier.fillMaxWidth())
+                        }
+                    }
+                }
+
+                AnimatedVisibility(
+                    visible = imagen == null,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         BotonSecundario(
                             "Tomar foto",
@@ -176,8 +195,16 @@ fun PantallaEvento(onVolver: () -> Unit) {
                 }
             }
 
-            // Avisos: permiso denegado, o "Evento E-08 guardado"
-            estado.mensaje?.let { Nota(it) }
+            // Avisos con animación (Tarea #20): permiso denegado o "Evento E-08 guardado"
+            AnimatedVisibility(
+                visible = estado.mensaje != null,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                estado.mensaje?.let { mensaje ->
+                    Nota(mensaje)
+                }
+            }
 
             // ---- Botones ----
             Spacer(Modifier.height(14.dp))
@@ -208,4 +235,3 @@ private fun pedirFotoEvento(
         == PackageManager.PERMISSION_GRANTED
     ) disparar() else permiso.launch(Manifest.permission.CAMERA)
 }
-
