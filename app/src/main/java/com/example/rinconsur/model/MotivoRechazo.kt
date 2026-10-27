@@ -11,3 +11,12 @@ enum class MotivoRechazo(val etiqueta: String) {
     FUERA_DE_HORARIO("Fuera del horario programado"),
     OTRO("Otro motivo")
 }
+/**
+ * El texto que se guarda en la sesion rechazada: las etiquetas elegidas, y el detalle escrito si
+ * entre ellas esta "Otro motivo". Vive aca, y no en el ViewModel, para poder medir su largo en una
+ * prueba sin emulador.
+ */
+fun textoDeRechazo(motivos: Set<MotivoRechazo>, detalle: String): String =
+    motivos.joinToString("; ") {
+        if (it == MotivoRechazo.OTRO) it.etiqueta + ": " + detalle.trim() else it.etiqueta
+    }
