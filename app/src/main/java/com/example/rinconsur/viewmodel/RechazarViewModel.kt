@@ -6,6 +6,9 @@ import com.example.rinconsur.data.FlujoRepository
 import com.example.rinconsur.model.EstadoSesion
 import com.example.rinconsur.model.MotivoRechazo
 import com.example.rinconsur.model.RechazarUiState
+import com.example.rinconsur.data.TEXTO_MAXIMO
+import com.example.rinconsur.data.mensajeDeTextoLibre
+import com.example.rinconsur.model.textoDeRechazo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -62,18 +65,22 @@ class RechazarViewModel(application: Application) : AndroidViewModel(application
     fun rechazar(idSesion: Long, idRevisor: Long): Boolean {
         val estado = _uiState.value
         val errorMotivos = if (estado.motivos.isEmpty()) "Elige al menos un motivo" else null
-        val errorOtro = if (estado.exigeOtro && estado.otroMotivo.trim().length < 10)
-            "Cuenta el motivo (10 caracteres mínimo)" else null
+
+        // Lo que se guarda: las etiquetas elegidas, y el detalle si es "otro"
+        val motivo = textoDeRechazo(estado.motivos, estado.otroMotivo)
+
+        // El detalle sigue la misma regla que los demas textos libres. Ademas, las etiquetas marcadas
+        // ocupan lugar en el texto final, y ese texto completo es el que tiene que caber en 200.
+        val errorOtro = if (!estado.exigeOtro) null else
+            mensajeDeTextoLibre(estado.otroMotivo, "Cuenta el motivo")
+                ?: if (motivo.length > TEXTO_MAXIMO)
+                    "Con los motivos marcados el texto pasa de $TEXTO_MAXIMO caracteres: acorta el detalle"
+                else null
 
         if (errorMotivos != null || errorOtro != null) {
             _uiState.update { it.copy(errorMotivos = errorMotivos, errorOtro = errorOtro) }
             return false
         }
-
-        // El motivo se guarda como texto: las etiquetas elegidas, y el detalle si es "otro"
-        val motivo = estado.motivos
-            .map { if (it == MotivoRechazo.OTRO) it.etiqueta + ": " + estado.otroMotivo.trim() else it.etiqueta }
-            .joinToString("; ")
 
         repositorio.revisarSesion(idSesion, EstadoSesion.RECHAZADA, idRevisor, motivo)
         _uiState.update { it.copy(rechazada = true) }

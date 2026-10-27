@@ -38,6 +38,7 @@ import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.ui.theme.Info
 import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.RechazarViewModel
+import com.example.rinconsur.data.TEXTO_MAXIMO
 
 /**
  * Rechazar una sesión (supervisor). Se marcan uno o más motivos en casillas; si se marca
@@ -111,7 +112,7 @@ fun PantallaRechazar(idSesion: Long, onVolver: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     error = estado.errorOtro,
                     lineas = 3,
-                    maximo = 200
+                    maximo = TEXTO_MAXIMO
                 )
             }
 
