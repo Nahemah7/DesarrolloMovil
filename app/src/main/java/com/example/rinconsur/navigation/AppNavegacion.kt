@@ -23,7 +23,6 @@ import com.example.rinconsur.ui.components.BarraNavegacion
 import com.example.rinconsur.ui.components.esRaiz
 import com.example.rinconsur.ui.components.menuDe
 import com.example.rinconsur.ui.screens.PantallaCierre
-import com.example.rinconsur.ui.screens.PantallaEntrada
 import com.example.rinconsur.ui.screens.PantallaEvento
 import com.example.rinconsur.ui.screens.PantallaLogin
 import com.example.rinconsur.ui.screens.PantallaMiSesion
@@ -78,8 +77,8 @@ fun AppNavegacion() {
     // En los pasos que cuelgan de ellas, la flecha vuelve al paso anterior.
     val volver: (() -> Unit)? = if (esRaiz(rutaActual)) null else ({ navController.navigateUp() })
 
-    // Sin perfil adentro (login y recuperacion) la barra de la app no se muestra.
-    val conBarra = rutaActual != Ruta.Login.ruta && rutaActual != Ruta.Entrada.ruta
+    // Sin perfil adentro (login) la barra de la app no se muestra.
+    val conBarra = rutaActual != Ruta.Login.ruta
 
     Scaffold(
         containerColor = Hueso,
@@ -145,16 +144,6 @@ fun AppNavegacion() {
                 )
             }
 
-            // El supervisor entra a la pantalla interina hasta que existan las suyas.
-            composable(Ruta.Entrada.ruta) {
-                PantallaEntrada(
-                    onCerrarSesion = {
-                        loginViewModel.cerrarSesion()
-                        navController.navigate(Ruta.Login.ruta) { popUpTo(0) }
-                    }
-                )
-            }
-
             // ---- Colaborador observador ----
             composable(Ruta.MiSesion.ruta) {
                 PantallaMiSesion(
@@ -185,8 +174,13 @@ fun AppNavegacion() {
             // Estado de la red y sesiones por enviar: se llega despues de cerrar una sesion
             composable(Ruta.SinSenal.ruta) {
                 PantallaSinSenal(
+                    // La sesion ya se envio: se cierra su flujo (registro y cierre) para que no se
+                    // pueda volver a una pantalla que quedo apuntando a la sesion enviada.
                     onVolver = {
-                        navController.navigate(Ruta.MiSesion.ruta) { popUpTo(Ruta.MiSesion.ruta) }
+                        navController.navigate(Ruta.MiSesion.ruta) {
+                            popUpTo(Ruta.MiSesion.ruta) { inclusive = true }
+                            launchSingleTop = true
+                        }
                     }
                 )
             }

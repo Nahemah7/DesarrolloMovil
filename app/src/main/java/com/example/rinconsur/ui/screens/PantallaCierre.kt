@@ -12,7 +12,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +46,18 @@ fun PantallaCierre(onEnviar: () -> Unit, onIrA: (String) -> Unit) {
     val vm: CierreViewModel = viewModel()
     val resumen by vm.resumen.collectAsStateWithLifecycle()
     val codigo by vm.codigo.collectAsStateWithLifecycle()
+    val aviso by vm.aviso.collectAsStateWithLifecycle()
+    val yaEnviada by vm.yaEnviada.collectAsStateWithLifecycle()
+
+    // Al volver a esta pantalla se relee la sesion: pudo enviarse desde otra pestaña.
+    val ciclo = LocalLifecycleOwner.current
+    DisposableEffect(ciclo) {
+        val observador = LifecycleEventObserver { _, evento ->
+            if (evento == Lifecycle.Event.ON_RESUME) vm.releer()
+        }
+        ciclo.lifecycle.addObserver(observador)
+        onDispose { ciclo.lifecycle.removeObserver(observador) }
+    }
 
     Scaffold(
         containerColor = Hueso,
@@ -75,12 +91,27 @@ fun PantallaCierre(onEnviar: () -> Unit, onIrA: (String) -> Unit) {
                     Text("Los anulados y los «no determinado» no entran en el denominador.",
                         style = MaterialTheme.typography.bodySmall, color = Apagado)
                 }
-                Nota(
-                    if (vm.sePuedeValidar) "La sesión se puede validar."
-                    else "Con 30 registros válidos o más la sesión se puede validar. Si el teléfono está sin señal, queda por enviar y no se pierde."
-                )
-                Spacer(Modifier.height(14.dp))
-                BotonPrincipal("Enviar a validación", onClick = { if (vm.cerrar()) onEnviar() })
+                if (yaEnviada) {
+                    // Enviada: no se ofrece el boton otra vez ni se puede seguir tocando la sesion.
+                    TarjetaSeccion {
+                        Text("Esta sesión ya fue enviada a validación.",
+                            style = MaterialTheme.typography.labelMedium, color = Tinta)
+                        Text("No se le pueden agregar registros. Queda en la lista del supervisor por validar.",
+                            style = MaterialTheme.typography.bodySmall, color = Apagado)
+                    }
+                } else {
+                    Nota(
+                        if (vm.sePuedeValidar) "La sesión se puede validar."
+                        else "Faltan " + vm.faltan + " registros válidos para enviar: el mínimo es " + vm.minimo +
+                            ". Si el teléfono está sin señal, la sesión queda por enviar y no se pierde."
+                    )
+                    Spacer(Modifier.height(14.dp))
+                    BotonPrincipal("Enviar a validación", onClick = { if (vm.cerrar()) onEnviar() })
+                    aviso?.let { texto ->
+                        Spacer(Modifier.height(10.dp))
+                        Text(texto, style = MaterialTheme.typography.bodyMedium, color = Aviso)
+                    }
+                }
                 Spacer(Modifier.height(20.dp))
             }
         }

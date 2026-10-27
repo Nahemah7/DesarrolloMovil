@@ -74,6 +74,7 @@ class FlujoDbHelper(context: Context) :
     telefono       VARCHAR(20)  NULL,
     password_hash  VARCHAR(255) NOT NULL,
     activo         BOOLEAN      NOT NULL DEFAULT 1,
+    foto           BLOB         NULL,
     fecha_creacion DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uq_usuario_rut UNIQUE (rut),
     CONSTRAINT uq_usuario_correo UNIQUE (correo),
@@ -946,16 +947,6 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
      * Cada version nueva agrega su bloque, y la app que ya estaba instalada no pierde nada.
      */
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        if (oldVersion < 5) {
-            // Version 5: el evento no se borra, se anula con motivo y queda el rastro
-            db.execSQL("ALTER TABLE evento_dia ADD COLUMN anulado INTEGER NOT NULL DEFAULT 0")
-            db.execSQL("ALTER TABLE evento_dia ADD COLUMN motivo_anulacion VARCHAR(200)")
-            db.execSQL("ALTER TABLE evento_dia ADD COLUMN id_usuario_anula INT")
-            db.execSQL("ALTER TABLE evento_dia ADD COLUMN fecha_anulacion DATETIME")
-            // La vista del tipo de dia se rehace para que no cuente los eventos anulados
-            db.execSQL("DROP VIEW IF EXISTS v_tipo_dia")
-            db.execSQL(SQL_VISTAS.first())
-        }
         if (oldVersion < 2) {
             // Version 2: la foto de evidencia del evento (recurso nativo de camara y galeria)
             db.execSQL("ALTER TABLE evento_dia ADD COLUMN foto BLOB")
@@ -970,7 +961,6 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
     id_pregunta INTEGER PRIMARY KEY AUTOINCREMENT,
     texto       VARCHAR(120) NOT NULL,
     activa      BOOLEAN      NOT NULL DEFAULT 1,
-    foto BLOB,
     CONSTRAINT uq_pregunta_texto UNIQUE (texto)
 )""")
             db.execSQL("""CREATE TABLE respuesta_seguridad (
@@ -988,6 +978,16 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
   (4, '¿Cuál fue tu primer trabajo?'),
   (5, '¿Cuál es tu comida favorita?'),
   (6, '¿Cómo se llamaba tu mejor amigo de la infancia?')""")
+        }
+        if (oldVersion < 5) {
+            // Version 5: el evento no se borra, se anula con motivo y queda el rastro
+            db.execSQL("ALTER TABLE evento_dia ADD COLUMN anulado INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE evento_dia ADD COLUMN motivo_anulacion VARCHAR(200)")
+            db.execSQL("ALTER TABLE evento_dia ADD COLUMN id_usuario_anula INT")
+            db.execSQL("ALTER TABLE evento_dia ADD COLUMN fecha_anulacion DATETIME")
+            // La vista del tipo de dia se rehace para que no cuente los eventos anulados
+            db.execSQL("DROP VIEW IF EXISTS v_tipo_dia")
+            db.execSQL(SQL_VISTAS.first())
         }
     }
 
@@ -1243,6 +1243,7 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
             "id_sesion = ?", arrayOf(idSesion.toString())
         )
 
+    /** Cierra solo una sesion EN CURSO: enviar dos veces la misma no cambia nada ni duplica el envio. */
     fun cerrarSesionReal(idSesion: Long, hora: String): Int =
         writableDatabase.update(
             "sesion_observacion",
@@ -1250,7 +1251,8 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
                 put("fin_real", hora)
                 put("id_estado", ESTADO_FINALIZADA)
             },
-            "id_sesion = ?", arrayOf(idSesion.toString())
+            "id_sesion = ? AND id_estado = ?",
+            arrayOf(idSesion.toString(), ESTADO_EN_CURSO.toString())
         )
 
     /** Validar o rechazar (el que revisa nunca es el observador: lo garantiza el CHECK del esquema). */
@@ -1276,6 +1278,15 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
         comprasOtraTienda: Boolean,
         seDirige: Long? = null
     ): Long {
+        // El conteo termina cuando la sesion se envia a validacion. Se comprueba aca, en la base, y
+        // no solo en la pantalla: la pantalla puede seguir viva con una sesion que ya se cerro
+        // (volver a la pestaña, reabrir desde la pila de navegacion), y entonces se seguia contando
+        // sobre una sesion ya enviada. Devuelve -1 cuando no se inserto.
+        val estadoActual = writableDatabase.rawQuery(
+            "SELECT id_estado FROM sesion_observacion WHERE id_sesion = ?",
+            arrayOf(idSesion.toString())
+        ).use { c -> if (c.moveToFirst()) c.getLong(0) else -1L }
+        if (estadoActual != ESTADO_EN_CURSO) return -1L
         val valores = ContentValues().apply {
             put("id_sesion", idSesion)
             put("fecha_hora", ahora())

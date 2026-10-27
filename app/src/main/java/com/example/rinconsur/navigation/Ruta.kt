@@ -10,8 +10,6 @@ package com.example.rinconsur.navigation
 sealed class Ruta(val ruta: String) {
     // Entrada
     data object Login : Ruta("login")
-    /** Interina, para el supervisor, hasta que existan sus pantallas de conteo. */
-    data object Entrada : Ruta("entrada")
 
     // Supervisor de piso
     data object Sesiones : Ruta("sesiones")

@@ -26,7 +26,7 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
      * Solo se cuenta sobre una sesion EN CURSO. Antes, si no habia ninguna, tomaba cualquier sesion
      * del dia: despues de enviarla se podia seguir registrando en la ya cerrada.
      */
-    private val idSesion: Long = repositorio.sesionEnCursoDe(idObservador)?.id ?: 0L
+    private var idSesion: Long = repositorio.sesionEnCursoDe(idObservador)?.id ?: 0L
 
     private val _uiState = MutableStateFlow(
         RegistroUiState(
@@ -39,6 +39,24 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
         )
     )
     val uiState: StateFlow<RegistroUiState> = _uiState.asStateFlow()
+
+    /**
+     * Se relee al volver a la pantalla. La sesion cambia por fuera de esta pantalla (se envia desde el
+     * cierre, se inicia desde Mi sesion): si no se relee, la pantalla sigue contando sobre la sesion
+     * que ya se cerro y se podia seguir registrando despues de enviarla.
+     */
+    fun releer() {
+        idSesion = repositorio.sesionEnCursoDe(idObservador)?.id ?: 0L
+        _uiState.update {
+            it.copy(
+                codigoSesion = repositorio.resumenDeSesion(idSesion).codigo,
+                resumen = repositorio.resumenDeSesion(idSesion),
+                ultimosRegistros = repositorio.ultimosRegistros(idSesion),
+                sinSesionEnCurso = idSesion == 0L,
+                sesionEnCurso = idSesion != 0L
+            )
+        }
+    }
 
     fun onClasificacion(clasificacion: Clasificacion) {
         _uiState.update {
@@ -81,7 +99,7 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
             _uiState.update { it.copy(mensaje = "Si es transito, indica hacia donde se dirige") }
             return false
         }
-        repositorio.registrar(
+        val fila = repositorio.registrar(
             idSesion = idSesion,
             clasificacion = estado.clasificacion,
             rangoEtario = rangoEtario,
@@ -89,6 +107,11 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
             comprasOtraTienda = estado.comprasOtraTienda,
             seDirige = estado.destino
         )
+        if (fila < 0) {
+            // La base lo rechazo porque la sesion ya no esta en curso: no se conto nada.
+            refrescar(mensaje = "La sesión ya fue enviada a validación: no se pueden agregar registros.")
+            return false
+        }
         refrescar(mensaje = null)
         return true
     }
@@ -134,10 +157,14 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
     }
 
     private fun refrescar(mensaje: String?) {
+        idSesion = repositorio.sesionEnCursoDe(idObservador)?.id ?: 0L
         _uiState.update {
             it.copy(
+                codigoSesion = repositorio.resumenDeSesion(idSesion).codigo,
                 resumen = repositorio.resumenDeSesion(idSesion),
                 ultimosRegistros = repositorio.ultimosRegistros(idSesion),
+                sinSesionEnCurso = idSesion == 0L,
+                sesionEnCurso = idSesion != 0L,
                 mensaje = mensaje
             )
         }

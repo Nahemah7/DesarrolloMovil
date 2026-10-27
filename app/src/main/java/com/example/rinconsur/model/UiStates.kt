@@ -113,14 +113,6 @@ data class RechazarUiState(
     val exigeOtro: Boolean get() = motivos.contains(MotivoRechazo.OTRO)
 }
 
-/** Estado de la pantalla de sesion iniciada. */
-data class EntradaUiState(
-    val nombre: String = "",
-    val rut: String = "",
-    val perfil: PerfilUsuario = PerfilUsuario.OBSERVADOR,
-    val accesos: List<Acceso> = emptyList()
-)
-
 /**
  * Programar una sesion de conteo (supervisor de piso). El acceso y el observador se eligen de las
  * listas de la base; la duracion se calcula sola y el choque con otra sesion se avisa antes de

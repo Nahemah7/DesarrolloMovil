@@ -153,7 +153,9 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit) {
             BotonSecundario("Programar sesión", onClick = onProgramar, modifier = Modifier.fillMaxWidth())
 
             Seccion(
-                if (estado.filtro == "Por validar") "Por validar · " + estado.visibles.size + " sesiones"
+                if (estado.filtro == "Por validar")
+                    "Por validar · " + estado.visibles.size +
+                        if (estado.visibles.size == 1) " sesión" else " sesiones"
                 else "Sesiones del día · " + estado.visibles.size
             )
             if (estado.visibles.isEmpty()) {

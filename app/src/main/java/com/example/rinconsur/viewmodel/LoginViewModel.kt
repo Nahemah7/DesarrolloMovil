@@ -134,7 +134,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     private companion object {
         /** Clave de los colaboradores de ejemplo del prototipo. En produccion no existe. */
-        const val CLAVE_DE_EJEMPLO = "Rinconsur2026"
+        const val CLAVE_DE_EJEMPLO = "rincon2026"
 
     /** Daniela no cambio su clave: sigue con la del anexo, y su boton entra con esa. */
     const val CLAVE_DE_LA_SUPERVISORA = "rincon2026"

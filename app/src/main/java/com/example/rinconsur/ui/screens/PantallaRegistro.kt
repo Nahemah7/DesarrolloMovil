@@ -27,7 +27,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -201,6 +205,17 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
 
     // Las plantillas pueden haber cambiado si se edito una hoja y se volvio
     LaunchedEffect(Unit) { vm.recargarPlantillas() }
+
+    // Al volver a la pantalla se relee la sesion: pudo iniciarse o enviarse mientras no estaba, y
+    // sin esto se seguia contando sobre la sesion ya enviada.
+    val ciclo = LocalLifecycleOwner.current
+    DisposableEffect(ciclo) {
+        val observador = LifecycleEventObserver { _, evento ->
+            if (evento == Lifecycle.Event.ON_RESUME) vm.releer()
+        }
+        ciclo.lifecycle.addObserver(observador)
+        onDispose { ciclo.lifecycle.removeObserver(observador) }
+    }
 
     // El aviso se borra solo para no tapar la cuenta mientras se registra.
     LaunchedEffect(estado.mensaje) {
