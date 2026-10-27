@@ -98,13 +98,6 @@ fun PantallaLogin(onEntrar: (PerfilUsuario) -> Unit) {
             TextButton(onClick = { recuperando = true }) {
                 Text("¿Olvidaste tu clave?", color = Burdeo, style = MaterialTheme.typography.labelSmall)
             }
-            Nota("El teléfono se comparte entre turnos: la sesión se cierra al devolver el equipo.")
-            Seccion("Entrar directo (prototipo)")
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                BotonSecundario(texto = "Observadora", onClick = { vm.entrarComo(PerfilUsuario.OBSERVADOR)?.let(onEntrar) })
-                BotonSecundario(texto = "Supervisora", onClick = { vm.entrarComo(PerfilUsuario.SUPERVISOR)?.let(onEntrar) })
-            }
-            Nota("Para la defensa: entran sin escribir la credencial. Valida igual contra la base, con su hash. En producción no va.")
             // Colchon final: los ultimos datos no quedan debajo de los botones del sistema
             Spacer(Modifier.height(36.dp))
         }
