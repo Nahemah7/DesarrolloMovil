@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.example.rinconsur.data.FlujoRepository
 import com.example.rinconsur.data.SesionPreferencias
+import com.example.rinconsur.data.mensajeDeTextoLibre
 import com.example.rinconsur.model.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -86,17 +87,14 @@ class EventoViewModel(application: Application) : AndroidViewModel(application) 
     /** Valida por campo y, si esta todo bien, guarda en SQLite (con la foto como BLOB). */
     fun guardar(): Boolean {
         val estado = _uiState.value
+
         val errorFecha = when {
             estado.fecha.isBlank() -> "Escribe la fecha del evento"
             !Regex("\\d{4}-\\d{2}-\\d{2}").matches(estado.fecha.trim()) -> "Usa el formato 2026-09-15"
             else -> null
         }
-        val errorDescripcion = when {
-            estado.descripcion.isBlank() -> "Cuenta que paso"
-            estado.descripcion.trim().length < 10 -> "Un poco más de detalle (10 caracteres)"
-            estado.descripcion.length > 200 -> "Maximo 200 caracteres"
-            else -> null
-        }
+        val errorDescripcion = mensajeDeTextoLibre(estado.descripcion, "Cuenta qué pasó")
+
         // Regla del caso: si se cierra un acceso, hay que decir cual
         val errorAcceso = if (estado.tipo == TipoEvento.CIERRE_ACCESO && estado.idAcceso == null)
             "Si es cierre de acceso, indica cual" else null
@@ -140,16 +138,14 @@ class EventoViewModel(application: Application) : AndroidViewModel(application) 
      * Anular un evento no lo borra: pide el motivo, guarda quien lo anula y sale del conteo del dia.
      * El evento se conserva en la lista con su motivo, porque cambia el tipo de dia de los indicadores.
      */
-    fun anular(idEvento: Long, motivo: String): Boolean {
-        if (motivo.trim().length < 5) {
-            _uiState.update { it.copy(mensaje = "Escribe el motivo de la anulación (al menos 5 letras).") }
-            return false
-        }
+    fun anular(idEvento: Long, motivo: String): String? {
+        val error = mensajeDeTextoLibre(motivo, "Escribe el motivo de la anulación")
+        if (error != null) return error
 
         repositorio.anularEvento(idEvento, motivo.trim(), sesion.leer().coerceAtLeast(1L))
         recargarEventos()
         _uiState.update { it.copy(mensaje = "Evento anulado. Queda en la lista con su motivo.") }
-        return true
+        return null
     }
 
     override fun onCleared() {

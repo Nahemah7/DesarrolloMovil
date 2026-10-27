@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import com.example.rinconsur.model.EventoDia
 import com.example.rinconsur.ui.components.EtiquetaEstado
 import com.example.rinconsur.ui.theme.Tinta
+import com.example.rinconsur.data.TEXTO_MAXIMO
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -155,7 +156,7 @@ fun PantallaEvento(onVolver: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     error = estado.errorDescripcion,
                     lineas = 3,
-                    maximo = 200
+                    maximo = TEXTO_MAXIMO
                 )
             }
 
@@ -312,6 +313,7 @@ fun PantallaEvento(onVolver: () -> Unit) {
     // Anular: pide el motivo; el evento queda en la lista con el motivo y su rastro.
     eventoAAnular?.let { evento ->
         var motivo by remember(evento.id) { mutableStateOf("") }
+        var errorMotivo by remember(evento.id) { mutableStateOf<String?>(null) }
 
         AlertDialog(
             onDismissRequest = { eventoAAnular = null },
@@ -322,17 +324,19 @@ fun PantallaEvento(onVolver: () -> Unit) {
                     Spacer(Modifier.height(10.dp))
                     CampoTexto(
                         valor = motivo,
-                        onValorCambia = { motivo = it },
+                        onValorCambia = { motivo = it; errorMotivo = null },
                         etiqueta = "Motivo de la anulación",
-                        etiquetaArriba = true
+                        etiquetaArriba = true,
+                        error = errorMotivo,
+                        lineas = 3,
+                        maximo = TEXTO_MAXIMO
                     )
                 }
             },
             confirmButton = {
                 TextButton(onClick = {
-                    if (vm.anular(evento.id, motivo)) {
-                        eventoAAnular = null
-                    }
+                    val error = vm.anular(evento.id, motivo)
+                    if (error == null) eventoAAnular = null else errorMotivo = error
                 }) { Text("Anular") }
             },
             dismissButton = {
