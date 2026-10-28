@@ -1,24 +1,40 @@
 package com.example.rinconsur.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -26,6 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rinconsur.ui.components.BarraApp
 import com.example.rinconsur.ui.components.BotonPrincipal
 import com.example.rinconsur.ui.components.Filtro
+import com.example.rinconsur.ui.components.MensajeFlotante
 import com.example.rinconsur.ui.components.NavInferior
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
@@ -34,10 +51,13 @@ import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.ui.theme.Apagado
 import com.example.rinconsur.ui.theme.Aviso
 import com.example.rinconsur.ui.theme.Burdeo
+import com.example.rinconsur.ui.theme.Linea
 import com.example.rinconsur.ui.theme.Info
 import com.example.rinconsur.ui.theme.Ok
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.ProgramarViewModel
+import kotlinx.coroutines.delay
 
 /** "2026-09-15" se muestra como 15-09-2026. */
 private fun fechaLarga(fecha: String): String {
@@ -54,9 +74,15 @@ fun PantallaProgramar(onIrA: (String) -> Unit) {
     val vm: ProgramarViewModel = viewModel()
     val estado by vm.uiState.collectAsStateWithLifecycle()
 
+    // El aviso se borra solo: es una guarda, no un estado del formulario.
+    LaunchedEffect(estado.error) {
+        if (estado.error != null) { delay(3500); vm.limpiarError() }
+    }
+
     Scaffold(
         containerColor = Hueso,
     ) { pad ->
+        Box(Modifier.fillMaxSize()) {
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             Seccion("Acceso")
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -73,14 +99,18 @@ fun PantallaProgramar(onIrA: (String) -> Unit) {
             Seccion("Fecha")
             TarjetaSeccion {
                 Text("Hoy · " + fechaLarga(estado.fecha), style = MaterialTheme.typography.bodyMedium, color = Tinta)
-                Nota("Se programa para el día de trabajo en curso.")
+                Nota("Se programa para el día de hoy.")
             }
 
             Seccion("Horario (30 a 60 min)")
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                BloqueHora("Desde", estado.horaInicio, Modifier.weight(1f)) { vm.onHoraInicio(it) }
-                BloqueHora("Hasta", estado.horaFin, Modifier.weight(1f)) { vm.onHoraFin(it) }
+            Row(
+                Modifier.fillMaxWidth().padding(top = 2.dp, bottom = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                BloqueHora("Desde", estado.horaInicio, vm.horas, Modifier.weight(1f)) { vm.onHoraInicio(it) }
+                BloqueHora("Hasta", estado.horaFin, vm.horas, Modifier.weight(1f)) { vm.onHoraFin(it) }
             }
+            Spacer(Modifier.height(10.dp))
             TarjetaSeccion {
                 Text(
                     estado.duracionMinutos.toString() + " min",
@@ -89,7 +119,7 @@ fun PantallaProgramar(onIrA: (String) -> Unit) {
                     color = if (estado.duracionValida) Ok else Aviso
                 )
                 Nota(
-                    if (estado.duracionValida) "Dentro del rango que pide el caso."
+                    if (estado.duracionValida) "Duración dentro de lo permitido."
                     else "Tiene que durar entre 30 y 60 minutos."
                 )
             }
@@ -115,11 +145,6 @@ fun PantallaProgramar(onIrA: (String) -> Unit) {
                 }
             }
 
-            estado.error?.let {
-                Spacer(Modifier.height(8.dp))
-                TarjetaSeccion { Text(it, style = MaterialTheme.typography.bodyMedium, color = Aviso) }
-            }
-
             if (estado.programada.isNotEmpty()) {
                 Spacer(Modifier.height(8.dp))
                 TarjetaSeccion {
@@ -135,18 +160,79 @@ fun PantallaProgramar(onIrA: (String) -> Unit) {
             BotonPrincipal("Programar sesión", onClick = { vm.programar() })
             Spacer(Modifier.height(20.dp))
         }
+        // La guarda va flotante al centro: el resto (el detalle del cruce) queda en el formulario.
+        MensajeFlotante(estado.error)
+        }
     }
 }
 
 /** Una hora con sus dos pasos, de 5 en 5 minutos. */
 @Composable
-private fun BloqueHora(etiqueta: String, hora: String, modifier: Modifier = Modifier, onCambiar: (Int) -> Unit) {
-    Column(modifier) {
-        Text(etiqueta, style = MaterialTheme.typography.labelMedium, color = Apagado)
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            TextButton(onClick = { onCambiar(-5) }) { Text("−5", color = Burdeo) }
-            Text(hora, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Tinta)
-            TextButton(onClick = { onCambiar(5) }) { Text("+5", color = Burdeo) }
+private fun BloqueHora(
+    etiqueta: String,
+    hora: String,
+    horas: List<String>,
+    modifier: Modifier = Modifier,
+    onElegir: (String) -> Unit
+) {
+    var abierto by remember { mutableStateOf(false) }
+    // La lista abre en la hora actual: con 121 horas de 5 en 5, abrir siempre en 10:00 obliga a
+    // recorrer media lista para volver a la tarde.
+    val desplazamiento = remember { ScrollState(0) }
+    val altoFilaPx = with(LocalDensity.current) { 48.dp.toPx() }
+    LaunchedEffect(abierto) {
+        if (abierto) {
+            val indice = horas.indexOf(hora).coerceAtLeast(0)
+            desplazamiento.scrollTo((indice * altoFilaPx).toInt())
+        }
+    }
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            etiqueta,
+            style = MaterialTheme.typography.labelMedium,
+            color = Apagado,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(2.dp))
+        Box {
+            // Un toque abre la lista de horas de 5 en 5: recorrer de a 5 con dos botones obligaba a
+            // decenas de toques para mover una sesion de la manana a la tarde.
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color.White)
+                    .border(1.dp, Linea, RoundedCornerShape(10.dp))
+                    .clickable { abierto = true }
+                    .padding(horizontal = 12.dp, vertical = 11.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(hora, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Tinta)
+                Text("  ▾", fontSize = 12.sp, color = Apagado)
+            }
+            // Seis filas a la vista: la lista se corre con el dedo en vez de mostrar veinte numeros.
+            DropdownMenu(
+                expanded = abierto,
+                onDismissRequest = { abierto = false },
+                modifier = Modifier.heightIn(max = (6 * 48 + 16).dp),
+                scrollState = desplazamiento
+            ) {
+                horas.forEach { h ->
+                    val elegida = h == hora
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                h,
+                                color = if (elegida) Burdeo else Tinta,
+                                fontWeight = if (elegida) FontWeight.Bold else FontWeight.Normal
+                            )
+                        },
+                        onClick = { onElegir(h); abierto = false }
+                    )
+                }
+            }
         }
     }
 }

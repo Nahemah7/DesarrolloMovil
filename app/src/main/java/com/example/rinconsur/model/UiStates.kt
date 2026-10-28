@@ -69,13 +69,26 @@ data class SesionesUiState(
 data class IndicadoresUiState(
     val indicadores: IndicadoresDia? = null,
     val porAcceso: List<TransitoPorAcceso> = emptyList(),
-    val periodo: String = "Hoy",
+    val periodo: TipoPeriodo = TipoPeriodo.HOY,
     val tipoDia: String = "Habil",
     /** La fecha que se esta mirando: hoy, no el ultimo dia con ingresos cargados. */
     val fecha: String = "",
     /** Las sesiones de hoy: es lo unico que se puede mostrar cuando la tienda aun no cargo el dia. */
-    val sesionesHoy: List<SesionResumen> = emptyList()
-)
+    val sesionesHoy: List<SesionResumen> = emptyList(),
+    /** Si los dias habiles ya cargados tienen cifras: sirve para avisar cuando hoy no hay nada. */
+    val hayDatosEnHabiles: Boolean = false,
+    /** Las semanas con dias cargados, de la mas nueva a la mas vieja. */
+    val semanas: List<SemanaIndicadores> = emptyList(),
+    /** Donde esta parado el filtro: 0 = todas las semanas, 1 = la mas nueva, y sigue hacia atras. */
+    val posicionSemana: Int = 0
+) {
+    /** La semana que se esta mirando; null cuando el filtro esta en "todas". */
+    val semanaElegida: SemanaIndicadores?
+        get() = semanas.getOrNull(posicionSemana - 1)
+
+    val haySemanaAnterior: Boolean get() = posicionSemana < semanas.size
+    val haySemanaSiguiente: Boolean get() = posicionSemana > 0
+}
 
 /** Estado del registro de un evento del dia (formulario con validacion por campo). */
 data class EventoUiState(
@@ -125,7 +138,7 @@ data class ProgramarUiState(
     val sesionesDeLaFecha: List<SesionResumen> = emptyList(),
     val idAcceso: Long? = null,
     val horaInicio: String = "13:00",
-    val horaFin: String = "13:45",
+    val horaFin: String = "13:40",
     val idObservador: Long? = null,
     val error: String? = null,
     val programada: String = "",

@@ -119,6 +119,17 @@ class FlujoRepository(context: Context) {
 
     fun indicadoresDeFecha(fecha: String): IndicadoresDia? = db.indicadoresDeFecha(fecha)
 
+    /** El consolidado de los dias habiles o de los fines de semana, de todo o de una semana. */
+    fun indicadoresDeTipoDia(tipo: String, desde: String? = null, hasta: String? = null): IndicadoresDia? =
+        db.indicadoresDeTipoDia(tipo, desde, hasta)
+
+    fun transitoPorAccesoDeTipo(tipo: String, desde: String? = null, hasta: String? = null): List<TransitoPorAcceso> =
+        db.transitoPorAccesoDeTipo(tipo, desde, hasta)
+
+    /** Las semanas con dias cargados: el filtro de arriba de los indicadores. */
+    fun semanasConDatos(): List<Pair<String, String>> = db.semanasConDatos()
+
+
     fun transitoPorAcceso(fecha: String): List<TransitoPorAcceso> = db.transitoPorAcceso(fecha)
 
     fun bloquesPendientes(fecha: String): List<String> = db.bloquesPendientes(fecha)

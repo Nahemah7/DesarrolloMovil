@@ -144,7 +144,7 @@ fun PantallaEvento(onVolver: () -> Unit) {
                 CampoTexto(
                     valor = estado.fecha,
                     onValorCambia = { vm.onFecha(it) },
-                    etiqueta = "Fecha (2026-09-15)",
+                    etiqueta = "Fecha (día-mes-año)",
                     modifier = Modifier.fillMaxWidth(),
                     error = estado.errorFecha
                 )

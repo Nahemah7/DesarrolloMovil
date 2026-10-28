@@ -1,0 +1,40 @@
+package com.example.rinconsur.model
+
+/**
+ * Una semana con dias cargados por la tienda, de lunes a domingo.
+ *
+ * Sirve de filtro en la pantalla de indicadores: elegir la semana acota el consolidado, y dentro de
+ * ella el filtro de habiles / fin de semana separa los dias de una misma semana.
+ */
+data class SemanaIndicadores(val desde: String, val hasta: String) {
+
+    /** "19-25 oct": corto, para que entren varias semanas en la fila de filtros. */
+    val etiqueta: String
+        get() {
+            val d1 = diaDe(desde)
+            val d2 = diaDe(hasta)
+            val mes = mesCorto(hasta)
+            return if (mesCorto(desde) == mes) "$d1-$d2 $mes" else "$d1 ${mesCorto(desde)} - $d2 $mes"
+        }
+
+    /** "Semana del 19 hasta el 25 de octubre": como se lee el dia en el resto de la app. */
+    val titulo: String
+        get() = "Semana del " + diaDe(desde) + " de " + mesLargo(desde) +
+            " hasta el " + diaDe(hasta) + " de " + mesLargo(hasta)
+
+    private fun diaDe(iso: String): String = iso.takeLast(2).trimStart('0').ifEmpty { "0" }
+
+    private fun mesLargo(iso: String): String {
+        val m = iso.substring(5, 7).toIntOrNull() ?: return ""
+        return listOf(
+            "enero", "febrero", "marzo", "abril", "mayo", "junio",
+            "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+        ).getOrElse(m - 1) { "" }
+    }
+
+    private fun mesCorto(iso: String): String {
+        val m = iso.substring(5, 7).toIntOrNull() ?: return ""
+        return listOf("ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic")
+            .getOrElse(m - 1) { "" }
+    }
+}

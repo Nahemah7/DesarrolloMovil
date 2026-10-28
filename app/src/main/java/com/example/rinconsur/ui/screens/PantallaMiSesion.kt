@@ -104,7 +104,7 @@ fun PantallaMiSesion(onIniciar: () -> Unit, onIrA: (String) -> Unit) {
                 if (sesionesFiltradas.isEmpty()) {
                     TarjetaSeccion {
                         Text(
-                            "No hay sesiones para el filtro seleccionado ($filtroSeleccionado).",
+                            "No hay sesiones en este filtro.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Apagado
                         )

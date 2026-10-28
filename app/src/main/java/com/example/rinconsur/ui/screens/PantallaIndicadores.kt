@@ -2,32 +2,47 @@ package com.example.rinconsur.ui.screens
 
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rinconsur.model.EstadoSesion
 import com.example.rinconsur.model.IndicadoresDia
+import com.example.rinconsur.model.TipoPeriodo
 import com.example.rinconsur.ui.components.BarraPorcentaje
+import com.example.rinconsur.ui.components.FilaFiltros
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaEstadistica
 import com.example.rinconsur.ui.components.TarjetaSeccion
+import com.example.rinconsur.ui.theme.Apagado
+import com.example.rinconsur.ui.theme.Burdeo
 import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.IndicadoresViewModel
@@ -57,6 +72,17 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
 
     val ind = state.indicadores
     val porAcceso = state.porAcceso
+    val esHoy = state.periodo == TipoPeriodo.HOY
+    /** Que se esta mirando, dicho con fechas: hoy, o la semana y el tipo de día elegidos. */
+    val cabecera = if (esHoy) fechaCorta(state.fecha) + " · hoy"
+        else {
+            val dias = ind?.dias ?: 0
+            // La semana ya esta dicha en el navegador de arriba: aca va el tipo y cuantos dias entran.
+            state.periodo.etiqueta + " · " + dias + (if (dias == 1) " día" else " días") +
+                (ind?.let { " (" + fechaCorta(it.desde) + " a " + fechaCorta(it.hasta) + ")" } ?: "")
+        }
+    /** El alcance con el que se escriben las notas: un dia o varios. */
+    val alcance = if (esHoy) "del día" else "del período"
 
     val maxIngresosAcceso = porAcceso.maxOfOrNull { it.ingresos }?.takeIf { it > 0 } ?: 1
 
@@ -69,8 +95,49 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
         ) {
+            // Arriba la semana, con un boton a cada lado: la lista de semanas crece y una fila de
+            // chips por semana deja de caber. La posicion de mas a la derecha es "todas".
+            if (!esHoy && state.semanas.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { vm.onSemanaAnterior() }, enabled = state.haySemanaAnterior) {
+                        Icon(
+                            Icons.Filled.KeyboardArrowLeft,
+                            contentDescription = "Semana anterior",
+                            tint = if (state.haySemanaAnterior) Tinta else Apagado
+                        )
+                    }
+                    Text(
+                        text = state.semanaElegida?.titulo ?: "Todas las semanas",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Tinta,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(1f)
+                    )
+                    IconButton(onClick = { vm.onSemanaSiguiente() }, enabled = state.haySemanaSiguiente) {
+                        Icon(
+                            Icons.Filled.KeyboardArrowRight,
+                            contentDescription = "Semana siguiente",
+                            tint = if (state.haySemanaSiguiente) Tinta else Apagado
+                        )
+                    }
+                }
+            }
+
+            // Abajo el tipo de dia: dentro de la semana elegida, habiles y fin de semana se separan.
+            FilaFiltros(
+                opciones = TipoPeriodo.entries.map { it.etiqueta },
+                elegido = state.periodo.etiqueta
+            ) { etiqueta ->
+                TipoPeriodo.entries.firstOrNull { it.etiqueta == etiqueta }?.let { vm.onPeriodo(it) }
+            }
+            Spacer(Modifier.height(10.dp))
+
             if (ind == null) {
-                Nota(fechaCorta(state.fecha) + " · hoy")
+                Nota(cabecera)
 
                 // Lo unico que hoy se puede mostrar: lo que llevamos medido.
                 val sesiones = state.sesionesHoy
@@ -79,6 +146,7 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                 val enCurso = sesiones.count { it.estado == EstadoSesion.EN_CURSO }
                 val rechazadas = sesiones.count { it.estado == EstadoSesion.RECHAZADA }
 
+                if (esHoy) {
                 Seccion("Tu medición de hoy")
                 TarjetaSeccion {
                     if (sesiones.isEmpty()) {
@@ -95,8 +163,9 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                         }
                     }
                 }
+                }
 
-                Seccion("Indicadores del día")
+                Seccion(if (esHoy) "Indicadores del día" else "Indicadores del período")
                 TarjetaSeccion {
                     Text(
                         "Sin información",
@@ -105,17 +174,24 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                     )
                     Spacer(Modifier.height(4.dp))
                     Nota(
-                        "La tienda todavía no cargó los ingresos y las transacciones de hoy, y sin esos dos " +
-                            "datos no hay conversión ni tránsito que calcular: no se estiman."
+                        if (esHoy)
+                            "La tienda todavía no cargó los ingresos y las transacciones de hoy, y sin esos dos " +
+                                "datos no hay conversión ni tránsito que calcular: no se estiman."
+                        else
+                            "Ningún día de este período tiene ingresos y transacciones cargados, y sin esos dos " +
+                                "datos no hay conversión ni tránsito que calcular: no se estiman."
                     )
                 }
 
                 Nota(
-                    "Cuando el conteo de la tienda esté cargado, esta pantalla muestra la conversión, " +
-                        "el tránsito por acceso y el avance de la medición."
+                    if (esHoy && state.hayDatosEnHabiles)
+                        "Los días hábiles tienen cifras cargadas: están en el filtro «Hábiles»."
+                    else
+                        "Cuando el conteo de la tienda esté cargado, esta pantalla muestra la conversión, " +
+                            "el tránsito por acceso y el avance de la medición."
                 )
             } else {
-                Nota(ind.fecha + (ind.tipoDia?.let { " · " + it } ?: "") + " · datos de la tienda")
+                Nota(cabecera + " · datos de la tienda")
 
                 // ---- 1) Lo que llevamos medido: el avance, con su barra animada ----
                 val totalBloques = ind.bloquesMedidos + ind.bloquesEstimados + ind.bloquesSinInformacion
@@ -131,10 +207,11 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                     Spacer(Modifier.height(8.dp))
                     Nota(
                         if (ind.bloquesSinInformacion > 0)
-                            "Quedan ${ind.bloquesSinInformacion} bloque(s) sin información. Mientras falten, " +
+                            (if (ind.bloquesSinInformacion == 1) "Queda 1 bloque sin información. Mientras falte, "
+                            else "Quedan ${ind.bloquesSinInformacion} bloques sin información. Mientras falten, ") +
                                 "el tránsito es parcial y la conversión sin tránsito no se calcula."
                         else
-                            "Los $totalBloques bloques del día están medidos: los indicadores están completos."
+                            "Los $totalBloques bloques $alcance están medidos: los indicadores están completos."
                     )
                 }
 
@@ -168,7 +245,7 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                 Seccion("Tránsito medido")
                 TarjetaSeccion {
                     if (ind.bloquesMedidos == 0) {
-                        Nota("Sin bloques medidos en este día: no hay tránsito que mostrar todavía.")
+                        Nota("Sin bloques medidos en este " + (if (esHoy) "día" else "período") + ": no hay tránsito que mostrar todavía.")
                     } else {
                         TarjetaEstadistica(
                             valor = IndicadoresDia.formatoMiles((ind.transito ?: 0.0).toInt()),
@@ -211,7 +288,7 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                         )
                         Spacer(Modifier.height(4.dp))
                         Nota(
-                            "Para calcularla hay que descontar el tránsito de los $totalBloques bloques del día " +
+                            "Para calcularla hay que descontar el tránsito de los $totalBloques bloques $alcance " +
                                 "y faltan ${ind.bloquesSinInformacion} por medir. Estimarla con datos parciales " +
                                 "daría un número que no es el del día."
                         )
@@ -219,7 +296,7 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                 }
 
                 Spacer(Modifier.height(8.dp))
-                Nota("Las cifras salen de las vistas SQL del consolidado; la app no recalcula ni promedia nada.")
+                Nota("Las cifras se calculan con los ingresos y las transacciones que carga la tienda.")
             }
 
             Spacer(Modifier.height(20.dp))

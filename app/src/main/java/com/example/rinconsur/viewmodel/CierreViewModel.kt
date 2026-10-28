@@ -61,6 +61,11 @@ class CierreViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    /** El aviso flotante se borra solo: no queda tapando el resumen. */
+    fun limpiarAviso() {
+        _aviso.value = null
+    }
+
     fun cerrar(): Boolean {
         // Estado real de la base antes de enviar: la sesion pudo cerrarse por fuera.
         val enCurso = repositorio.sesionEnCursoDe(idObservador)

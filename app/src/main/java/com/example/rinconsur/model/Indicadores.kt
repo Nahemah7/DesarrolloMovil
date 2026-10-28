@@ -13,7 +13,11 @@ data class IndicadoresDia(
     val conversionSinTransito: Double?,
     val bloquesMedidos: Int,
     val bloquesEstimados: Int,
-    val bloquesSinInformacion: Int
+    val bloquesSinInformacion: Int,
+    /** Cuantos dias entran: 1 cuando es un dia suelto, N cuando es el consolidado de un periodo. */
+    val dias: Int = 1,
+    val desde: String = fecha,
+    val hasta: String = fecha
 ) {
     val coberturaTexto: String
         get() = "$bloquesMedidos medidos · $bloquesEstimados estimados · $bloquesSinInformacion sin información"

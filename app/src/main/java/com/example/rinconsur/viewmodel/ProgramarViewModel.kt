@@ -40,12 +40,20 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun onObservador(id: Long) = _uiState.update { it.copy(idObservador = id, error = null, programada = "", codigo = "") }
 
-    fun onHoraInicio(delta: Int) = _uiState.update {
-        it.copy(horaInicio = mover(it.horaInicio, delta), error = null, programada = "", codigo = "")
+    fun onHoraInicio(hora: String) = _uiState.update {
+        it.copy(horaInicio = hora, error = null, programada = "", codigo = "")
     }
 
-    fun onHoraFin(delta: Int) = _uiState.update {
-        it.copy(horaFin = mover(it.horaFin, delta), error = null, programada = "", codigo = "")
+    fun onHoraFin(hora: String) = _uiState.update {
+        it.copy(horaFin = hora, error = null, programada = "", codigo = "")
+    }
+
+    /** Las horas que se pueden elegir, de 10 en 10 dentro del horario de la tienda. */
+    val horas: List<String> = (10 * 60..20 * 60 step 10).map { "%02d:%02d".format(it / 60, it % 60) }
+
+    /** El aviso flotante se borra solo: no queda tapando el formulario. */
+    fun limpiarError() {
+        _uiState.update { it.copy(error = null) }
     }
 
     /** Devuelve true si quedo programada. Si no, deja el motivo en el estado. */
@@ -71,12 +79,11 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
                 codigo = codigo,
                 programada = nombreDe(e, idObservador),
                 sesionesDeLaFecha = repositorio.sesionesDeFecha(e.fecha),
-                // El formulario queda limpio para la proxima: si no, la sesion recien creada
-                // aparece como choque de si misma y sigue mostrando el aviso de que se cruza.
+                // El acceso y el observador se limpian para que la sesion recien creada no aparezca
+                // como choque de si misma. La hora se queda donde quedo la programacion: volver a
+                // 13:00 obligaba a recorrerla de nuevo en cada sesion.
                 idAcceso = null,
-                idObservador = null,
-                horaInicio = "13:00",
-                horaFin = "13:45"
+                idObservador = null
             )
         }
         return true
@@ -92,14 +99,6 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
             e.observadores.firstOrNull { it.id == choque.idObservador }?.nombre ?: "Esa persona"
         }
         return donde + " ya tiene una sesión de " + choque.horaInicioCorta + " a " + choque.horaFinCorta + ": se cruza."
-    }
-
-    /** Mueve la hora en pasos de 5 minutos, dentro del dia. */
-    private fun mover(hora: String, delta: Int): String {
-        val partes = hora.split(":")
-        val actual = (partes.getOrNull(0)?.toIntOrNull() ?: 0) * 60 + (partes.getOrNull(1)?.toIntOrNull() ?: 0)
-        val nueva = (actual + delta).coerceIn(0, 23 * 60 + 55)
-        return "%02d:%02d".format(nueva / 60, nueva % 60)
     }
 
     override fun onCleared() {

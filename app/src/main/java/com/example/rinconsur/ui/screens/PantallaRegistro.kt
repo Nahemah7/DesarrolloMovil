@@ -296,7 +296,7 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
                 }
             }
 
-            Seccion("Plantillas de prerellenado")
+            Seccion("Plantillas de registro rápido")
             Bloque {
                 Text("Si entra alguien del mismo perfil, toca un número para aplicarla.",
                     style = MaterialTheme.typography.bodySmall)

@@ -98,6 +98,7 @@ fun PantallaLogin(onEntrar: (PerfilUsuario) -> Unit) {
             TextButton(onClick = { recuperando = true }) {
                 Text("¿Olvidaste tu clave?", color = Burdeo, style = MaterialTheme.typography.labelSmall)
             }
+            Nota("El teléfono se comparte entre turnos: la sesión se cierra al devolver el equipo.")
             // Colchon final: los ultimos datos no quedan debajo de los botones del sistema
             Spacer(Modifier.height(36.dp))
         }

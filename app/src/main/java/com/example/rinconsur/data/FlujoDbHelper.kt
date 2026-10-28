@@ -24,7 +24,7 @@ class FlujoDbHelper(context: Context) :
 
     companion object {
         private const val NOMBRE_BD = "rinconsur.db"
-        private const val VERSION_BD = 5
+        private const val VERSION_BD = 6
 
         /** Estado con el que se abre y se cierra la sesion de conteo. */
         const val ESTADO_PROGRAMADA = 1L
@@ -929,6 +929,97 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
   (6, '¿Cómo se llamaba tu mejor amigo de la infancia?');""",
 
         )
+
+        /**
+         * Dia de ejemplo de fin de semana: sabado 24-10-2026, completo (los 4 accesos por los 11
+         * bloques, y las 11 filas de transacciones), con dos sesiones validadas para que el avance de
+         * la medicion no salga vacio.
+         *
+         * Es **dato de ejemplo**, no del anexo: el unico dia real que trae el caso es el 15-09-2026,
+         * que sigue intacto en SQL_DATOS. Se siembra para que la pantalla de indicadores tenga las dos
+         * vistas (habiles y fin de semana) con cifras. Los DELETE lo dejan re-aplicable: si se siembra
+         * otra vez, no duplica filas.
+         *
+         * Cifras: 4.780 ingresos y 415 transacciones (conversion bruta 8,7 %, como el dia del anexo);
+         * A1 1.242 · A2 956 · A3 766 · A4 1.816.
+         */
+        private val SQL_DEMO_FIN_DE_SEMANA: List<String> = listOf(
+            """DELETE FROM registro_observacion WHERE id_sesion IN (21, 22);""",
+            """DELETE FROM sesion_observacion WHERE id_sesion IN (21, 22);""",
+            """DELETE FROM conteo_ingreso WHERE fecha = '2026-10-24';""",
+            """DELETE FROM transaccion_bloque WHERE fecha = '2026-10-24';""",
+            """INSERT INTO conteo_ingreso (id_acceso, fecha, id_bloque, cantidad, id_usuario_carga) VALUES
+  (1, '2026-10-24', 1, 83, 2),
+  (2, '2026-10-24', 1, 65, 2),
+  (3, '2026-10-24', 1, 52, 2),
+  (4, '2026-10-24', 1, 124, 2),
+  (1, '2026-10-24', 2, 102, 2),
+  (2, '2026-10-24', 2, 78, 2),
+  (3, '2026-10-24', 2, 63, 2),
+  (4, '2026-10-24', 2, 149, 2),
+  (1, '2026-10-24', 3, 130, 2),
+  (2, '2026-10-24', 3, 100, 2),
+  (3, '2026-10-24', 3, 80, 2),
+  (4, '2026-10-24', 3, 190, 2),
+  (1, '2026-10-24', 4, 153, 2),
+  (2, '2026-10-24', 4, 117, 2),
+  (3, '2026-10-24', 4, 94, 2),
+  (4, '2026-10-24', 4, 223, 2),
+  (1, '2026-10-24', 5, 119, 2),
+  (2, '2026-10-24', 5, 91, 2),
+  (3, '2026-10-24', 5, 73, 2),
+  (4, '2026-10-24', 5, 173, 2),
+  (1, '2026-10-24', 6, 96, 2),
+  (2, '2026-10-24', 6, 74, 2),
+  (3, '2026-10-24', 6, 59, 2),
+  (4, '2026-10-24', 6, 140, 2),
+  (1, '2026-10-24', 7, 90, 2),
+  (2, '2026-10-24', 7, 70, 2),
+  (3, '2026-10-24', 7, 56, 2),
+  (4, '2026-10-24', 7, 132, 2),
+  (1, '2026-10-24', 8, 102, 2),
+  (2, '2026-10-24', 8, 78, 2),
+  (3, '2026-10-24', 8, 63, 2),
+  (4, '2026-10-24', 8, 149, 2),
+  (1, '2026-10-24', 9, 136, 2),
+  (2, '2026-10-24', 9, 104, 2),
+  (3, '2026-10-24', 9, 83, 2),
+  (4, '2026-10-24', 9, 198, 2),
+  (1, '2026-10-24', 10, 141, 2),
+  (2, '2026-10-24', 10, 109, 2),
+  (3, '2026-10-24', 10, 87, 2),
+  (4, '2026-10-24', 10, 206, 2),
+  (1, '2026-10-24', 11, 90, 2),
+  (2, '2026-10-24', 11, 70, 2),
+  (3, '2026-10-24', 11, 56, 2),
+  (4, '2026-10-24', 11, 132, 2);""",
+            """INSERT INTO transaccion_bloque (fecha, id_bloque, cantidad, id_usuario_carga) VALUES
+  ('2026-10-24', 1, 28, 2),
+  ('2026-10-24', 2, 34, 2),
+  ('2026-10-24', 3, 44, 2),
+  ('2026-10-24', 4, 51, 2),
+  ('2026-10-24', 5, 40, 2),
+  ('2026-10-24', 6, 32, 2),
+  ('2026-10-24', 7, 30, 2),
+  ('2026-10-24', 8, 34, 2),
+  ('2026-10-24', 9, 45, 2),
+  ('2026-10-24', 10, 47, 2),
+  ('2026-10-24', 11, 30, 2);""",
+            """INSERT INTO sesion_observacion (id_sesion, codigo, id_acceso, fecha, hora_inicio_prog, hora_fin_prog, inicio_real, fin_real, id_estado, id_observador, id_programador, id_revisor, fecha_revision, motivo_rechazo) VALUES
+  (21, 'S-0021', 1, '2026-10-24', '13:00:00', '13:45:00', '2026-10-24 13:02:00', '2026-10-24 13:44:00', 4, 5, 3, 4, '2026-10-24 20:00:00', NULL),
+  (22, 'S-0022', 2, '2026-10-24', '13:00:00', '13:45:00', '2026-10-24 13:01:00', '2026-10-24 13:45:00', 4, 6, 3, 4, '2026-10-24 20:00:00', NULL);""",
+            """INSERT INTO registro_observacion (id_sesion, fecha_hora, id_clasificacion, id_rango, id_tipo_compania, compras_otra_tienda, id_acceso_destino, anulado)
+SELECT 21, datetime('2026-10-24 13:05:00', '+' || (n * 40) || ' seconds'),
+       CASE WHEN n % 11 = 0 THEN 3 WHEN n % 3 = 0 THEN 2 ELSE 1 END,
+       (n % 5) + 1, (n % 4) + 1, n % 2, NULL, 0
+FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 32) SELECT n FROM c);""",
+            """INSERT INTO registro_observacion (id_sesion, fecha_hora, id_clasificacion, id_rango, id_tipo_compania, compras_otra_tienda, id_acceso_destino, anulado)
+SELECT 22, datetime('2026-10-24 13:04:00', '+' || (n * 40) || ' seconds'),
+       CASE WHEN n % 11 = 0 THEN 3 WHEN n % 3 = 0 THEN 2 ELSE 1 END,
+       (n % 5) + 1, (n % 4) + 1, n % 2, NULL, 0
+FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 32) SELECT n FROM c);"""
+        )
+
     }
 
     override fun onConfigure(db: SQLiteDatabase) {
@@ -940,6 +1031,7 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
         SQL_ESQUEMA.forEach { db.execSQL(it) }
         SQL_VISTAS.forEach { db.execSQL(it) }
         SQL_DATOS.forEach { db.execSQL(it) }
+        SQL_DEMO_FIN_DE_SEMANA.forEach { db.execSQL(it) }
     }
 
     /**
@@ -988,6 +1080,11 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
             // La vista del tipo de dia se rehace para que no cuente los eventos anulados
             db.execSQL("DROP VIEW IF EXISTS v_tipo_dia")
             db.execSQL(SQL_VISTAS.first())
+        }
+        if (oldVersion < 6) {
+            // Version 6: el dia de ejemplo de fin de semana, para que los indicadores tengan las dos
+            // vistas. Es dato de ejemplo; el dia real del anexo (15-09) no se toca.
+            SQL_DEMO_FIN_DE_SEMANA.forEach { db.execSQL(it) }
         }
     }
 
@@ -1347,6 +1444,93 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
                 bloquesSinInformacion = c.entero("sin_informacion")
             )
         }
+
+    /**
+     * El consolidado de todos los dias de un tipo ("Habil" o "Fin de semana").
+     *
+     * Se suman las cifras y se **recalculan** los porcentajes sobre el total: promediar las
+     * conversiones de cada dia daria un numero que no es el del periodo. La conversion sin transito
+     * solo sale si ningun bloque del periodo quedo sin informacion, igual que en el dia suelto.
+     */
+    fun indicadoresDeTipoDia(tipo: String, desde: String? = null, hasta: String? = null): IndicadoresDia? =
+        readableDatabase.rawQuery(
+            "SELECT MIN(fecha) AS desde, MAX(fecha) AS hasta, COUNT(*) AS dias, tipo_dia, " +
+                "SUM(ingresos) AS ingresos, SUM(transacciones) AS transacciones, " +
+                "ROUND(100.0 * SUM(transacciones) / NULLIF(SUM(ingresos), 0), 1) AS conversion_bruta, " +
+                "CASE WHEN SUM(CASE WHEN dia = 'completo' THEN 1 ELSE 0 END) = COUNT(*) " +
+                "     THEN 'completo' ELSE 'incompleto' END AS dia, " +
+                "SUM(transito) AS transito, SUM(ingresos) - SUM(transito) AS flujo_sin_transito, " +
+                "CASE WHEN SUM(sin_informacion) = 0 " +
+                "     THEN ROUND(100.0 * SUM(transacciones) / NULLIF(SUM(ingresos) - SUM(transito), 0), 1) " +
+                "     END AS conversion_sin_transito, " +
+                "SUM(medidos) AS medidos, SUM(estimados) AS estimados, SUM(sin_informacion) AS sin_informacion " +
+                "FROM v_conversion_dia WHERE tipo_dia = ?" +
+                (if (desde != null && hasta != null) " AND fecha BETWEEN ? AND ?" else ""),
+            (if (desde != null && hasta != null) arrayOf(tipo, desde, hasta) else arrayOf(tipo))
+        ).use { c ->
+            if (!c.moveToNext() || c.getInt(c.getColumnIndexOrThrow("dias")) == 0) return null
+            IndicadoresDia(
+                fecha = c.texto("hasta"),
+                tipoDia = c.texto("tipo_dia"),
+                ingresos = c.entero("ingresos"),
+                transacciones = c.entero("transacciones"),
+                conversionBruta = c.decimalOpcional("conversion_bruta"),
+                estadoDia = c.texto("dia"),
+                transito = c.decimalOpcional("transito"),
+                flujoSinTransito = c.decimalOpcional("flujo_sin_transito"),
+                conversionSinTransito = c.decimalOpcional("conversion_sin_transito"),
+                bloquesMedidos = c.entero("medidos"),
+                bloquesEstimados = c.entero("estimados"),
+                bloquesSinInformacion = c.entero("sin_informacion"),
+                dias = c.entero("dias"),
+                desde = c.texto("desde"),
+                hasta = c.texto("hasta")
+            )
+        }
+
+    /**
+     * Las semanas (lunes a domingo) que tienen algun dia cargado, de la mas nueva a la mas vieja.
+     * Se calcula con `strftime('%w')`, donde el domingo es 0: se retrocede al lunes de esa semana.
+     */
+    fun semanasConDatos(): List<Pair<String, String>> {
+        val lista = mutableListOf<Pair<String, String>>()
+        readableDatabase.rawQuery(
+            "SELECT date(fecha, '-' || ((CAST(strftime('%w', fecha) AS INTEGER) + 6) % 7) || ' days') AS desde, " +
+                "       date(fecha, '-' || ((CAST(strftime('%w', fecha) AS INTEGER) + 6) % 7) || ' days', '+6 days') AS hasta " +
+                "FROM v_conversion_dia GROUP BY desde ORDER BY desde DESC",
+            null
+        ).use { c ->
+            while (c.moveToNext()) lista.add(c.texto("desde") to c.texto("hasta"))
+        }
+        return lista
+    }
+
+    /** Transito estimado por acceso sumado en todos los dias de ese tipo. */
+    fun transitoPorAccesoDeTipo(tipo: String, desde: String? = null, hasta: String? = null): List<TransitoPorAcceso> {
+        val lista = mutableListOf<TransitoPorAcceso>()
+        readableDatabase.rawQuery(
+            "SELECT acceso, SUM(ingresos) AS ingresos, SUM(transito_estimado) AS transito, " +
+                "CASE WHEN SUM(CASE WHEN origen = 'medido' THEN 1 ELSE 0 END) > 0 THEN 'medido' " +
+                "     WHEN SUM(CASE WHEN origen = 'estimado' THEN 1 ELSE 0 END) > 0 THEN 'estimado' " +
+                "     ELSE 'sin información' END AS origen " +
+                "FROM v_transito_bloque WHERE tipo_dia = ?" +
+                (if (desde != null && hasta != null) " AND fecha BETWEEN ? AND ?" else "") +
+                " GROUP BY acceso ORDER BY acceso",
+            (if (desde != null && hasta != null) arrayOf(tipo, desde, hasta) else arrayOf(tipo))
+        ).use { c ->
+            while (c.moveToNext()) {
+                lista.add(
+                    TransitoPorAcceso(
+                        acceso = c.texto("acceso"),
+                        ingresos = c.entero("ingresos"),
+                        transitoEstimado = c.decimalOpcional("transito"),
+                        origen = OrigenTransito.porNombre(c.texto("origen"))
+                    )
+                )
+            }
+        }
+        return lista
+    }
 
     /** Transito estimado por acceso en la fecha: suma los bloques de la vista. */
     fun transitoPorAcceso(fecha: String): List<TransitoPorAcceso> {

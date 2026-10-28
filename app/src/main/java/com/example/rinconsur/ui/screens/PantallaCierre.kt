@@ -1,6 +1,8 @@
 package com.example.rinconsur.ui.screens
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -26,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rinconsur.ui.components.BarraApp
 import com.example.rinconsur.ui.components.BotonPrincipal
+import com.example.rinconsur.ui.components.MensajeFlotante
 import com.example.rinconsur.ui.components.NavInferior
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.TarjetaSeccion
@@ -36,6 +40,7 @@ import com.example.rinconsur.ui.theme.Burdeo
 import com.example.rinconsur.ui.theme.Info
 import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.CierreViewModel
+import kotlinx.coroutines.delay
 
 private fun pct(v: Double?): String =
     if (v == null) "—" else String.format("%.1f", v).replace('.', ',') + " %"
@@ -59,9 +64,15 @@ fun PantallaCierre(onEnviar: () -> Unit, onIrA: (String) -> Unit) {
         onDispose { ciclo.lifecycle.removeObserver(observador) }
     }
 
+    // El aviso se borra solo: es una guarda, no un estado de la pantalla.
+    LaunchedEffect(aviso) {
+        if (aviso != null) { delay(3000); vm.limpiarAviso() }
+    }
+
     Scaffold(
         containerColor = Hueso,
     ) { pad ->
+        Box(Modifier.fillMaxSize()) {
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             if (codigo.isEmpty()) {
                 // Sin sesion en curso no hay nada que cerrar: antes se colaba la sesion sembrada
@@ -107,13 +118,13 @@ fun PantallaCierre(onEnviar: () -> Unit, onIrA: (String) -> Unit) {
                     )
                     Spacer(Modifier.height(14.dp))
                     BotonPrincipal("Enviar a validación", onClick = { if (vm.cerrar()) onEnviar() })
-                    aviso?.let { texto ->
-                        Spacer(Modifier.height(10.dp))
-                        Text(texto, style = MaterialTheme.typography.bodyMedium, color = Aviso)
-                    }
                 }
                 Spacer(Modifier.height(20.dp))
             }
+        }
+        // La guarda (por que no se puede enviar) va flotante al centro, como en registro: abajo se
+        // pierde cuando el resumen es largo, y es justo lo que hay que leer.
+        MensajeFlotante(aviso)
         }
     }
 }
