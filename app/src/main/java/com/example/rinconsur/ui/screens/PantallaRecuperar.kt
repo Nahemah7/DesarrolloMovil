@@ -37,10 +37,6 @@ import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.viewmodel.RecuperarViewModel
 
-/**
- * Recuperar la clave sin correo, en tres pasos: RUT, la pregunta de seguridad y la clave
- * nueva. Es un formulario con validacion por campo y su mensaje en cada paso.
- */
 @Composable
 fun PantallaRecuperar(onVolver: () -> Unit) {
     val vm: RecuperarViewModel = viewModel()
@@ -129,7 +125,6 @@ fun PantallaRecuperar(onVolver: () -> Unit) {
     }
 }
 
-/** Aviso de error con el mismo formato que usa el login: icono, texto y una nota al pie. */
 @Composable
 private fun BloqueAviso(texto: String?) {
     if (texto == null) return

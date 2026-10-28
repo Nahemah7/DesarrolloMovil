@@ -50,31 +50,20 @@ import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.SesionesViewModel
 
-/** "2026-09-15" se muestra como 15-09. */
 private fun fechaDiaMes(fecha: String): String {
     val p = fecha.split("-")
     return if (p.size == 3) p[2] + "-" + p[1] else fecha
 }
 
-/**
- * Lista de sesiones del supervisor (filtros Hoy, Por validar y Semana). Las sesiones finalizadas
- * se pueden validar o rechazar. Validar se hace aquí (vm.validar); rechazar abre el formulario
- * de motivos (PantallaRechazar) a través de [onRechazar].
- *
- * Reglas que cuida esta pantalla: una sesión necesita al menos 30 registros válidos para validarse
- * (RN-10) y quien la observó no puede revisarla (HU-05).
- */
 @Composable
 fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit) {
     val vm: SesionesViewModel = viewModel()
     val estado by vm.uiState.collectAsStateWithLifecycle()
 
-    // Al volver del formulario de rechazo se relee la lista: el rechazo se guarda desde otra pantalla.
     LaunchedEffect(Unit) { vm.recargar() }
 
     var abrirCalendario by remember { mutableStateOf(false) }
 
-    // Quién está mirando la lista: para que nadie revise su propia sesión
     val contexto = LocalContext.current
     val idRevisor = remember { SesionPreferencias(contexto).leer() }
 
@@ -85,7 +74,6 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
         ) {
-            // El dia que se revisa: flechas a los lados y el nombre del dia abre el calendario.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -121,8 +109,6 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // FilaFiltros ocupa todo el ancho por dentro: se le da el peso para que el atajo "Hoy"
-                // conserve su lugar a la derecha.
                 FilaFiltros(
                     opciones = listOf("Día", "Por validar"),
                     elegido = estado.filtro,
@@ -133,7 +119,6 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit) {
                 }
             }
 
-            // Lo que espera revision puede ser de otro dia: si no se dice, la lista de "Hoy" parece quieta.
             if (estado.porValidar.isNotEmpty() && estado.filtro != "Por validar") {
                 Nota(
                     "Hay " + estado.porValidar.size +
@@ -180,7 +165,6 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit) {
                                 color = Apagado
                             )
                         }
-                        // El estado va escrito, no solo con color
                         EtiquetaEstado(
                             s.estado.etiqueta,
                             when (s.estado) {
@@ -199,7 +183,6 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit) {
                     }
                     s.motivoRechazo?.let { Nota("Motivo del rechazo: " + it) }
 
-                    // Solo las finalizadas esperan revisión
                     if (s.estado.esperaRevision) {
                         when {
                             s.idObservador == idRevisor ->
@@ -230,7 +213,6 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit) {
             Spacer(Modifier.height(20.dp))
         }
     }
-    // El calendario sirve solo para elegir el dia: se elige y se vuelve a la lista de ese dia.
     if (abrirCalendario) {
         val formatoDia = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
             .apply { timeZone = java.util.TimeZone.getTimeZone("UTC") }

@@ -13,18 +13,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-/**
- * Perfil de quien esta usando el telefono: sus datos (el nombre es lo unico editable, el RUT
- * identifica la cuenta), la foto, y la seguridad —cambiar la clave y elegir la pregunta con la que
- * la recupera si se le olvida.
- */
 class PerfilViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = FlujoRepository(application)
     private val sesion = SesionPreferencias(application)
     private val persona: Colaborador? = repositorio.colaboradorPorId(sesion.leer())
 
-    /** Lo que hay guardado, para volver atras si el cambio de nombre se cancela. */
     private var nombreOriginal: String = persona?.nombre ?: ""
     private var apellidoOriginal: String = persona?.apellido ?: ""
 
@@ -54,7 +48,6 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    // ---------- nombre y apellido ----------
 
     fun onNombreCambia(valor: String) {
         _uiState.update { it.copy(nombre = valor, errorNombre = null, avisoNombre = null) }
@@ -64,11 +57,6 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
         _uiState.update { it.copy(apellido = valor, errorNombre = null, avisoNombre = null) }
     }
 
-    /**
-     * Guarda el nombre. Es un dato vivo: el resto de la app lo lee de la base al abrir cada
-     * pantalla, asi que el cambio se ve en la barra, en el perfil y en las pantallas del supervisor
-     * sin copias por ningun lado.
-     */
     fun guardarNombre(): Boolean {
         val p = persona ?: return false
         val e = _uiState.value
@@ -92,7 +80,6 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
         return true
     }
 
-    /** Se cerro el cambio sin guardar: los campos vuelven a lo que hay en la base. */
     fun cancelarCambioNombre() {
         _uiState.update {
             it.copy(
@@ -104,13 +91,10 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    /** Letras (con tildes y enie), espacios, guion y apostrofo: lo que lleva un nombre de persona. */
     private fun textoDeNombreValido(texto: String): Boolean =
         texto.length in 2..40 && texto.all { it.isLetter() || it == ' ' || it == '-' || it == '\'' }
 
-    // ---------- foto de perfil ----------
 
-    /** La foto ya viene recortada cuadrada y reducida desde la camara: aca solo se guarda. */
     fun guardarFoto(bytes: ByteArray?) {
         val p = persona ?: return
         if (repositorio.guardarFoto(p.id, bytes)) {
@@ -126,17 +110,12 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
 
     fun limpiarAvisoFoto() { _uiState.update { it.copy(avisoFoto = null) } }
 
-    // ---------- cambio de clave ----------
 
     fun onClaveActualCambia(v: String) { _uiState.update { it.copy(claveActual = v, errorActual = null, avisoClave = null) } }
     fun onClaveNuevaCambia(v: String) { _uiState.update { it.copy(claveNueva = v, errorNueva = null, avisoClave = null) } }
     fun onRepetirCambia(v: String) { _uiState.update { it.copy(repetirNueva = v, errorRepetir = null, avisoClave = null) } }
     fun onAlternarClave() { _uiState.update { it.copy(claveVisible = !it.claveVisible) } }
 
-    /**
-     * Cambia la clave. Valida por campo: primero la actual, despues la regla acordada (8 caracteres
-     * con mayuscula, minuscula y numero) y por ultimo que las dos nuevas coincidan.
-     */
     fun cambiarClave(): Boolean {
         val p = persona
         if (p == null) {
@@ -166,9 +145,7 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
         return true
     }
 
-    // ---------- preguntas de seguridad ----------
 
-    /** La pregunta elegida reemplaza a la anterior: la cuenta usa una sola. */
     fun onElegirPregunta(idPregunta: Long) {
         _uiState.update {
             it.copy(elegidas = listOf(idPregunta), errorPreguntas = null, avisoPreguntas = null)
@@ -181,10 +158,6 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    /**
-     * Guarda la respuesta de la pregunta elegida. Se guarda hasheada, con el RUT como sal: lo que
-     * queda en la base no es la respuesta escrita.
-     */
     fun guardarPreguntas(): Boolean {
         val p = persona ?: return false
         val e = _uiState.value

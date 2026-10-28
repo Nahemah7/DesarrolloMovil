@@ -13,9 +13,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-/**
- * Estado de la hoja de una plantilla. Los valores se editan aca y se guardan en las preferencias.
- */
 data class PlantillaUiState(
     val numero: Int = 1,
     val clasificacion: Clasificacion = Clasificacion.TRANSITO,
@@ -29,7 +26,6 @@ data class PlantillaUiState(
     val mensaje: String? = null
 )
 
-/** Editar una de las tres plantillas de prerellenado. */
 class PlantillaViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = FlujoRepository(application)
@@ -38,7 +34,6 @@ class PlantillaViewModel(application: Application) : AndroidViewModel(applicatio
     private val _uiState = MutableStateFlow(PlantillaUiState())
     val uiState: StateFlow<PlantillaUiState> = _uiState.asStateFlow()
 
-    /** Se llama con el numero de plantilla que se abrio desde la pantalla de registro. */
     fun cargar(numero: Int) {
         val guardada = plantillas.leer(numero)
         _uiState.update {
@@ -63,7 +58,6 @@ class PlantillaViewModel(application: Application) : AndroidViewModel(applicatio
     fun onCompras(v: Boolean) = _uiState.update { it.copy(comprasOtraTienda = v, guardada = false) }
     fun onDestino(id: Long) = _uiState.update { it.copy(destino = id, guardada = false) }
 
-    /** Guarda la plantilla. El tramo etario es obligatorio, como al registrar. */
     fun guardar(): Boolean {
         val e = _uiState.value
         if (e.rangoEtario == null) {

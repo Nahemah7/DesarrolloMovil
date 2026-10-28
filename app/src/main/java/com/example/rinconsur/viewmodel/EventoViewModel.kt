@@ -11,19 +11,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-/**
- * Alta de un evento del dia, con la foto de evidencia.
- *
- * Toda la validacion vive aca, no en la pantalla: la pantalla solo muestra el error que el
- * ViewModel calcula, campo por campo (es lo que la rubrica llama "validacion desacoplada").
- */
 class EventoViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = FlujoRepository(application)
     private val sesion = SesionPreferencias(application)
     private val fechaDeTrabajo = repositorio.fechaHoy()
 
-    /** Catalogos para la pantalla. */
     val accesos: List<Acceso> = repositorio.accesos()
     val tipos: List<TipoEvento> = TipoEvento.entries
 
@@ -35,7 +28,6 @@ class EventoViewModel(application: Application) : AndroidViewModel(application) 
         )
     )
 
-    /** Relee la lista del dia: se llama al entrar, al guardar y al anular. */
     private fun recargarEventos() {
         _uiState.update {
             it.copy(
@@ -64,9 +56,7 @@ class EventoViewModel(application: Application) : AndroidViewModel(application) 
         _uiState.update { it.copy(descripcion = valor, errorDescripcion = null, guardado = false) }
     }
 
-    /** La foto ya viene reducida y comprimida: la pantalla la convierte antes de pasarla. */
     fun onFoto(bytes: ByteArray) {
-        // Si habia un aviso de permiso denegado, ya no corresponde: la foto llego igual
         _uiState.update { it.copy(fotoBytes = bytes, guardado = false, mensaje = null) }
     }
 
@@ -84,7 +74,6 @@ class EventoViewModel(application: Application) : AndroidViewModel(application) 
         _uiState.update { it.copy(mensaje = null) }
     }
 
-    /** Valida por campo y, si esta todo bien, guarda en SQLite (con la foto como BLOB). */
     fun guardar(): Boolean {
         val estado = _uiState.value
 
@@ -95,7 +84,6 @@ class EventoViewModel(application: Application) : AndroidViewModel(application) 
         }
         val errorDescripcion = mensajeDeTextoLibre(estado.descripcion, "Cuenta qué pasó")
 
-        // Regla del caso: si se cierra un acceso, hay que decir cual
         val errorAcceso = if (estado.tipo == TipoEvento.CIERRE_ACCESO && estado.idAcceso == null)
             "Si es cierre de acceso, indica cual" else null
 
@@ -106,7 +94,6 @@ class EventoViewModel(application: Application) : AndroidViewModel(application) 
             return false
         }
 
-        // Correlativo igual al de la semilla del caso: E-01, E-02, ... E-07
         val codigo = "E-" + String.format("%02d", repositorio.contarTodosLosEventos() + 1)
         repositorio.registrarEvento(
             EventoDia(
@@ -134,10 +121,6 @@ class EventoViewModel(application: Application) : AndroidViewModel(application) 
         return true
     }
 
-    /**
-     * Anular un evento no lo borra: pide el motivo, guarda quien lo anula y sale del conteo del dia.
-     * El evento se conserva en la lista con su motivo, porque cambia el tipo de dia de los indicadores.
-     */
     fun anular(idEvento: Long, motivo: String): String? {
         val error = mensajeDeTextoLibre(motivo, "Escribe el motivo de la anulación")
         if (error != null) return error

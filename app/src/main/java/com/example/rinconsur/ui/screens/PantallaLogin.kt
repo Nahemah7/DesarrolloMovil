@@ -30,10 +30,8 @@ import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.ui.theme.*
 import com.example.rinconsur.viewmodel.*
 
-/** Inicio de sesion: valida el RUT contra la base y recuerda quien entro. */
 @Composable
 fun PantallaLogin(onEntrar: (PerfilUsuario) -> Unit) {
-    // La recuperacion de clave vive dentro del login: es el mismo formulario, en tres pasos.
     var recuperando by rememberSaveable { mutableStateOf(false) }
     if (recuperando) {
         PantallaRecuperar(onVolver = { recuperando = false })
@@ -49,7 +47,6 @@ fun PantallaLogin(onEntrar: (PerfilUsuario) -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = Dimens.espacioPantalla)
         ) {
-            // Espacio para que el encabezado no quede pegado a la barra de estado del telefono
             Spacer(Modifier.height(36.dp))
             Text("RINCÓN SUR", style = MaterialTheme.typography.labelMedium, color = Burdeo)
             Text("Control de flujo\npor acceso", style = MaterialTheme.typography.titleLarge)
@@ -72,7 +69,6 @@ fun PantallaLogin(onEntrar: (PerfilUsuario) -> Unit) {
                 onAlternarVisibilidad = vm::onAlternarClave,
                 error = estado.errorClave
             )
-            // El error de autenticacion va arriba del boton y es uno solo, sin decir cual campo fallo
             if (estado.errorGeneral != null) {
                 TarjetaSeccion(modifier = Modifier.padding(top = Dimens.espacioChico)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -99,7 +95,6 @@ fun PantallaLogin(onEntrar: (PerfilUsuario) -> Unit) {
                 Text("¿Olvidaste tu clave?", color = Burdeo, style = MaterialTheme.typography.labelSmall)
             }
             Nota("El teléfono se comparte entre turnos: la sesión se cierra al devolver el equipo.")
-            // Colchon final: los ultimos datos no quedan debajo de los botones del sistema
             Spacer(Modifier.height(36.dp))
         }
     }

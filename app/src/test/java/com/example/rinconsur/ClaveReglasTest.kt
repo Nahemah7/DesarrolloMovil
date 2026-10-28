@@ -10,10 +10,6 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Reglas de la clave: 8 caracteres, con mayuscula, minuscula y numero.
- * Se prueban en JVM, sin emulador ni base.
- */
 class ClaveReglasTest {
 
     @Test fun `una clave que cumple todo es valida`() {

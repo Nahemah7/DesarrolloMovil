@@ -23,25 +23,6 @@ import com.example.rinconsur.ui.styles.EstilosBoton
 import com.example.rinconsur.ui.styles.estiloAltoBoton
 import com.example.rinconsur.ui.theme.RinconSurTheme
 
-// =====================================================================
-//  BotonPrincipal.kt  —  COMPONENTE REUTILIZABLE
-//  ---------------------------------------------------------------------
-//  Un componente es una funcion @Composable que:
-//   1) recibe DATOS por parametro (texto, habilitado)
-//   2) recibe EVENTOS por parametro (onClick: () -> Unit)
-//   3) NO conoce el ViewModel: solo dibuja.
-//
-//  El parametro "modifier" (valor por defecto Modifier) permite que la
-//  pantalla decida el ancho: fillMaxWidth(), weight(1f), etc.
-// =====================================================================
-
-/**
- * Boton principal de la app: ancho completo, alto fijo y una sola accion clara.
- *
- * ANIMACION 3: al mantener el dedo, el boton se achica un 3 % y vuelve con un resorte. Es
- * retroalimentacion: la persona sabe que el toque entro incluso antes de que aparezca el
- * resultado, y en esta app se usa de pie y con una mano.
- */
 @Composable
 fun BotonPrincipal(
     texto: String,

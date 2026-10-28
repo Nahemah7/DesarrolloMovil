@@ -6,13 +6,6 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 
-/**
- * Recurso nativo de vibracion: la segunda API que pide la entrega.
- *
- * Se justifica en el propio caso: el observador registra de pie y mirando a la persona, con una
- * mano. El aviso corto confirma que el registro quedo guardado sin tener que mirar la pantalla,
- * que es justo lo que pide registrar en menos de 3 segundos (RNF-01).
- */
 object Vibracion {
 
     private const val DURACION_MS = 45L

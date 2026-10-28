@@ -11,13 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/**
- * El encabezado de la barra: el titulo y el dato corto de cada pantalla, armados desde los datos
- * (quien entro, que sesion tiene en curso, como esta la red) y no desde la pantalla.
- *
- * La barra vive en el contenedor, asi que este ViewModel es el que decide que se lee arriba: las
- * pantallas no arman su propio encabezado y por eso no puede quedar distinto entre una y otra.
- */
 class EncabezadoViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = FlujoRepository(application)
@@ -33,20 +26,11 @@ class EncabezadoViewModel(application: Application) : AndroidViewModel(applicati
     private val _subtitulo = MutableStateFlow("")
     val subtitulo: StateFlow<String> = _subtitulo.asStateFlow()
 
-    /**
-     * Quien esta adentro se lee en cada pantalla y no una sola vez: el telefono se comparte entre
-     * turnos, y si no se relee, el encabezado y el menu quedan con el colaborador anterior.
-     */
     private fun usuarioActual(): Colaborador? {
         val id = preferencias.leer()
         return if (id > 0) repositorio.colaboradorPorId(id) else null
     }
 
-    /**
-     * Lee el encabezado que corresponde a la ruta que se esta mostrando.
-     * Los datos que van en la ruta (la plantilla, la sesion que se rechaza) llegan como argumentos:
-     * la ruta de navegacion es el patron, no el valor.
-     */
     fun actualizar(ruta: String, numeroPlantilla: String? = null, idSesion: String? = null) {
         val usuario = usuarioActual()
         _perfil.value = usuario?.perfil ?: PerfilUsuario.OBSERVADOR

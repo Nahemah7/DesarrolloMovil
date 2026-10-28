@@ -11,10 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/**
- * Cola de sesiones por enviar. El telefono guarda siempre; el envio depende de la red,
- * y el medio de conexion se lee del sistema (recurso nativo), no se deduce.
- */
 class SinSenalViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = FlujoRepository(application)
@@ -32,7 +28,6 @@ class SinSenalViewModel(application: Application) : AndroidViewModel(application
     private val _mensaje = MutableStateFlow<String?>(null)
     val mensaje: StateFlow<String?> = _mensaje.asStateFlow()
 
-    /** Vuelve a preguntarle al sistema: es lo que hace el boton "Reintentar". */
     fun revisarRed() {
         _conectado.value = red.hayInternet()
         _medio.value = red.medioDeConexion()
@@ -51,7 +46,6 @@ class SinSenalViewModel(application: Application) : AndroidViewModel(application
         _mensaje.value = null
     }
 
-    /** Las sesiones que ya se cerraron y todavia no estan validadas: lo que falta enviar. */
     private fun porEnviar(): List<SesionResumen> =
         repositorio.sesionesDeFecha(repositorio.fechaHoy()).filter { it.estado == EstadoSesion.FINALIZADA }
 

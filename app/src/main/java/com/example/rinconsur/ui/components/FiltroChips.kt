@@ -22,10 +22,6 @@ import com.example.rinconsur.ui.theme.Burdeo
 import com.example.rinconsur.ui.theme.BurdeoSuave
 import com.example.rinconsur.ui.theme.RinconSurTheme
 
-/**
- * Un filtro de una sola opcion (acceso, tipo de dia, periodo).
- * El elegido no se distingue solo por color: lleva marca y queda en negrita (RNF-07).
- */
 @Composable
 fun Filtro(texto: String, activo: Boolean, onClick: () -> Unit) {
     FilterChip(
@@ -34,17 +30,14 @@ fun Filtro(texto: String, activo: Boolean, onClick: () -> Unit) {
         label = {
             Text(
                 texto,
-                // El elegido crece: la seleccion se percibe por tamano y peso, no solo por color (RNF-07)
                 style = if (activo) MaterialTheme.typography.titleSmall else MaterialTheme.typography.labelMedium,
                 fontWeight = if (activo) FontWeight.Bold else FontWeight.Normal
             )
         },
         leadingIcon = null,
         shape = RoundedCornerShape(50),
-        // La caja del elegido tambien crece: si solo crece el texto, el ojo no lo registra
         modifier = Modifier.height(if (activo) 38.dp else 32.dp),
         colors = FilterChipDefaults.filterChipColors(
-            // Sobre el fondo hueso el chip sin elegir necesita superficie: si no, queda plano
             containerColor = Color.White,
             selectedContainerColor = BurdeoSuave,
             selectedLabelColor = Burdeo
@@ -52,7 +45,6 @@ fun Filtro(texto: String, activo: Boolean, onClick: () -> Unit) {
     )
 }
 
-/** Fila de filtros que se puede desplazar en horizontal. */
 @Composable
 fun FilaFiltros(
     opciones: List<String>,

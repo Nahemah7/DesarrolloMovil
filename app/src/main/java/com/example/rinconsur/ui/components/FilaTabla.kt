@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.dp
 import com.example.rinconsur.ui.theme.Apagado
 import com.example.rinconsur.ui.theme.Tinta
 
-/** Fila de una tabla simple de tres columnas: concepto, cantidad y porcentaje. */
 @Composable
 fun FilaTabla(
     concepto: String,

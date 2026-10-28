@@ -5,7 +5,6 @@ import com.example.rinconsur.model.Clasificacion
 import com.example.rinconsur.model.Compania
 import com.example.rinconsur.model.RangoEtario
 
-/** Una plantilla de prerellenado: lo que el observador repite cuando entra alguien del mismo perfil. */
 data class Plantilla(
     val clasificacion: Clasificacion,
     val rangoEtario: RangoEtario,
@@ -14,12 +13,6 @@ data class Plantilla(
     val destino: Long?
 )
 
-/**
- * Las tres plantillas del observador, guardadas en las preferencias del telefono.
- *
- * No van a la base: son una ayuda para registrar mas rapido, no un dato de la sesion, y no se envian
- * a validacion. Cada una se guarda como una linea de texto con los cinco valores.
- */
 class Plantillas(context: Context) {
 
     private val prefs = context.getSharedPreferences("plantillas", Context.MODE_PRIVATE)

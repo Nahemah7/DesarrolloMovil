@@ -15,7 +15,6 @@ object EstilosCampo {
 
     @Composable
     fun colores(): TextFieldColors = OutlinedTextFieldDefaults.colors(
-        // Sin esto el campo queda del color del fondo y se ve plano (Silvio: "mismo fondo plano de hueso")
         focusedContainerColor = Color.White,
         unfocusedContainerColor = Color.White,
         focusedBorderColor = MaterialTheme.colorScheme.primary,

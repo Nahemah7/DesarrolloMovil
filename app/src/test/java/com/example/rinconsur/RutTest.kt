@@ -6,12 +6,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-/**
- * Validador de RUT (modulo 11).
- *
- * Los RUT validos que se usan aca son los del Anexo 9: el caso garantiza que su digito verificador
- * es correcto, asi que sirven como referencia externa (no son numeros que hayamos inventado).
- */
 class RutTest {
 
     @Test
@@ -47,7 +41,6 @@ class RutTest {
 
     @Test
     fun elFormatoCanonicoEsElQueSeGuarda() {
-        // Es el formato sobre el que se calcula el hash de la clave: tiene que ser siempre el mismo.
         assertEquals("19.876.345-4", Rut.formatear("198763454"))
         assertEquals("19.876.345-4", Rut.formatear("19.876.345-4"))
         assertEquals("11.111.112-K", Rut.formatear("11111112k"))

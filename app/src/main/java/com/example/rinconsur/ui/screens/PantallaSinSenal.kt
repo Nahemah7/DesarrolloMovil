@@ -31,10 +31,6 @@ import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.SinSenalViewModel
 
-/**
- * Estado de la red y sesiones por enviar. Recurso nativo: el estado de la red se lee del sistema
- * (ConnectivityManager), no se supone. El teléfono guarda siempre; la red solo decide si se puede enviar.
- */
 @Composable
 fun PantallaSinSenal(onVolver: () -> Unit) {
     val vm: SinSenalViewModel = viewModel()
@@ -52,7 +48,6 @@ fun PantallaSinSenal(onVolver: () -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
         ) {
-            // ---- Estado de la red (siempre con palabra, no solo color) ----
             Seccion("Conexión")
             TarjetaSeccion {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -73,7 +68,6 @@ fun PantallaSinSenal(onVolver: () -> Unit) {
                 Nota("El teléfono guarda siempre. Lo que depende de la red es el envío.")
             }
 
-            // ---- Sesiones por enviar ----
             Seccion("Por enviar")
             TarjetaSeccion {
                 if (porEnviar.isEmpty()) {
@@ -98,10 +92,8 @@ fun PantallaSinSenal(onVolver: () -> Unit) {
                 }
             }
 
-            // Resultado del último intento: "enviada" o "sigue guardada en este teléfono"
             mensaje?.let { Nota(it) }
 
-            // ---- Botones ----
             Spacer(Modifier.height(14.dp))
             BotonPrincipal(
                 texto = "Enviar ahora",

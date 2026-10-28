@@ -26,7 +26,6 @@ import com.example.rinconsur.ui.theme.Ok
 import com.example.rinconsur.ui.theme.OkSuave
 import com.example.rinconsur.ui.theme.RinconSurTheme
 
-/** Etiqueta redondeada generica: fondo suave y texto del mismo color. */
 @Composable
 fun Etiqueta(texto: String, fondo: Color = FondoSuave, textoColor: Color = Apagado) {
     Box(
@@ -44,7 +43,6 @@ fun Etiqueta(texto: String, fondo: Color = FondoSuave, textoColor: Color = Apaga
     }
 }
 
-/** Etiqueta redondeada de estado. Nunca informa solo con color: siempre lleva la palabra. */
 @Composable
 fun EtiquetaEstado(texto: String, tipo: String = "neutro") {
     val par: Pair<Color, Color> = when (tipo) {
@@ -69,7 +67,6 @@ fun EtiquetaEstado(texto: String, tipo: String = "neutro") {
     }
 }
 
-/** Titulo de seccion en mayusculas y gris. */
 @Composable
 fun Seccion(texto: String, modifier: Modifier = Modifier) {
     Text(
@@ -80,7 +77,6 @@ fun Seccion(texto: String, modifier: Modifier = Modifier) {
     )
 }
 
-/** Aclaracion chica debajo de un bloque. */
 @Composable
 fun Nota(texto: String, modifier: Modifier = Modifier) {
     Text(

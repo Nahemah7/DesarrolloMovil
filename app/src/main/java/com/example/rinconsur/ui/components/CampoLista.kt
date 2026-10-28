@@ -37,14 +37,6 @@ import com.example.rinconsur.ui.theme.Linea
 import com.example.rinconsur.ui.theme.RinconSurTheme
 import com.example.rinconsur.ui.theme.Tinta
 
-/**
- * Campo que se elige de una lista: muestra la opcion elegida y abre la lista al tocarlo.
- *
- * Se usa donde la lista es larga y mostrarla entera llenaria la pantalla de opciones que nadie
- * marco (las preguntas de seguridad, por ejemplo). No es un campo de texto de solo lectura: es un
- * campo propio, asi el valor que muestra queda como texto real —se ve en pantalla y lo lee el
- * lector de pantalla— y no tapado por una capa que recogia el toque.
- */
 @Composable
 fun CampoLista(
     etiqueta: String,

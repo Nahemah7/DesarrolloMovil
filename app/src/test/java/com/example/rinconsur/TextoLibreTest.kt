@@ -11,10 +11,6 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Regla del texto libre (evento, "otro motivo" del rechazo y motivo de anulacion): entre 10 y 200
- * caracteres, medidos sin los espacios de los lados. Se prueba en JVM, sin emulador ni base.
- */
 class TextoLibreTest {
 
     private val vacio = "Escribe algo"
@@ -49,7 +45,6 @@ class TextoLibreTest {
         assertNull(mensajeDeTextoLibre("  " + "a".repeat(TEXTO_MINIMO) + "  ", vacio))
     }
 
-    // ---- el texto que se guarda al rechazar una sesion ----
 
     @Test fun `sin otro motivo se guardan solo las etiquetas`() {
         val texto = textoDeRechazo(
@@ -70,7 +65,6 @@ class TextoLibreTest {
     }
 
     @Test fun `un detalle de 200 caracteres junto a otras etiquetas pasa el maximo`() {
-        // Por esto el ViewModel mide el texto completo y no solo el detalle
         val texto = textoDeRechazo(
             setOf(MotivoRechazo.INTERRUMPIDA, MotivoRechazo.OTRO),
             detalle = "a".repeat(TEXTO_MAXIMO)

@@ -47,15 +47,7 @@ import com.example.rinconsur.navigation.Ruta
 import com.example.rinconsur.ui.theme.Burdeo
 import com.example.rinconsur.ui.theme.Hueso
 
-/**
- * Barra de navegacion de la app: el titulo de la pantalla, la accion de volver y el menu del perfil.
- *
- * Vive en el contenedor (AppNavegacion), no en las pantallas: por eso el menu se ve igual en todas y
- * no se pierde al cambiar de pantalla. Los iconos van sin nombre; cada uno lleva su descripcion para
- * el lector de pantalla, y el activo se marca con fondo y con el icono relleno, no solo con color.
- */
 
-/** Una opcion del menu: su nombre para el lector de pantalla, su ruta y sus dos iconos (normal y activo). */
 data class OpcionMenu(
     val etiqueta: String,
     val ruta: String,
@@ -63,14 +55,12 @@ data class OpcionMenu(
     val iconoActivo: ImageVector
 )
 
-/** Colores de la barra sobre burdeo. El gris apagado de la app no sirve aca: no alcanza el contraste. */
 private val IconoInactivo = Color(0xFFD8C3CA)
 private val SubtituloBarra = Color(0xFFE9D9DE)
 private val FondoActivo = Hueso.copy(alpha = 0.20f)
 private val FondoVolver = Hueso.copy(alpha = 0.10f)
 private val BordeVolver = Hueso.copy(alpha = 0.30f)
 
-/** Las opciones de cada perfil: el observador tiene tres, el supervisor cuatro. */
 fun menuDe(perfil: PerfilUsuario): List<OpcionMenu> = when (perfil) {
     PerfilUsuario.OBSERVADOR -> listOf(
         OpcionMenu("Registrar", Ruta.Registro.ruta, Icons.Outlined.Add, Icons.Filled.Add),
@@ -78,8 +68,6 @@ fun menuDe(perfil: PerfilUsuario): List<OpcionMenu> = when (perfil) {
         OpcionMenu("Perfil", Ruta.Perfil.ruta, Icons.Outlined.Person, Icons.Filled.Person)
     )
 
-    // La pantalla de indicadores todavia no existe; su icono entra a Perfil, que es donde caia
-    // antes desde la barra inferior, y se conecta a su ruta cuando la pantalla exista.
     else -> listOf(
         OpcionMenu("Sesiones", Ruta.Sesiones.ruta, Icons.Outlined.List, Icons.Filled.List),
         OpcionMenu("Medir", Ruta.Evento.ruta, Icons.Outlined.Edit, Icons.Filled.Edit),
@@ -88,29 +76,18 @@ fun menuDe(perfil: PerfilUsuario): List<OpcionMenu> = when (perfil) {
     )
 }
 
-/**
- * Cada icono del menu es un destino propio y su pantalla queda marcada: no se marca la opcion de
- * donde se venia. Lo unico que se hereda es la hoja o el paso que cuelga de una pantalla con icono
- * (la plantilla se abre desde Registrar, el rechazo se hace sobre una sesion de Sesiones).
- */
 private fun esLaActiva(opcion: OpcionMenu, rutaActual: String): Boolean {
     if (opcion.ruta == rutaActual) return true
     return when {
-        // Pasos del registro del observador: la hoja de plantilla y el cierre de su sesion.
         rutaActual.startsWith("plantilla") || rutaActual.startsWith("cierre") ||
                 rutaActual.startsWith("sin_senal") -> opcion.etiqueta == "Registrar"
 
-        // El rechazo se hace sobre una sesion, que es lo que muestra Sesiones.
         rutaActual.startsWith("rechazar") || rutaActual.startsWith("programar") -> opcion.etiqueta == "Sesiones"
 
         else -> false
     }
 }
 
-/**
- * Las pantallas que son destino de un icono: no llevan flecha, porque el menu ya es la forma de
- * moverse y volver atras no corresponde a ninguna de ellas.
- */
 fun esRaiz(ruta: String): Boolean =
     ruta.startsWith("mi_sesion") || ruta.startsWith("registro") || ruta.startsWith("sesiones") ||
             ruta.startsWith("evento") || ruta.startsWith("perfil") || ruta.startsWith("indicadores")
@@ -122,7 +99,6 @@ fun BarraNavegacion(
     opciones: List<OpcionMenu>,
     rutaActual: String,
     onIr: (String) -> Unit,
-    /** Solo en pantallas de flujo: en las raices no se dibuja la flecha. */
     onVolver: (() -> Unit)? = null
 ) {
     Row(
@@ -181,7 +157,6 @@ fun BarraNavegacion(
     }
 }
 
-/** Un icono de la barra: area tactil de 40 x 40 dp con su descripcion para el lector de pantalla. */
 @Composable
 private fun BotonBarra(
     icono: ImageVector,

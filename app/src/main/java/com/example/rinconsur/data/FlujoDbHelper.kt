@@ -7,18 +7,6 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.example.rinconsur.model.*
 
-/**
- * Base de datos de la app, SQL escrito a mano,
- * `onCreate` que crea y precarga, y metodos que devuelven modelos (no cursores).
- *
- * El esquema es el modelo C01 v2 (15 tablas y 6 vistas), el mismo que quedo validado
- * contra los anexos del caso. El original MySQL/MariaDB y la traduccion a SQLite estan
- * documentados en `docs/base_tecnica.md` y en `docs/rincon_sur_sqlite.sql`.
- *
- * Las vistas hacen el trabajo pesado (conversion del dia, proporcion de transito de la
- * sesion, transito por bloque). La app las consulta en vez de recalcular: asi no puede
- * desviarse de lo que dice el modelo.
- */
 class FlujoDbHelper(context: Context) :
     SQLiteOpenHelper(context, NOMBRE_BD, null, VERSION_BD) {
 
@@ -26,14 +14,12 @@ class FlujoDbHelper(context: Context) :
         private const val NOMBRE_BD = "rinconsur.db"
         private const val VERSION_BD = 6
 
-        /** Estado con el que se abre y se cierra la sesion de conteo. */
         const val ESTADO_PROGRAMADA = 1L
     const val ESTADO_EN_CURSO = 2L
         const val ESTADO_FINALIZADA = 3L
         const val ESTADO_VALIDADA = 4L
         const val ESTADO_RECHAZADA = 5L
 
-        /** Minimo de registros validos para poder validar una sesion (Anexo 8). */
         const val MINIMO_REGISTROS = 30
 
         private const val SQL_USUARIO =
@@ -49,9 +35,7 @@ class FlujoDbHelper(context: Context) :
                 "JOIN estado_sesion e ON e.id_estado = s.id_estado " +
                 "LEFT JOIN v_sesion_proporcion v ON v.id_sesion = s.id_sesion "
 
-        // ---- esquema, vistas y datos de ejemplo del caso ----
         private val SQL_ESQUEMA: List<String> = listOf(
-        // 15 tablas del modelo C01 v2
         """CREATE TABLE rol (
     id_rol      INT          NOT NULL,
     codigo      VARCHAR(5)   NOT NULL,
@@ -258,7 +242,6 @@ class FlujoDbHelper(context: Context) :
         )
 
         private val SQL_VISTAS: List<String> = listOf(
-        // 6 vistas: el calculo vive en SQL
         """CREATE VIEW v_tipo_dia AS
 SELECT d.fecha,
        CASE WHEN (CAST(strftime('%w', d.fecha) AS INTEGER) + 1) IN (1, 7)
@@ -349,7 +332,6 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
         )
 
         private val SQL_DATOS: List<String> = listOf(
-        // datos de ejemplo: 23 INSERT, el UPDATE de anulados y los 7 UPDATE del hash de la clave
         """INSERT INTO rol (id_rol, codigo, nombre, descripcion) VALUES
   (1, 'P-01', 'Jefa de tienda', 'Consulta indicadores, historial y perfil; registra la meta'),
   (2, 'P-02', 'Subgerente comercial', 'Administra sesiones, valida, carga ingresos y transacciones, gestiona colaboradores'),
@@ -930,19 +912,6 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
 
         )
 
-        /**
-         * Dia de ejemplo de fin de semana: sabado 24-10-2026, completo (los 4 accesos por los 11
-         * bloques, y las 11 filas de transacciones), con dos sesiones validadas para que el avance de
-         * la medicion no salga vacio.
-         *
-         * Es **dato de ejemplo**, no del anexo: el unico dia real que trae el caso es el 15-09-2026,
-         * que sigue intacto en SQL_DATOS. Se siembra para que la pantalla de indicadores tenga las dos
-         * vistas (habiles y fin de semana) con cifras. Los DELETE lo dejan re-aplicable: si se siembra
-         * otra vez, no duplica filas.
-         *
-         * Cifras: 4.780 ingresos y 415 transacciones (conversion bruta 8,7 %, como el dia del anexo);
-         * A1 1.242 · A2 956 · A3 766 · A4 1.816.
-         */
         private val SQL_DEMO_FIN_DE_SEMANA: List<String> = listOf(
             """DELETE FROM registro_observacion WHERE id_sesion IN (21, 22);""",
             """DELETE FROM sesion_observacion WHERE id_sesion IN (21, 22);""",
@@ -1034,21 +1003,14 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
         SQL_DEMO_FIN_DE_SEMANA.forEach { db.execSQL(it) }
     }
 
-    /**
-     * Migrar conservando los datos: ALTER TABLE, nunca DROP, para no borrar lo que ya esta guardado en el telefono.
-     * Cada version nueva agrega su bloque, y la app que ya estaba instalada no pierde nada.
-     */
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         if (oldVersion < 2) {
-            // Version 2: la foto de evidencia del evento (recurso nativo de camara y galeria)
             db.execSQL("ALTER TABLE evento_dia ADD COLUMN foto BLOB")
         }
         if (oldVersion < 4) {
             db.execSQL("ALTER TABLE usuario ADD COLUMN foto BLOB")
         }
         if (oldVersion < 3) {
-            // Version 3: preguntas de seguridad para recuperar la clave sin correo. Se crean y se
-            // siembran aca porque una base que ya existe no vuelve a pasar por onCreate.
             db.execSQL("""CREATE TABLE pregunta_seguridad (
     id_pregunta INTEGER PRIMARY KEY AUTOINCREMENT,
     texto       VARCHAR(120) NOT NULL,
@@ -1072,18 +1034,14 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
   (6, '¿Cómo se llamaba tu mejor amigo de la infancia?')""")
         }
         if (oldVersion < 5) {
-            // Version 5: el evento no se borra, se anula con motivo y queda el rastro
             db.execSQL("ALTER TABLE evento_dia ADD COLUMN anulado INTEGER NOT NULL DEFAULT 0")
             db.execSQL("ALTER TABLE evento_dia ADD COLUMN motivo_anulacion VARCHAR(200)")
             db.execSQL("ALTER TABLE evento_dia ADD COLUMN id_usuario_anula INT")
             db.execSQL("ALTER TABLE evento_dia ADD COLUMN fecha_anulacion DATETIME")
-            // La vista del tipo de dia se rehace para que no cuente los eventos anulados
             db.execSQL("DROP VIEW IF EXISTS v_tipo_dia")
             db.execSQL(SQL_VISTAS.first())
         }
         if (oldVersion < 6) {
-            // Version 6: el dia de ejemplo de fin de semana, para que los indicadores tengan las dos
-            // vistas. Es dato de ejemplo; el dia real del anexo (15-09) no se toca.
             SQL_DEMO_FIN_DE_SEMANA.forEach { db.execSQL(it) }
         }
     }
@@ -1119,19 +1077,13 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
     }
 
     fun listarRangosEtarios(): List<Pair<RangoEtario, String>> =
-        // El rango es siempre uno de los cinco del anexo: la edad no se pregunta, se estima (RN-07)
         RangoEtario.entries.map { it to it.etiqueta }
 
     fun listarCompanias(): List<Compania> = Compania.entries
 
-    /**
-     * La fecha de hoy en el telefono. Con esta se fechan las sesiones y los eventos: el trabajo se
-     * hace el dia que se hace, no el ultimo dia que alguien cargo ingresos.
-     */
     fun fechaHoy(): String =
         java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
 
-    /** El dia con datos de ingresos (el anexo): es el que usan los indicadores. */
     fun fechaDeTrabajo(): String =
         readableDatabase.rawQuery("SELECT MAX(fecha) AS fecha FROM conteo_ingreso", null).use { c ->
             if (c.moveToNext()) c.texto("fecha") else ""
@@ -1145,11 +1097,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
     fun buscarColaboradorPorId(id: Long): Colaborador? =
         consultarColaboradores(SQL_USUARIO + "WHERE u.id_usuario = ?", arrayOf(id.toString())).firstOrNull()
 
-    /**
-     * Cambia el nombre de la persona. Son los dos campos que la app muestra: el nombre en la barra,
-     * en el perfil y en la lista de observadores, y el apellido junto al nombre en la lista de
-     * sesiones del supervisor. El RUT y el rol no se tocan: identifican la cuenta.
-     */
     fun cambiarNombre(idUsuario: Long, nombres: String, apellidoPaterno: String): Int {
         val valores = ContentValues().apply {
             put("nombres", nombres)
@@ -1164,14 +1111,10 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
     fun sesionesDeFecha(fecha: String): List<SesionResumen> =
         consultarSesiones(SQL_SESIONES + "WHERE s.fecha = ? ORDER BY s.hora_inicio_prog", arrayOf(fecha))
 
-    /** Una sesion por su id, sin importar la fecha (la pantalla de rechazo la recibe por la ruta). */
     fun buscarSesion(idSesion: Long): SesionResumen? =
         consultarSesiones(SQL_SESIONES + "WHERE s.id_sesion = ?", arrayOf(idSesion.toString())).firstOrNull()
 
-    /** Los colaboradores que pueden contar: el rol de observador, sin numeros fijos. */
     // ==================== seguridad de la clave ====================
-
-    /** Preguntas del catalogo, para que cada persona elija dos en su perfil. */
     fun listarPreguntas(): List<PreguntaSeguridad> {
         val lista = mutableListOf<PreguntaSeguridad>()
         readableDatabase.rawQuery(
@@ -1180,7 +1123,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
         return lista
     }
 
-    /** Las preguntas que esa persona ya tiene guardadas, para mostrarlas al recuperar la clave. */
     fun listarPreguntasDe(idUsuario: Long): List<PreguntaSeguridad> {
         val lista = mutableListOf<PreguntaSeguridad>()
         readableDatabase.rawQuery(
@@ -1192,16 +1134,11 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
         return lista
     }
 
-    /** Si ya eligio sus preguntas: sin esto no puede recuperar la clave. */
     fun tienePreguntas(idUsuario: Long): Boolean =
         readableDatabase.rawQuery(
             "SELECT COUNT(*) FROM respuesta_seguridad WHERE id_usuario = ?", arrayOf(idUsuario.toString())
         ).use { c -> c.moveToFirst() && c.getInt(0) >= 1 }
 
-    /**
-     * Guarda las respuestas elegidas: se guarda el hash, nunca el texto. La respuesta se normaliza
-     * (sin espacios al borde, en minusculas) para que "Firulais" y "firulais" valgan igual.
-     */
     fun guardarRespuestas(idUsuario: Long, rut: String, respuestas: List<Pair<Long, String>>) {
         writableDatabase.beginTransaction()
         try {
@@ -1220,7 +1157,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
         }
     }
 
-    /** Las respuestas coinciden con las guardadas. */
     fun verificarRespuestas(idUsuario: Long, rut: String, respuestas: List<Pair<Long, String>>): Boolean {
         if (respuestas.isEmpty()) return false
         var correctas = 0
@@ -1235,8 +1171,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
         return correctas == respuestas.size
     }
 
-    /** Cambia la clave. Recibe el hash ya calculado: la clave en texto no pasa por aca. */
-    /** Guarda la foto de perfil ya recortada y reducida. Pasar null la borra. */
     fun guardarFoto(idUsuario: Long, foto: ByteArray?): Boolean {
         val valores = ContentValues().apply {
             if (foto == null || foto.isEmpty()) putNull("foto") else put("foto", foto)
@@ -1246,7 +1180,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
         ) == 1
     }
 
-    /** La foto de perfil guardada, o null si esa persona no tiene. */
     fun fotoDe(idUsuario: Long): ByteArray? {
         readableDatabase.query(
             "usuario", arrayOf("foto"), "id_usuario = ?", arrayOf(idUsuario.toString()),
@@ -1263,7 +1196,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
             "id_usuario = ?", arrayOf(idUsuario.toString())
         ) == 1
 
-    /** Normalizacion de una respuesta, igual al guardar que al verificar. */
     private fun normalizarRespuesta(respuesta: String): String = respuesta.trim().lowercase()
 
     fun listarObservadores(): List<Colaborador> =
@@ -1272,10 +1204,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
             arrayOf()
         )
 
-    /**
-     * Programa una sesion de conteo. Queda en estado Programada con sus horas previstas y quien la
-     * programo; las horas reales las escribe el observador cuando la inicia.
-     */
     fun programarSesion(
         idAcceso: Long,
         fecha: String,
@@ -1303,12 +1231,10 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
         return codigo
     }
 
-    /** Todas las sesiones cerradas que esperan revision, de cualquier fecha. */
     fun sesionesPorValidarTodas(): List<SesionResumen> =
         consultarSesiones(SQL_SESIONES + "WHERE s.id_estado = ? ORDER BY s.fecha DESC, s.hora_inicio_prog",
             arrayOf(ESTADO_FINALIZADA.toString()))
 
-    /** Las sesiones desde una fecha hacia atras (para el filtro Semana). */
     fun sesionesDeLosUltimosDias(desde: String, dias: Int): List<SesionResumen> =
         consultarSesiones(
             SQL_SESIONES + "WHERE s.fecha <= ? AND s.fecha >= date(?, ?) ORDER BY s.fecha DESC, s.hora_inicio_prog",
@@ -1329,7 +1255,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
         )
     }
 
-    /** Arranca la sesion programada: queda En curso y con su hora real de inicio. */
     fun iniciarSesion(idSesion: Long, hora: String): Int =
         writableDatabase.update(
             "sesion_observacion",
@@ -1340,7 +1265,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
             "id_sesion = ?", arrayOf(idSesion.toString())
         )
 
-    /** Cierra solo una sesion EN CURSO: enviar dos veces la misma no cambia nada ni duplica el envio. */
     fun cerrarSesionReal(idSesion: Long, hora: String): Int =
         writableDatabase.update(
             "sesion_observacion",
@@ -1352,7 +1276,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
             arrayOf(idSesion.toString(), ESTADO_EN_CURSO.toString())
         )
 
-    /** Validar o rechazar (el que revisa nunca es el observador: lo garantiza el CHECK del esquema). */
     fun revisarSesion(idSesion: Long, estado: EstadoSesion, idRevisor: Long, motivo: String? = null): Int =
         writableDatabase.update(
             "sesion_observacion",
@@ -1375,10 +1298,7 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
         comprasOtraTienda: Boolean,
         seDirige: Long? = null
     ): Long {
-        // El conteo termina cuando la sesion se envia a validacion. Se comprueba aca, en la base, y
-        // no solo en la pantalla: la pantalla puede seguir viva con una sesion que ya se cerro
-        // (volver a la pestaña, reabrir desde la pila de navegacion), y entonces se seguia contando
-        // sobre una sesion ya enviada. Devuelve -1 cuando no se inserto.
+
         val estadoActual = writableDatabase.rawQuery(
             "SELECT id_estado FROM sesion_observacion WHERE id_sesion = ?",
             arrayOf(idSesion.toString())
@@ -1397,7 +1317,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
         return writableDatabase.insert("registro_observacion", null, valores)
     }
 
-    /** Anular no borra: deja el registro con su motivo y quien lo anulo (RN-11). */
     fun anularRegistro(idRegistro: Long, motivo: String, idColaborador: Long): Int =
         writableDatabase.update(
             "registro_observacion",
@@ -1445,13 +1364,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
             )
         }
 
-    /**
-     * El consolidado de todos los dias de un tipo ("Habil" o "Fin de semana").
-     *
-     * Se suman las cifras y se **recalculan** los porcentajes sobre el total: promediar las
-     * conversiones de cada dia daria un numero que no es el del periodo. La conversion sin transito
-     * solo sale si ningun bloque del periodo quedo sin informacion, igual que en el dia suelto.
-     */
     fun indicadoresDeTipoDia(tipo: String, desde: String? = null, hasta: String? = null): IndicadoresDia? =
         readableDatabase.rawQuery(
             "SELECT MIN(fecha) AS desde, MAX(fecha) AS hasta, COUNT(*) AS dias, tipo_dia, " +
@@ -1488,10 +1400,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
             )
         }
 
-    /**
-     * Las semanas (lunes a domingo) que tienen algun dia cargado, de la mas nueva a la mas vieja.
-     * Se calcula con `strftime('%w')`, donde el domingo es 0: se retrocede al lunes de esa semana.
-     */
     fun semanasConDatos(): List<Pair<String, String>> {
         val lista = mutableListOf<Pair<String, String>>()
         readableDatabase.rawQuery(
@@ -1505,7 +1413,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
         return lista
     }
 
-    /** Transito estimado por acceso sumado en todos los dias de ese tipo. */
     fun transitoPorAccesoDeTipo(tipo: String, desde: String? = null, hasta: String? = null): List<TransitoPorAcceso> {
         val lista = mutableListOf<TransitoPorAcceso>()
         readableDatabase.rawQuery(
@@ -1532,7 +1439,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
         return lista
     }
 
-    /** Transito estimado por acceso en la fecha: suma los bloques de la vista. */
     fun transitoPorAcceso(fecha: String): List<TransitoPorAcceso> {
         val lista = mutableListOf<TransitoPorAcceso>()
         readableDatabase.rawQuery(
@@ -1586,8 +1492,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
             }
         )
 
-    /** Todos los eventos de la base: sirve para dar el codigo correlativo (E-07, E-08...). */
-    /** Anular un evento no lo borra: queda con su motivo y quien lo anulo. */
     fun anularEvento(idEvento: Long, motivo: String, idColaborador: Long): Int =
         writableDatabase.update(
             "evento_dia",
@@ -1605,7 +1509,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
             if (c.moveToNext()) c.entero("n") else 0
         }
 
-    /** Cuantos eventos hay registrados en una fecha: la pantalla lo muestra al guardar. */
     fun contarEventos(fecha: String): Int =
         readableDatabase.rawQuery(
             "SELECT COUNT(*) AS n FROM evento_dia WHERE anulado = 0 AND ? BETWEEN fecha_inicio AND fecha_fin",
@@ -1614,10 +1517,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
             if (c.moveToNext()) c.entero("n") else 0
         }
 
-    /**
-     * Todos los eventos, del mas reciente al mas viejo. La lista no se filtra por el dia: un evento
-     * de otra fecha se tiene que poder ver igual, si no desaparece apenas se registra.
-     */
     fun eventosRegistrados(): List<EventoDia> {
         val lista = mutableListOf<EventoDia>()
         readableDatabase.rawQuery(
@@ -1726,7 +1625,6 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
         java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(java.util.Date())
 }
 
-// ---- lectores de cursor con nombre de columna (evitan los indices a mano) ----
 
 private fun Cursor.texto(columna: String): String = getString(getColumnIndexOrThrow(columna)) ?: ""
 

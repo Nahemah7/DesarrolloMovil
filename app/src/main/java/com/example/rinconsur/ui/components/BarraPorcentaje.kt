@@ -30,19 +30,6 @@ import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.FondoSuave
 import com.example.rinconsur.ui.theme.RinconSurTheme
 
-/**
- * Barra con el valor escrito al final del relleno (decision de las maquetas: no se
- * estira hasta el borde, para que el numero se lea siempre).
- * `atenuada` se usa cuando el dato es estimado y hay que notarlo.
- *
- * ANIMACION 1: el relleno crece al entrar a la pantalla. Informa el tamano relativo sin que el
- * supervisor tenga que comparar numeros.
- *
- * El crecimiento es lento a proposito (1,2 s, con una curva que arranca rapido y frena) y empieza
- * despues de que la pantalla termino de entrar: con 700 ms y salida inmediata, la barra ya estaba
- * llena cuando el ojo llegaba y la animacion no se veia. Al cambiar el dato se anima desde donde
- * estaba, no desde cero.
- */
 @Composable
 fun BarraPorcentaje(
     etiqueta: String,
@@ -51,15 +38,11 @@ fun BarraPorcentaje(
     color: Color = Burdeo,
     atenuada: Boolean = false
 ) {
-    // Sin la clave del valor: al cambiar el dato se anima desde el relleno actual en vez de saltar
-    // a cero, y la primera vez arranca vacia.
     val relleno = remember { Animatable(0f) }
     LaunchedEffect(valor) {
         delay(180)
         relleno.animateTo(
             targetValue = (valor / 100f).coerceIn(0.02f, 0.84f),
-            // Curva de entrada y salida suave: la de salida rapida (0.22, 1) dejaba la barra casi
-            // llena en el primer medio segundo y se leia como un salto, no como un crecimiento.
             animationSpec = tween(
                 durationMillis = 1300,
                 easing = CubicBezierEasing(0.35f, 0f, 0.25f, 1f)

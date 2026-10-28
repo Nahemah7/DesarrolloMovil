@@ -1,9 +1,5 @@
 package com.example.rinconsur.model
 
-/**
- * Sesion de conteo: 30 a 60 minutos en un acceso, sin traslape (RN-02).
- * El rechazo no borra nada: guarda quien reviso, cuando y por que (RN-11).
- */
 data class SesionObservacion(
     val id: Long,
     val codigo: String,

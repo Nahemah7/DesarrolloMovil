@@ -16,22 +16,11 @@ import com.example.rinconsur.model.ResumenSesion
 import com.example.rinconsur.model.SesionResumen
 import com.example.rinconsur.model.TransitoPorAcceso
 
-/**
- * REPOSITORIO
- *
- * Es la unica fuente de datos de la app: los ViewModel le piden a esta clase y nunca hablan con
- * SQLite directamente. Hoy todo sale de la base local; el dia que los ingresos y las boletas
- * lleguen del sistema central de la empresa, se cambia **aca** y ninguna pantalla se toca.
- *
- * Tambien deja el calculo del caso donde corresponde: los porcentajes y el transito estimado los
- * devuelven las vistas de la base, no se recalculan en Kotlin.
- */
 class FlujoRepository(context: Context) {
 
     private val db = FlujoDbHelper(context)
 
     companion object {
-        /** Minimo de registros validos para poder validar una sesion (Anexo 8). */
         const val MINIMO_REGISTROS = FlujoDbHelper.MINIMO_REGISTROS
     }
 
@@ -45,7 +34,6 @@ class FlujoRepository(context: Context) {
 
     fun companias(): List<Compania> = db.listarCompanias()
 
-    /** El dia con el que trabaja la app (la ultima fecha con ingresos cargados). */
     fun fechaHoy(): String = db.fechaHoy()
 
     fun fechaDeTrabajo(): String = db.fechaDeTrabajo()
@@ -56,7 +44,6 @@ class FlujoRepository(context: Context) {
 
     fun colaboradorPorId(id: Long): Colaborador? = db.buscarColaboradorPorId(id)
 
-    /** Cambia el nombre y el apellido. Devuelve true si la base acepto el cambio. */
     fun cambiarNombre(idUsuario: Long, nombres: String, apellidoPaterno: String): Boolean =
         db.cambiarNombre(idUsuario, nombres, apellidoPaterno) > 0
 
@@ -91,15 +78,11 @@ class FlujoRepository(context: Context) {
 
     fun cerrarSesion(idSesion: Long, hora: String): Int = db.cerrarSesionReal(idSesion, hora)
 
-    /**
-     * Validar o rechazar. No borra nada: guarda el estado, quien reviso y el motivo (RN-11).
-     */
     fun revisarSesion(idSesion: Long, estado: EstadoSesion, idRevisor: Long, motivo: String? = null): Int =
         db.revisarSesion(idSesion, estado, idRevisor, motivo)
 
     // ---- registros ----
 
-    /** Cuenta a una persona. Sin texto libre: todo son catalogos, para registrar en menos de 3 s. */
     fun registrar(
         idSesion: Long,
         clasificacion: Clasificacion,
@@ -115,18 +98,14 @@ class FlujoRepository(context: Context) {
     fun ultimosRegistros(idSesion: Long, limite: Int = 8): List<Registro> =
         db.ultimosRegistros(idSesion, limite)
 
-    // ---- indicadores (los calcula la base, en sus vistas) ----
-
     fun indicadoresDeFecha(fecha: String): IndicadoresDia? = db.indicadoresDeFecha(fecha)
 
-    /** El consolidado de los dias habiles o de los fines de semana, de todo o de una semana. */
     fun indicadoresDeTipoDia(tipo: String, desde: String? = null, hasta: String? = null): IndicadoresDia? =
         db.indicadoresDeTipoDia(tipo, desde, hasta)
 
     fun transitoPorAccesoDeTipo(tipo: String, desde: String? = null, hasta: String? = null): List<TransitoPorAcceso> =
         db.transitoPorAccesoDeTipo(tipo, desde, hasta)
 
-    /** Las semanas con dias cargados: el filtro de arriba de los indicadores. */
     fun semanasConDatos(): List<Pair<String, String>> = db.semanasConDatos()
 
 
@@ -147,7 +126,6 @@ class FlujoRepository(context: Context) {
 
     fun contarTodosLosEventos(): Int = db.contarTodosLosEventos()
 
-    // Seguridad de la clave: catalogo de preguntas y respuestas (recuperar sin correo)
     fun preguntas(): List<PreguntaSeguridad> = db.listarPreguntas()
     fun preguntasDe(idUsuario: Long): List<PreguntaSeguridad> = db.listarPreguntasDe(idUsuario)
     fun tienePreguntas(idUsuario: Long): Boolean = db.tienePreguntas(idUsuario)
@@ -157,7 +135,6 @@ class FlujoRepository(context: Context) {
         db.verificarRespuestas(idUsuario, rut, respuestas)
     fun cambiarClave(idUsuario: Long, nuevoHash: String): Boolean = db.cambiarClave(idUsuario, nuevoHash)
 
-    /** La foto de perfil de esa persona, ya recortada y reducida, o null si no tiene. */
     fun fotoDe(idUsuario: Long): ByteArray? = db.fotoDe(idUsuario)
 
     fun guardarFoto(idUsuario: Long, foto: ByteArray?): Boolean = db.guardarFoto(idUsuario, foto)

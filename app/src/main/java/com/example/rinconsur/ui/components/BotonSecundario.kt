@@ -16,7 +16,6 @@ import com.example.rinconsur.ui.styles.EstilosBoton
 import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.RinconSurTheme
 
-/** Boton de accion secundaria: contorno, mismo alto que el principal. */
 @Composable
 fun BotonSecundario(
     texto: String,

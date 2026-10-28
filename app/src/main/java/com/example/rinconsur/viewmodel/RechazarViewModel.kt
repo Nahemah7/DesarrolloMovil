@@ -14,13 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-/**
- * Rechazo de una sesion: el supervisor elige los motivos en casillas y, si elige "Otro motivo",
- * tiene que escribir cual (la casilla de texto se activa sola). La validacion vive aca.
- *
- * El rechazo no borra nada: la sesion queda rechazada con quien la reviso, cuando y por que, y sus
- * registros se conservan para volver a contar ese bloque.
- */
 class RechazarViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = FlujoRepository(application)
@@ -31,7 +24,6 @@ class RechazarViewModel(application: Application) : AndroidViewModel(application
 
     fun cargar(idSesion: Long) {
         if (idSesion <= 0L || _uiState.value.codigo.isNotEmpty()) return
-        // Por id y sin importar la fecha: la sesion que se rechaza puede ser de dias anteriores
         val sesion = repositorio.sesion(idSesion) ?: return
         val acceso = repositorio.accesos().firstOrNull { it.id == sesion.idAcceso }
         _uiState.value = RechazarUiState(
@@ -50,7 +42,6 @@ class RechazarViewModel(application: Application) : AndroidViewModel(application
             it.copy(
                 motivos = nuevos,
                 errorMotivos = null,
-                // Si saca "Otro motivo", se borra el texto: no tiene sentido pedirlo
                 otroMotivo = if (nuevos.contains(MotivoRechazo.OTRO)) it.otroMotivo else "",
                 errorOtro = null
             )
@@ -61,16 +52,12 @@ class RechazarViewModel(application: Application) : AndroidViewModel(application
         _uiState.update { it.copy(otroMotivo = texto, errorOtro = null) }
     }
 
-    /** Valida por campo y guarda el rechazo. */
     fun rechazar(idSesion: Long, idRevisor: Long): Boolean {
         val estado = _uiState.value
         val errorMotivos = if (estado.motivos.isEmpty()) "Elige al menos un motivo" else null
 
-        // Lo que se guarda: las etiquetas elegidas, y el detalle si es "otro"
         val motivo = textoDeRechazo(estado.motivos, estado.otroMotivo)
 
-        // El detalle sigue la misma regla que los demas textos libres. Ademas, las etiquetas marcadas
-        // ocupan lugar en el texto final, y ese texto completo es el que tiene que caber en 200.
         val errorOtro = if (!estado.exigeOtro) null else
             mensajeDeTextoLibre(estado.otroMotivo, "Cuenta el motivo")
                 ?: if (motivo.length > TEXTO_MAXIMO)

@@ -21,13 +21,6 @@ import com.example.rinconsur.ui.theme.Apagado
 import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.RinconSurTheme
 
-/**
- * Campo de texto con etiqueta y mensaje de error debajo.
- *
- * [etiquetaArriba] pone la etiqueta encima de la caja en vez de flotando sobre su borde. Dentro de un
- * dialogo la etiqueta flotante queda encima del texto escrito (se manchan las dos lineas), asi que ahi
- * se usa la etiqueta arriba.
- */
 @Composable
 fun CampoTexto(
     valor: String,
@@ -81,7 +74,6 @@ fun CampoTexto(
     )
 }
 
-/** El campo en si: con etiqueta flotante, o sin ella cuando la etiqueta va arriba. */
 @Composable
 private fun CampoTextoBase(
     valor: String,

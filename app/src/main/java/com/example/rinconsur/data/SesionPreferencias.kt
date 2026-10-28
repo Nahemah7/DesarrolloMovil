@@ -3,11 +3,6 @@ package com.example.rinconsur.data
 import android.content.Context
 import androidx.core.content.edit
 
-/**
- * Quien esta usando el telefono queda guardado aca (SharedPreferences), no en la base:
- * es un dato del equipo, no de la tienda. Al cerrar sesion se borra, porque el
- * telefono se comparte entre turnos y nadie debe quedar adentro.
- */
 class SesionPreferencias(context: Context) {
 
     private val prefs = context.getSharedPreferences("sesion", Context.MODE_PRIVATE)

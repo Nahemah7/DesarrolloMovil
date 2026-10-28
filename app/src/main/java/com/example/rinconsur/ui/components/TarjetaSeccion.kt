@@ -22,7 +22,6 @@ import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.RinconSurTheme
 import com.example.rinconsur.ui.theme.Tinta
 
-/** Tarjeta con titulo y acento lateral opcionales: el contenedor de casi todo en esta app. */
 @Composable
 fun TarjetaSeccion(
     titulo: String? = null,
@@ -62,5 +61,3 @@ private fun TarjetaSeccionPreview() {
         TarjetaSeccion(titulo = "Proporcion de transito") { Text("61 de 113 = 54,0 %") }
     }
 }
-
-/** Franja de color a la izquierda de la tarjeta: marca la tarjeta importante sin gritar. */

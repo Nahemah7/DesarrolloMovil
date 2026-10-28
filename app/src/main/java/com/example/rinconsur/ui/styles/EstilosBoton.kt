@@ -16,7 +16,6 @@ import com.example.rinconsur.ui.theme.Burdeo
 import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.GrisDeshabilitado
 
-/** Forma y colores de los botones, en un solo lugar. */
 object EstilosBoton {
     val forma: Shape = RoundedCornerShape(Dimens.radioBoton)
     val relleno = PaddingValues(horizontal = 18.dp, vertical = 10.dp)

@@ -45,7 +45,6 @@ import kotlinx.coroutines.delay
 private fun pct(v: Double?): String =
     if (v == null) "—" else String.format("%.1f", v).replace('.', ',') + " %"
 
-/** Cierre de la sesion: el resumen que el observador manda a validacion. */
 @Composable
 fun PantallaCierre(onEnviar: () -> Unit, onIrA: (String) -> Unit) {
     val vm: CierreViewModel = viewModel()
@@ -54,7 +53,6 @@ fun PantallaCierre(onEnviar: () -> Unit, onIrA: (String) -> Unit) {
     val aviso by vm.aviso.collectAsStateWithLifecycle()
     val yaEnviada by vm.yaEnviada.collectAsStateWithLifecycle()
 
-    // Al volver a esta pantalla se relee la sesion: pudo enviarse desde otra pestaña.
     val ciclo = LocalLifecycleOwner.current
     DisposableEffect(ciclo) {
         val observador = LifecycleEventObserver { _, evento ->
@@ -64,7 +62,6 @@ fun PantallaCierre(onEnviar: () -> Unit, onIrA: (String) -> Unit) {
         onDispose { ciclo.lifecycle.removeObserver(observador) }
     }
 
-    // El aviso se borra solo: es una guarda, no un estado de la pantalla.
     LaunchedEffect(aviso) {
         if (aviso != null) { delay(3000); vm.limpiarAviso() }
     }
@@ -75,7 +72,6 @@ fun PantallaCierre(onEnviar: () -> Unit, onIrA: (String) -> Unit) {
         Box(Modifier.fillMaxSize()) {
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             if (codigo.isEmpty()) {
-                // Sin sesion en curso no hay nada que cerrar: antes se colaba la sesion sembrada
                 TarjetaSeccion {
                     Text("No tienes una sesión de conteo en curso.",
                         style = MaterialTheme.typography.bodyMedium, color = Tinta)
@@ -103,7 +99,6 @@ fun PantallaCierre(onEnviar: () -> Unit, onIrA: (String) -> Unit) {
                         style = MaterialTheme.typography.bodySmall, color = Apagado)
                 }
                 if (yaEnviada) {
-                    // Enviada: no se ofrece el boton otra vez ni se puede seguir tocando la sesion.
                     TarjetaSeccion {
                         Text("Esta sesión ya fue enviada a validación.",
                             style = MaterialTheme.typography.labelMedium, color = Tinta)
@@ -122,8 +117,6 @@ fun PantallaCierre(onEnviar: () -> Unit, onIrA: (String) -> Unit) {
                 Spacer(Modifier.height(20.dp))
             }
         }
-        // La guarda (por que no se puede enviar) va flotante al centro, como en registro: abajo se
-        // pierde cuando el resumen es largo, y es justo lo que hay que leer.
         MensajeFlotante(aviso)
         }
     }

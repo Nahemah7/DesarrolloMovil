@@ -17,14 +17,12 @@ import com.example.rinconsur.ui.theme.Apagado
 import com.example.rinconsur.ui.theme.Burdeo
 import com.example.rinconsur.ui.theme.RinconSurTheme
 
-/** Cabecera de las pantallas: titulo, quien esta adentro y su etiqueta de perfil. */
 @Composable
 fun BarraApp(
     titulo: String,
     subtitulo: String,
     etiqueta: String? = null,
     colorEtiqueta: Color = Burdeo,
-    /** Accion opcional a la derecha de la cabecera. Va arriba para no quedar bajo los botones del sistema. */
     accion: (@Composable () -> Unit)? = null
 ) {
     Row(

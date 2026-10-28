@@ -40,21 +40,14 @@ import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.RechazarViewModel
 import com.example.rinconsur.data.TEXTO_MAXIMO
 
-/**
- * Rechazar una sesión (supervisor). Se marcan uno o más motivos en casillas; si se marca
- * "Otro motivo" aparece una caja de texto que hay que llenar. Los errores se muestran junto
- * al campo que los causó (validación por campo) y la validación vive en el ViewModel.
- */
 @Composable
 fun PantallaRechazar(idSesion: Long, onVolver: () -> Unit) {
     val vm: RechazarViewModel = viewModel()
     val estado by vm.uiState.collectAsStateWithLifecycle()
 
-    // Quién revisa: la persona que tiene la sesión iniciada en el teléfono
     val contexto = LocalContext.current
     val idRevisor = remember { SesionPreferencias(contexto).leer() }
 
-    // Al abrir la pantalla se cargan los datos de la sesión que se va a rechazar
     LaunchedEffect(idSesion) { vm.cargar(idSesion) }
 
     Scaffold(
@@ -66,7 +59,6 @@ fun PantallaRechazar(idSesion: Long, onVolver: () -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
         ) {
-            // ---- Datos de la sesión ----
             Seccion("Sesión")
             TarjetaSeccion {
                 Text(estado.acceso, style = MaterialTheme.typography.bodyMedium, color = Tinta)
@@ -79,7 +71,6 @@ fun PantallaRechazar(idSesion: Long, onVolver: () -> Unit) {
                 Nota(estado.registros.toString() + " registros · tránsito " + pct)
             }
 
-            // ---- Motivos (casillas) ----
             Seccion("Motivo del rechazo")
             TarjetaSeccion {
                 vm.motivos.forEach { motivo ->
@@ -96,13 +87,11 @@ fun PantallaRechazar(idSesion: Long, onVolver: () -> Unit) {
                         Text(motivo.etiqueta, style = MaterialTheme.typography.bodyMedium, color = Tinta)
                     }
                 }
-                // Error del grupo de casillas (null = no se muestra nada)
                 estado.errorMotivos?.let {
                     Text(it, style = MaterialTheme.typography.bodySmall, color = Aviso)
                 }
             }
 
-            // ---- "Otro motivo": la caja de texto solo existe si se marcó esa casilla ----
             if (estado.exigeOtro) {
                 Spacer(Modifier.height(8.dp))
                 CampoTexto(

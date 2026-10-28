@@ -78,10 +78,6 @@ import com.example.rinconsur.data.Vibracion
 import com.example.rinconsur.viewmodel.RegistroViewModel
 import kotlinx.coroutines.delay
 
-/**
- * Nombre del tramo, como lo dice el observador al mirar a la persona. Es la decision del grupo:
- * el boton muestra este nombre grande y el rango en letra chica debajo.
- */
 private fun nombreDe(rango: RangoEtario): String = when (rango) {
     RangoEtario.MENOR_18 -> "Niño/a"
     RangoEtario.DE_18_A_25 -> "Joven"
@@ -90,7 +86,6 @@ private fun nombreDe(rango: RangoEtario): String = when (rango) {
     RangoEtario.DE_61_O_MAS -> "Tercera edad"
 }
 
-/** Color de cada tramo, para que el boton sea reconocible sin leerlo. */
 private fun colorDe(rango: RangoEtario): Color = when (rango) {
     RangoEtario.MENOR_18 -> EtiquetaNino
     RangoEtario.DE_18_A_25 -> EtiquetaJoven
@@ -99,11 +94,6 @@ private fun colorDe(rango: RangoEtario): Color = when (rango) {
     RangoEtario.DE_61_O_MAS -> EtiquetaTerceraEdad
 }
 
-/**
- * Boton de rango etario. Cuando esta elegido se rellena, se pone en blanco y lleva una marca:
- * asi se ve cual quedo registrado sin depender del color (RNF-07) y sin tener que leer.
- */
-/** Numero de plantilla: un toque la aplica, mantenerlo apretado abre su hoja para editarla. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BotonPlantilla(numero: Int, tiene: Boolean, alTocar: () -> Unit, alMantener: () -> Unit) {
@@ -122,9 +112,6 @@ private fun BotonPlantilla(numero: Int, tiene: Boolean, alTocar: () -> Unit, alM
 
 @Composable
 private fun RowScope.BotonRango(nombre: String, rango: String, color: Color, elegido: Boolean, onClick: () -> Unit) {
-    // El color del tramo es una RESPUESTA, no decoracion: sin elegir solo queda un punto que lo
-    // identifica; el relleno pleno aparece al elegir. Antes los seis iban tintados a la vez y la
-    // pantalla tenia ocho matices compitiendo con las cifras.
     Box(
         Modifier
             .weight(1f)
@@ -136,8 +123,6 @@ private fun RowScope.BotonRango(nombre: String, rango: String, color: Color, ele
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            // El punto reserva su espacio tambien al estar elegido: asi el texto queda centrado en
-            // las dos cajas y el boton no se ve corrido al crecer.
             Box(
                 Modifier.size(7.dp).clip(RoundedCornerShape(99.dp))
                     .background(if (elegido) Color.Transparent else color)
@@ -162,7 +147,6 @@ private fun RowScope.BotonRango(nombre: String, rango: String, color: Color, ele
     }
 }
 
-/** Superficie de la propuesta: blanca sobre el fondo hueso, sin borde. */
 @Composable
 private fun Bloque(modifier: Modifier = Modifier, contenido: @Composable ColumnScope.() -> Unit) {
     Column(
@@ -176,7 +160,6 @@ private fun Bloque(modifier: Modifier = Modifier, contenido: @Composable ColumnS
     )
 }
 
-/** Registrar un acceso: todo de un toque, de pie y sin escribir (RNF-01). */
 @Composable
 fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (String) -> Unit) {
     val vm: RegistroViewModel = viewModel()
@@ -187,7 +170,6 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
     var aAnular by remember { mutableStateOf<Long?>(null) }
 
 
-    // Anular deja rastro: no se borra, deja de contarse y queda quien lo hizo (RN-11).
     aAnular?.let { id ->
         AlertDialog(
             onDismissRequest = { aAnular = null },
@@ -203,11 +185,8 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
         )
     }
 
-    // Las plantillas pueden haber cambiado si se edito una hoja y se volvio
     LaunchedEffect(Unit) { vm.recargarPlantillas() }
 
-    // Al volver a la pantalla se relee la sesion: pudo iniciarse o enviarse mientras no estaba, y
-    // sin esto se seguia contando sobre la sesion ya enviada.
     val ciclo = LocalLifecycleOwner.current
     DisposableEffect(ciclo) {
         val observador = LifecycleEventObserver { _, evento ->
@@ -217,7 +196,6 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
         onDispose { ciclo.lifecycle.removeObserver(observador) }
     }
 
-    // El aviso se borra solo para no tapar la cuenta mientras se registra.
     LaunchedEffect(estado.mensaje) {
         if (estado.mensaje != null) { delay(2500); vm.limpiarMensaje() }
     }
@@ -225,8 +203,6 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
     Scaffold(
         containerColor = Hueso,
         bottomBar = {
-            // Alto y angosto, al alcance del pulgar. Con navigationBarsPadding para no quedar debajo
-            // de los botones del sistema, que es lo que lo hacia inusable.
             Column(
                 Modifier
                     .background(Color.White)
@@ -237,7 +213,6 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
             }
         }
     ) { pad ->
-        // El aviso flotante necesita un contenedor encima del formulario
         Box(Modifier.fillMaxSize()) {
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             if (estado.sinSesionEnCurso) {
@@ -251,7 +226,6 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
                 BotonPrincipal("Ir a Mi sesión", onClick = { onIrA("Mis sesiones") })
                 Spacer(Modifier.height(16.dp))
             }
-            // Los datos son el fuerte: la cifra manda y el resto se subordina
             Bloque {
                 val pct = estado.resumen.pctTransito?.let {
                     String.format("%.1f", it).replace('.', ',') + " %"
@@ -279,8 +253,6 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
                     Text(pct + " · " + estado.resumen.transito + " en tránsito",
                         style = MaterialTheme.typography.labelSmall, color = Burdeo)
                 }
-                // La sesion en curso y su envio viven aca, junto al dato que los justifica:
-                // la barra de arriba quedo solo para navegar.
                 if (!estado.sinSesionEnCurso) {
                     Spacer(Modifier.height(10.dp))
                     Row(
@@ -349,8 +321,6 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
                 Seccion("Hacia dónde se dirige")
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     estado.accesos.forEach { a ->
-                        // Etiqueta corta: los nombres completos no caben y el ultimo acceso quedaba
-                        // fuera de la pantalla, sin poder marcarlo.
                         Filtro(a.codigo, estado.destino == a.id) { vm.onDestino(a.id) }
                     }
                 }
@@ -387,7 +357,6 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
                 }
             }
 
-            // La cifra de arriba ya dice el total y la proporcion: aca solo va lo que aporta algo
             if (estado.resumen.sePuedeValidar) {
                 Nota("La sesión ya se puede validar.")
             } else {
@@ -395,7 +364,6 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
             }
             Spacer(Modifier.height(20.dp))
         }
-            // Encima de todo y al medio: no se va con el scroll del formulario
             MensajeFlotante(estado.mensaje)
         }
     }

@@ -38,18 +38,6 @@ import com.example.rinconsur.viewmodel.EncabezadoViewModel
 import com.example.rinconsur.viewmodel.LoginViewModel
 import com.example.rinconsur.ui.screens.PantallaIndicadores
 
-/**
- * Navegacion de la app. El perfil que entra decide el recorrido: el observador registra y cierra su
- * sesion de conteo; el supervisor programa, valida y mira los indicadores.
- *
- * La barra de arriba (titulo, volver y menu del perfil) la dibuja este contenedor y no cada pantalla:
- * asi es la misma en todas y no puede perderse al cambiar de pantalla. La entrada (login y
- * recuperacion) es la excepcion: ahi todavia no hay perfil ni menu que mostrar.
- *
- * Transicion: al cambiar de pantalla entra desde la derecha y se va hacia la izquierda (y al volver,
- * al reves). 250 ms: se ve de donde viene cada pantalla en vez de un corte seco, y no alcanza a
- * esperar.
- */
 @Composable
 fun AppNavegacion() {
     val navController = rememberNavController()
@@ -63,8 +51,6 @@ fun AppNavegacion() {
     val titulo by encabezado.titulo.collectAsStateWithLifecycle()
     val subtitulo by encabezado.subtitulo.collectAsStateWithLifecycle()
 
-    // El encabezado se relee al entrar a cada pantalla: sale de los datos, no de la pantalla. Los
-    // valores que viajan en la ruta (la plantilla, la sesion del rechazo) llegan como argumentos.
     LaunchedEffect(rutaActual, entrada?.arguments) {
         encabezado.actualizar(
             ruta = rutaActual,
@@ -73,16 +59,12 @@ fun AppNavegacion() {
         )
     }
 
-    // En las pantallas que son destino de un icono no hay flecha: el menu es la forma de moverse.
-    // En los pasos que cuelgan de ellas, la flecha vuelve al paso anterior.
     val volver: (() -> Unit)? = if (esRaiz(rutaActual)) null else ({ navController.navigateUp() })
 
-    // Sin perfil adentro (login) la barra de la app no se muestra.
     val conBarra = rutaActual != Ruta.Login.ruta
 
     Scaffold(
         containerColor = Hueso,
-        // La barra de estado la respeta la barra de arriba; el contenido no vuelve a reservarla.
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             if (conBarra) {
@@ -91,8 +73,6 @@ fun AppNavegacion() {
                     subtitulo = subtitulo,
                     opciones = menuDe(perfil),
                     rutaActual = rutaActual,
-                    // Tocar un icono lleva a su pantalla: si ya estaba en la pila se vuelve a ella en
-                    // vez de apilar otra copia, y asi el paso que colgaba queda cerrado.
                     onIr = { destino ->
                         if (!navController.popBackStack(destino, inclusive = false)) {
                             navController.navigate(destino) { launchSingleTop = true }
@@ -136,7 +116,6 @@ fun AppNavegacion() {
             composable(Ruta.Login.ruta) {
                 PantallaLogin(
                     onEntrar = { perfil ->
-                        // El observador cuenta; el supervisor programa la sesion y despues la revisa.
                         val destino =
                             if (perfil == PerfilUsuario.OBSERVADOR) Ruta.MiSesion.ruta else Ruta.Sesiones.ruta
                         navController.navigate(destino) { popUpTo(Ruta.Login.ruta) { inclusive = true } }
@@ -171,11 +150,8 @@ fun AppNavegacion() {
                 )
             }
 
-            // Estado de la red y sesiones por enviar: se llega despues de cerrar una sesion
             composable(Ruta.SinSenal.ruta) {
                 PantallaSinSenal(
-                    // La sesion ya se envio: se cierra su flujo (registro y cierre) para que no se
-                    // pueda volver a una pantalla que quedo apuntando a la sesion enviada.
                     onVolver = {
                         navController.navigate(Ruta.MiSesion.ruta) {
                             popUpTo(Ruta.MiSesion.ruta) { inclusive = true }
@@ -214,7 +190,6 @@ fun AppNavegacion() {
                         loginViewModel.cerrarSesion()
                         navController.navigate(Ruta.Login.ruta) { popUpTo(0) }
                     },
-                    // El nombre es un dato vivo: al guardarlo se relee el encabezado de la barra.
                     onDatosCambiados = { encabezado.actualizar(rutaActual) }
                 )
             }
@@ -222,7 +197,6 @@ fun AppNavegacion() {
     }
 }
 
-/** La pestana de abajo se traduce a su ruta. Las del supervisor llegan con sus pantallas. */
 private fun NavHostController.navegar(pestana: String) {
     val destino = when (pestana) {
         "Registrar" -> Ruta.Registro.ruta

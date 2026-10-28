@@ -13,7 +13,6 @@ import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.RinconSurTheme
 import com.example.rinconsur.ui.theme.Tinta
 
-/** Numero grande con su etiqueta debajo: los indicadores de las tarjetas. */
 @Composable
 fun TarjetaEstadistica(
     valor: String,

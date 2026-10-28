@@ -1,6 +1,5 @@
 package com.example.rinconsur.model
 
-/** Una sesion de observacion programada en un acceso (Anexo 9.4). */
 data class SesionResumen(
     val id: Long,
     val codigo: String,
@@ -16,7 +15,6 @@ data class SesionResumen(
     val idRevisor: Long? = null,
     val fechaRevision: String? = null,
     val motivoRechazo: String? = null,
-    // Datos que solo tienen sentido mirando la sesion completa (los llena la vista SQL)
     val nombreObservador: String = "",
     val registrosValidos: Int = 0,
     val transito: Int = 0,

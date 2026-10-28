@@ -25,7 +25,6 @@ private val EsquemaClaro = lightColorScheme(
     onError = Color.White
 )
 
-/** Tema de la app. Un solo esquema claro: se usa de pie y con luz de tienda. */
 @Composable
 fun RinconSurTheme(contenido: @Composable () -> Unit) {
     MaterialTheme(colorScheme = EsquemaClaro, typography = TipografiaRinconSur, content = contenido)

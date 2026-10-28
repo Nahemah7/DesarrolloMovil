@@ -10,10 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-/**
- * Programar una sesion de conteo. Quien programa es el colaborador que tiene la sesion abierta,
- * no un dato de la pantalla.
- */
 class ProgramarViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = FlujoRepository(application)
@@ -48,15 +44,12 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
         it.copy(horaFin = hora, error = null, programada = "", codigo = "")
     }
 
-    /** Las horas que se pueden elegir, de 10 en 10 dentro del horario de la tienda. */
     val horas: List<String> = (10 * 60..20 * 60 step 10).map { "%02d:%02d".format(it / 60, it % 60) }
 
-    /** El aviso flotante se borra solo: no queda tapando el formulario. */
     fun limpiarError() {
         _uiState.update { it.copy(error = null) }
     }
 
-    /** Devuelve true si quedo programada. Si no, deja el motivo en el estado. */
     fun programar(): Boolean {
         val e = _uiState.value
         val problema = when {
@@ -79,9 +72,6 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
                 codigo = codigo,
                 programada = nombreDe(e, idObservador),
                 sesionesDeLaFecha = repositorio.sesionesDeFecha(e.fecha),
-                // El acceso y el observador se limpian para que la sesion recien creada no aparezca
-                // como choque de si misma. La hora se queda donde quedo la programacion: volver a
-                // 13:00 obligaba a recorrerla de nuevo en cada sesion.
                 idAcceso = null,
                 idObservador = null
             )

@@ -16,12 +16,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.rinconsur.ui.theme.Tinta
 
-/**
- * Aviso flotante al medio de la pantalla.
- *
- * Va encima del contenido y no dentro del formulario: si el aviso vive en la lista, al bajar la
- * pantalla queda fuera de vista justo cuando hace falta leerlo.
- */
 @Composable
 fun BoxScope.MensajeFlotante(texto: String?) {
     texto ?: return

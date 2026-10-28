@@ -14,11 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-/**
- * Inicio de sesion. En este prototipo no hay clave real: se valida el RUT contra la
- * base (los siete colaboradores del Anexo 9.2) y se recuerda quien entro. Cuando exista
- * la API, este es el unico lugar que cambia: la pantalla no se toca.
- */
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = FlujoRepository(application)
@@ -30,7 +25,6 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val _usuario = MutableStateFlow<Colaborador?>(null)
     val usuario: StateFlow<Colaborador?> = _usuario.asStateFlow()
 
-    /** Si ya habia alguien adentro (el telefono no se cerro bien), se recupera. */
     init {
         val guardado = sesion.leer()
         if (guardado > 0) _usuario.value = repositorio.colaboradorPorId(guardado)
@@ -48,23 +42,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { it.copy(claveVisible = !it.claveVisible) }
     }
 
-    /**
-     * Valida y devuelve el rol que entro (o null si algo no cuadra).
-     *
-     * Dos niveles, a proposito distintos:
-     *  1. El RUT mal escrito (formato o digito verificador) es un error del numero que la persona
-     *     tipeo, se le dice claro y se le pide de nuevo. No revela nada del sistema: el digito
-     *     verificador se calcula con el propio RUT.
-     *  2. Todo lo que se compara con la base (el RUT no existe, la cuenta esta desactivada o la clave
-     *     no coincide) responde con **un solo mensaje generico**. Si la app dijera "ese RUT no esta
-     *     registrado", cualquiera podria probar RUTs y sacar la lista del personal; y si dijera
-     *     "la contraseña no coincide" confirmaria que el RUT existe y que solo falta la clave.
-     */
     fun entrar(): PerfilUsuario? {
         val rutEscrito = _uiState.value.rut
         val clave = _uiState.value.clave
 
-        // Nivel 1: el numero que se escribio
         if (Rut.validar(rutEscrito) != null) {
             _uiState.update {
                 it.copy(
@@ -82,7 +63,6 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             return null
         }
 
-        // Nivel 2: lo que se compara con la base (una sola respuesta, sin pistas)
         val encontrado = repositorio.colaboradorPorRut(Rut.formatear(rutEscrito))
             ?: repositorio.colaboradorPorRut(rutEscrito.trim())
         val claveCorrecta = encontrado != null &&

@@ -14,18 +14,12 @@ import com.example.rinconsur.ui.theme.BurdeoSuave
 import com.example.rinconsur.ui.theme.FondoSuave
 import com.example.rinconsur.ui.theme.Tinta
 
-/**
- * Navegacion inferior. Las opciones cambian segun el perfil que entro:
- * el observador ve sus dos pantallas, el supervisor las suyas.
- */
 @Composable
 fun NavInferior(
     opciones: List<String>,
     actual: String,
     onIr: (String) -> Unit
 ) {
-    // Sin altura fija: NavigationBar ya reserva el espacio de los botones del sistema. Fijarle
-    // 56dp hacia que el menu quedara debajo de ellos y no se pudiera tocar.
     NavigationBar(
         containerColor = FondoSuave,
         tonalElevation = 0.dp

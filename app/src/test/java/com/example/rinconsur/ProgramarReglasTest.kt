@@ -8,10 +8,6 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Reglas al programar una sesion de conteo: el horario dura entre 30 y 60 minutos y no se puede
- * pisar con otra sesion del mismo acceso ni de la misma persona.
- */
 class ProgramarReglasTest {
 
     private fun sesion(codigo: String, acceso: Long, inicio: String, fin: String, observador: Long) =

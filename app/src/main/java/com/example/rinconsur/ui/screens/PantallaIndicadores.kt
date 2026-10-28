@@ -47,20 +47,11 @@ import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.IndicadoresViewModel
 
-/**
- * Indicadores del dia, en tres bloques y en este orden: lo que ya medimos, lo que la tienda
- * registro y lo que todavia no se puede calcular.
- *
- * Regla: nada se promedia ni se rellena. Si falta medicion se dice "sin informacion" y se dice
- * cuantos bloques faltan. La conversion sin transito no se muestra hasta que el dia esta medido
- * completo: estimarla con datos parciales da un numero que no es el del dia.
- */
 @Composable
 fun PantallaIndicadores(onIrA: (String) -> Unit) {
     val vm: IndicadoresViewModel = viewModel()
     val state by vm.uiState.collectAsStateWithLifecycle()
 
-    // Al volver a la pantalla se relee: los indicadores cambian cuando se valida una sesion.
     val ciclo = LocalLifecycleOwner.current
     DisposableEffect(ciclo) {
         val observador = LifecycleEventObserver { _, evento ->
@@ -73,21 +64,16 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
     val ind = state.indicadores
     val porAcceso = state.porAcceso
     val esHoy = state.periodo == TipoPeriodo.HOY
-    /** Que se esta mirando, dicho con fechas: hoy, o la semana y el tipo de día elegidos. */
     val cabecera = if (esHoy) fechaCorta(state.fecha) + " · hoy"
         else {
             val dias = ind?.dias ?: 0
-            // La semana ya esta dicha en el navegador de arriba: aca va el tipo y cuantos dias entran.
             state.periodo.etiqueta + " · " + dias + (if (dias == 1) " día" else " días") +
                 (ind?.let { " (" + fechaCorta(it.desde) + " a " + fechaCorta(it.hasta) + ")" } ?: "")
         }
-    /** El alcance con el que se escriben las notas: un dia o varios. */
     val alcance = if (esHoy) "del día" else "del período"
 
     val maxIngresosAcceso = porAcceso.maxOfOrNull { it.ingresos }?.takeIf { it > 0 } ?: 1
 
-    // La barra la dibuja el contenedor: esta pantalla no arma su propio encabezado ni un menu
-    // inferior, que era lo que la dejaba con dos cabeceras y con los iconos duplicados abajo.
     Scaffold(containerColor = Hueso) { pad ->
         Column(
             modifier = Modifier
@@ -95,8 +81,6 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
         ) {
-            // Arriba la semana, con un boton a cada lado: la lista de semanas crece y una fila de
-            // chips por semana deja de caber. La posicion de mas a la derecha es "todas".
             if (!esHoy && state.semanas.isNotEmpty()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -127,7 +111,6 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                 }
             }
 
-            // Abajo el tipo de dia: dentro de la semana elegida, habiles y fin de semana se separan.
             FilaFiltros(
                 opciones = TipoPeriodo.entries.map { it.etiqueta },
                 elegido = state.periodo.etiqueta
@@ -139,7 +122,6 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
             if (ind == null) {
                 Nota(cabecera)
 
-                // Lo unico que hoy se puede mostrar: lo que llevamos medido.
                 val sesiones = state.sesionesHoy
                 val validadas = sesiones.count { it.estado == EstadoSesion.VALIDADA }
                 val programadas = sesiones.count { it.estado == EstadoSesion.PROGRAMADA }
@@ -193,7 +175,6 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
             } else {
                 Nota(cabecera + " · datos de la tienda")
 
-                // ---- 1) Lo que llevamos medido: el avance, con su barra animada ----
                 val totalBloques = ind.bloquesMedidos + ind.bloquesEstimados + ind.bloquesSinInformacion
                 val pctMedido = if (totalBloques > 0) 100f * ind.bloquesMedidos / totalBloques else 0f
 
@@ -215,7 +196,6 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                     )
                 }
 
-                // ---- 2) Lo que la tienda registró: llega completo, no depende de la medición ----
                 Seccion("Lo que la tienda registró")
                 TarjetaSeccion {
                     TarjetaEstadistica(
@@ -241,7 +221,6 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                     Nota("Estos datos vienen del conteo de la tienda: están completos y no dependen de lo que medimos.")
                 }
 
-                // ---- 3) El tránsito: solo lo medido, y dicho como parcial ----
                 Seccion("Tránsito medido")
                 TarjetaSeccion {
                     if (ind.bloquesMedidos == 0) {
@@ -271,7 +250,6 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                     }
                 }
 
-                // ---- 4) Lo que no se puede calcular todavía, dicho tal cual ----
                 Seccion("Conversión sin tránsito")
                 TarjetaSeccion {
                     val convST = ind.conversionSinTransito
@@ -304,13 +282,11 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
     }
 }
 
-/** 2026-10-26 -> 26-10-2026, como se lee en el resto de la app. */
 private fun fechaCorta(iso: String): String {
     val partes = iso.split("-")
     return if (partes.size == 3) partes[2] + "-" + partes[1] + "-" + partes[0] else iso
 }
 
-/** El número sube hasta su valor al abrir la pantalla: así se ve que el dato se está leyendo. */
 @Composable
 private fun numeroAnimado(valor: Int): String {
     val animado by animateIntAsState(

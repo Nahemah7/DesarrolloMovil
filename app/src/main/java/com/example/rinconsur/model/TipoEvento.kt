@@ -1,6 +1,5 @@
 package com.example.rinconsur.model
 
-/** Tipos de evento del dia (catalogo `tipo_evento`, Anexo 9.6). */
 enum class TipoEvento(val etiqueta: String, val idTipo: Long) {
     CLIMA("Clima", 1),
     FERIADO("Feriado", 2),

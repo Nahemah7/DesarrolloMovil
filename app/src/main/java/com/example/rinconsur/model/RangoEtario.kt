@@ -1,9 +1,5 @@
 package com.example.rinconsur.model
 
-/**
- * Tramo etario estimado por apariencia: nunca se le pregunta la edad a la persona (RN-07).
- * Los cinco tramos son obligatorios para el caso.
- */
 enum class RangoEtario(val etiqueta: String, val idRango: Long) {
     MENOR_18("Menor de 18 años", 1),
     DE_18_A_25("De 18 a 25 años", 2),

@@ -72,11 +72,6 @@ import com.example.rinconsur.ui.theme.Ok
 import com.example.rinconsur.viewmodel.PerfilViewModel
 import java.io.File
 
-/**
- * Perfil de quien esta usando el telefono: sus datos —el nombre y el apellido son lo unico
- * editable, el RUT identifica la cuenta—, la foto y la seguridad de la cuenta (cambiar la clave y
- * elegir la pregunta con la que la recupera).
- */
 @Composable
 fun PantallaPerfil(onSalir: () -> Unit, onDatosCambiados: () -> Unit = {}) {
     val vm: PerfilViewModel = viewModel()
@@ -84,7 +79,6 @@ fun PantallaPerfil(onSalir: () -> Unit, onDatosCambiados: () -> Unit = {}) {
     val contexto = LocalContext.current
     var cambiandoNombre by remember { mutableStateOf(false) }
 
-    // La camara: primero el permiso y despues el disparo. La foto vuelve ya recortada y reducida.
     val tomarFoto = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { salioBien: Boolean ->
@@ -108,7 +102,6 @@ fun PantallaPerfil(onSalir: () -> Unit, onDatosCambiados: () -> Unit = {}) {
         Column(
             Modifier
                 .padding(pad)
-                // Sin esto el boton "Cambiar la clave" queda debajo del teclado y el toque no llega
                 .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
@@ -211,7 +204,6 @@ fun PantallaPerfil(onSalir: () -> Unit, onDatosCambiados: () -> Unit = {}) {
         }
     }
 
-    // El nombre se cambia como accion y no con un campo siempre abierto: asi no se edita sin querer.
     if (cambiandoNombre) {
         AlertDialog(
             onDismissRequest = {
@@ -256,10 +248,6 @@ fun PantallaPerfil(onSalir: () -> Unit, onDatosCambiados: () -> Unit = {}) {
     }
 }
 
-/**
- * Avatar del perfil: la foto si la tiene, y si no las iniciales. Es el reconocimiento visual de
- * quien esta usando el telefono, no un dato del conteo.
- */
 @Composable
 private fun Avatar(nombre: String, foto: ByteArray?) {
     val iniciales = nombre.split(" ").filter { it.isNotBlank() }.take(2)
@@ -285,7 +273,6 @@ private fun Avatar(nombre: String, foto: ByteArray?) {
     }
 }
 
-/** Pide el permiso si falta y abre la camara; devuelve la foto ya recortada y reducida. */
 private fun pedirFoto(
     permiso: ManagedActivityResultLauncher<String, Boolean>,
     camara: ManagedActivityResultLauncher<Uri, Boolean>,

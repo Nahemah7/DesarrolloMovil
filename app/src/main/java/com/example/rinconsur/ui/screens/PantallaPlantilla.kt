@@ -51,10 +51,6 @@ import com.example.rinconsur.ui.theme.Peligro
 import com.example.rinconsur.ui.theme.Ok
 import com.example.rinconsur.viewmodel.PlantillaViewModel
 
-/**
- * La hoja de una plantilla de prerellenado: aca se ajustan sus valores y se guardan. Es el editor
- * al que se entra manteniendo apretado el numero en la pantalla de registro.
- */
 @Composable
 fun PantallaPlantilla(numero: Int, onVolver: () -> Unit) {
     val vm: PlantillaViewModel = viewModel()
@@ -109,13 +105,11 @@ fun PantallaPlantilla(numero: Int, onVolver: () -> Unit) {
             }
 
             Spacer(Modifier.height(18.dp))
-            // Guardar y borrar juntos y centrados: separados y a lo ancho no se entendian como par
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Los dos con el mismo ancho, el mismo alto y la misma forma: son un par, no dos cajas distintas
                 BotonPrincipal("Guardar", onClick = { vm.guardar() }, modifier = Modifier.width(140.dp))
                 if (estado.tenia) {
                     Spacer(Modifier.width(12.dp))

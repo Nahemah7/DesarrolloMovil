@@ -66,21 +66,14 @@ import java.io.File
 
 private const val LADO_FOTO_EVENTO = 512
 
-/**
- * Registrar un evento del día (clima, feriado, cierre de un acceso...), con foto de evidencia
- * opcional. Recursos nativos: la cámara (con su permiso) y, si no hay permiso, la galería.
- * La validación vive en el EventoViewModel: aquí solo se muestra el error de cada campo.
- */
 @Composable
 fun PantallaEvento(onVolver: () -> Unit) {
     val vm: EventoViewModel = viewModel()
     val estado by vm.uiState.collectAsStateWithLifecycle()
     val contexto = LocalContext.current
 
-    // Evento que se esta anulando: el dialogo pide el motivo y el evento no se borra.
     var eventoAAnular by remember { mutableStateOf<EventoDia?>(null) }
 
-    // Cámara: primero el permiso y después el disparo. La foto se reduce antes de guardarla.
     val tomarFoto = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { salioBien: Boolean ->
@@ -96,7 +89,6 @@ fun PantallaEvento(onVolver: () -> Unit) {
     ) { concedido: Boolean ->
         if (!concedido) vm.onPermisoDenegado()
     }
-    // Galería: alternativa cuando no hay permiso de cámara
     val galeria = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -116,7 +108,6 @@ fun PantallaEvento(onVolver: () -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
         ) {
-            // ---- Tipo ----
             Seccion("Tipo de evento")
             FilaFiltros(
                 opciones = vm.tipos.map { it.etiqueta },
@@ -125,7 +116,6 @@ fun PantallaEvento(onVolver: () -> Unit) {
                 vm.tipos.firstOrNull { it.etiqueta == etiqueta }?.let { vm.onTipo(it) }
             }
 
-            // ---- Acceso afectado (obligatorio si es cierre de acceso) ----
             Seccion("Acceso afectado")
             val codigoElegido = vm.accesos.firstOrNull { it.id == estado.idAcceso }?.codigo ?: "Todos"
             FilaFiltros(
@@ -138,7 +128,6 @@ fun PantallaEvento(onVolver: () -> Unit) {
                 Text(it, style = MaterialTheme.typography.bodySmall, color = Aviso)
             }
 
-            // ---- Fecha y descripción ----
             Seccion("Detalle")
             TarjetaSeccion {
                 CampoTexto(
@@ -160,7 +149,6 @@ fun PantallaEvento(onVolver: () -> Unit) {
                 )
             }
 
-            // ---- Foto de evidencia (opcional) ----
             Seccion("Foto de evidencia (opcional)")
             TarjetaSeccion {
                 val imagen = remember(estado.fotoBytes) {
@@ -208,7 +196,6 @@ fun PantallaEvento(onVolver: () -> Unit) {
                 }
             }
 
-            // Avisos con animación (Tarea #20): permiso denegado o "Evento E-08 guardado"
             AnimatedVisibility(
                 visible = estado.mensaje != null,
                 enter = fadeIn() + expandVertically(),
@@ -228,7 +215,6 @@ fun PantallaEvento(onVolver: () -> Unit) {
             )
             Spacer(Modifier.height(8.dp))
 
-            // ---- Lo registrado hoy: el evento no desaparece al guardarlo ----
             Spacer(Modifier.height(20.dp))
             Seccion("Eventos registrados · " + estado.eventos.size)
             if (estado.eventos.isEmpty()) {
@@ -264,7 +250,6 @@ fun PantallaEvento(onVolver: () -> Unit) {
                                 color = Tinta
                             )
 
-                            // Anulado manda; si no, la etiqueta dice si el evento ya paso o esta por venir
                             val etiqueta = when {
                                 evento.anulado -> "Anulado" to "aviso"
                                 evento.fechaFin < hoy -> "Finalizado" to "neutro"
@@ -277,7 +262,6 @@ fun PantallaEvento(onVolver: () -> Unit) {
                             }
                         }
 
-                        // La foto de evidencia, chica: se ve que esta sin abrir el evento
                         val miniatura = remember(evento.id, evento.anulado) {
                             evento.foto?.let { ConvertidorImagen.aBitmap(it) }
                         }
@@ -310,7 +294,6 @@ fun PantallaEvento(onVolver: () -> Unit) {
         }
     }
 
-    // Anular: pide el motivo; el evento queda en la lista con el motivo y su rastro.
     eventoAAnular?.let { evento ->
         var motivo by remember(evento.id) { mutableStateOf("") }
         var errorMotivo by remember(evento.id) { mutableStateOf<String?>(null) }
@@ -346,17 +329,14 @@ fun PantallaEvento(onVolver: () -> Unit) {
     }
 }
 
-/** La fecha de hoy como se guarda en la base: sirve para saber si el evento ya paso. */
 private fun hoyIso(): String =
     java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
 
-/** 2026-10-26 -> 26-10-2026: la fecha como se lee en el resto de la app. */
 private fun fechaCorta(iso: String): String {
     val partes = iso.split("-")
     return if (partes.size == 3) partes[2] + "-" + partes[1] + "-" + partes[0] else iso
 }
 
-/** Pide el permiso de cámara si falta; si ya lo hay, abre la cámara. */
 private fun pedirFotoEvento(
     permiso: ManagedActivityResultLauncher<String, Boolean>,
     camara: ManagedActivityResultLauncher<Uri, Boolean>,

@@ -12,12 +12,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Prueba de oro: los numeros del Anexo 9.
- *
- * La base se crea de cero antes de correr, asi el resultado no depende de lo que se haya hecho en
- * el emulador. Si alguno de estos numeros se mueve, la base dejo de reproducir el caso.
- */
 @RunWith(AndroidJUnit4::class)
 class PruebaDeOroTest {
 
@@ -58,8 +52,6 @@ class PruebaDeOroTest {
 
     @Test
     fun transitoEstimadoMedidoDelAnexo() {
-        // A4, 15-09, bloque de 13:00: 210 ingresos x 54,0 % = 113, y es medido porque hay sesion (RN-14).
-        // Se lee la vista tal como la lee la app: el calculo es de la base, no de Kotlin.
         db.readableDatabase.rawQuery(
             "SELECT transito_estimado, origen FROM v_transito_bloque " +
                 "WHERE fecha = ? AND acceso = 'A4' AND hora_inicio LIKE '13%'",

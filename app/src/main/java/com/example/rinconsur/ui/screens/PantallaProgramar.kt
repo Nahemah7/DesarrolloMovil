@@ -59,22 +59,16 @@ import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.ProgramarViewModel
 import kotlinx.coroutines.delay
 
-/** "2026-09-15" se muestra como 15-09-2026. */
 private fun fechaLarga(fecha: String): String {
     val p = fecha.split("-")
     return if (p.size == 3) p[2] + "-" + p[1] + "-" + p[0] else fecha
 }
 
-/**
- * Programar una sesion de conteo (supervisor de piso). Solo se puede programar si el horario dura
- * entre 30 y 60 minutos y no se cruza con otra sesion del mismo acceso o de la misma persona.
- */
 @Composable
 fun PantallaProgramar(onIrA: (String) -> Unit) {
     val vm: ProgramarViewModel = viewModel()
     val estado by vm.uiState.collectAsStateWithLifecycle()
 
-    // El aviso se borra solo: es una guarda, no un estado del formulario.
     LaunchedEffect(estado.error) {
         if (estado.error != null) { delay(3500); vm.limpiarError() }
     }
@@ -160,13 +154,11 @@ fun PantallaProgramar(onIrA: (String) -> Unit) {
             BotonPrincipal("Programar sesión", onClick = { vm.programar() })
             Spacer(Modifier.height(20.dp))
         }
-        // La guarda va flotante al centro: el resto (el detalle del cruce) queda en el formulario.
         MensajeFlotante(estado.error)
         }
     }
 }
 
-/** Una hora con sus dos pasos, de 5 en 5 minutos. */
 @Composable
 private fun BloqueHora(
     etiqueta: String,
@@ -176,8 +168,6 @@ private fun BloqueHora(
     onElegir: (String) -> Unit
 ) {
     var abierto by remember { mutableStateOf(false) }
-    // La lista abre en la hora actual: con 121 horas de 5 en 5, abrir siempre en 10:00 obliga a
-    // recorrer media lista para volver a la tarde.
     val desplazamiento = remember { ScrollState(0) }
     val altoFilaPx = with(LocalDensity.current) { 48.dp.toPx() }
     LaunchedEffect(abierto) {
@@ -196,8 +186,6 @@ private fun BloqueHora(
         )
         Spacer(Modifier.height(2.dp))
         Box {
-            // Un toque abre la lista de horas de 5 en 5: recorrer de a 5 con dos botones obligaba a
-            // decenas de toques para mover una sesion de la manana a la tarde.
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -212,7 +200,6 @@ private fun BloqueHora(
                 Text(hora, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Tinta)
                 Text("  ▾", fontSize = 12.sp, color = Apagado)
             }
-            // Seis filas a la vista: la lista se corre con el dedo en vez de mostrar veinte numeros.
             DropdownMenu(
                 expanded = abierto,
                 onDismissRequest = { abierto = false },

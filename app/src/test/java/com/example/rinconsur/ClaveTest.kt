@@ -7,7 +7,6 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** El hash de la clave: SHA-256 de "RUT|clave". La clave nunca se guarda en texto plano. */
 class ClaveTest {
 
     @Test
@@ -20,7 +19,6 @@ class ClaveTest {
 
     @Test
     fun elRutDelHashVaEnSuFormatoCanonico() {
-        // Esta distincion importa: si un lado limpia el RUT y el otro no, el login falla sin decir por que.
         assertNotEquals(
             Clave.hash("19.876.345-4", "rincon2026"),
             Clave.hash("198763454", "rincon2026")

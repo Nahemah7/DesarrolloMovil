@@ -22,7 +22,6 @@ import com.example.rinconsur.ui.styles.EstilosCampo
 import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.RinconSurTheme
 
-/** Campo de contrasena con boton para verla u ocultarla (no se escribe a ciegas). */
 @Composable
 fun CampoContrasena(
     valor: String,

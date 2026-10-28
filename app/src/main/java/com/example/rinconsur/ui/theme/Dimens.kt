@@ -2,7 +2,6 @@ package com.example.rinconsur.ui.theme
 
 import androidx.compose.ui.unit.dp
 
-/** Medidas de la app en un solo lugar, para no repartir numeros por las pantallas. */
 object Dimens {
     val espacioMini = 4.dp
     val espacioChico = 8.dp

@@ -1,6 +1,5 @@
 package com.example.rinconsur.model
 
-/** Con quien viene la persona (catalogo `tipo_compania`). */
 enum class Compania(val etiqueta: String, val idTipo: Long) {
     SOLO("Solo", 1),
     PAREJA("Pareja", 2),

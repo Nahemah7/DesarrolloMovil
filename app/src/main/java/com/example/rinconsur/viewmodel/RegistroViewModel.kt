@@ -12,20 +12,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-/**
- * El registro en si: la parte que se usa de pie, con una mano y sin escribir (RNF-01, RNF-02).
- * Se guarda con un toque y el resumen se vuelve a leer de la base (nada de contadores en memoria).
- */
 class RegistroViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = FlujoRepository(application)
     private val sesion = SesionPreferencias(application)
 
     private val idObservador: Long = sesion.leer()
-    /**
-     * Solo se cuenta sobre una sesion EN CURSO. Antes, si no habia ninguna, tomaba cualquier sesion
-     * del dia: despues de enviarla se podia seguir registrando en la ya cerrada.
-     */
+
     private var idSesion: Long = repositorio.sesionEnCursoDe(idObservador)?.id ?: 0L
 
     private val _uiState = MutableStateFlow(
@@ -40,11 +33,7 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
     )
     val uiState: StateFlow<RegistroUiState> = _uiState.asStateFlow()
 
-    /**
-     * Se relee al volver a la pantalla. La sesion cambia por fuera de esta pantalla (se envia desde el
-     * cierre, se inicia desde Mi sesion): si no se relee, la pantalla sigue contando sobre la sesion
-     * que ya se cerro y se podia seguir registrando despues de enviarla.
-     */
+
     fun releer() {
         idSesion = repositorio.sesionEnCursoDe(idObservador)?.id ?: 0L
         _uiState.update {
@@ -83,7 +72,6 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
         _uiState.update { it.copy(destino = idAcceso) }
     }
 
-    /** Guardar y seguir: no corta el ritmo de la observacion. */
     fun guardar(): Boolean {
         if (idSesion == 0L) {
             _uiState.update { it.copy(mensaje = "No tienes una sesión de conteo en curso.") }
@@ -108,7 +96,6 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
             seDirige = estado.destino
         )
         if (fila < 0) {
-            // La base lo rechazo porque la sesion ya no esta en curso: no se conto nada.
             refrescar(mensaje = "La sesión ya fue enviada a validación: no se pueden agregar registros.")
             return false
         }
@@ -118,19 +105,13 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
 
     private val guardadas = Plantillas(application)
 
-    /** Las tres plantillas del telefono, para los numeros de la pantalla. */
     private val _plantillas = MutableStateFlow<List<Plantilla?>>(listOf(null, null, null))
     val plantillas: StateFlow<List<Plantilla?>> = _plantillas.asStateFlow()
 
-    /** Se relee al entrar a la pantalla: pueden haber cambiado en la hoja. */
     fun recargarPlantillas() {
         _plantillas.value = (1..3).map { guardadas.leer(it) }
     }
 
-    /**
-     * Repetir un caso guardado, sin volver a marcarlo: cuando entran varias personas del mismo
-     * perfil se ahorra el unico toque que sobra (RNF-01).
-     */
     fun aplicarPlantilla(numero: Int): Boolean {
         val plantilla = _plantillas.value.getOrNull(numero - 1) ?: return false
         _uiState.update {
@@ -146,7 +127,6 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
         return true
     }
 
-    /** Anular es lo excepcional: deja rastro, no borra (RN-11). */
     fun anular(idRegistro: Long, motivo: String) {
         repositorio.anularRegistro(idRegistro, motivo, idObservador)
         refrescar(mensaje = "Registro anulado")

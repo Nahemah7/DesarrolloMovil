@@ -2,18 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Vibracion: confirma que el registro quedo guardado sin mirar la pantalla (RNF-01).
-         Se otorga al instalar, no se le pregunta al usuario. -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <!-- Camara: la foto de perfil del colaborador (y la evidencia del evento). Es un permiso
-         peligroso: se pide en pantalla la primera vez, diciendo para que se usa. -->
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <!-- La camara no es obligatoria para que la app sirva: no se exige en el catalogo de equipos -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
-    <!-- Para avisar cuando no hay red: la app no pierde nada, todo queda en la base local (RNF-03) -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
@@ -38,8 +32,6 @@
             </intent-filter>
         </activity>
 
-        <!-- La app de camara escribe la foto por nosotros: desde API 24 no puede recibir una URI
-             file://, asi que se le entrega una del FileProvider. -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.archivos"
