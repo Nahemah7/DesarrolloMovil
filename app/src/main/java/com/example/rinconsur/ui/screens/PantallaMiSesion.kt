@@ -28,12 +28,12 @@ import com.example.rinconsur.ui.components.FilaFiltros
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaSeccion
+import com.example.rinconsur.viewmodel.MiSesionViewModel
 import com.example.rinconsur.ui.theme.Apagado
-import com.example.rinconsur.ui.theme.Hueso
+import com.example.rinconsur.ui.theme.Fondo
 import com.example.rinconsur.ui.theme.Info
 import com.example.rinconsur.ui.theme.Ok
 import com.example.rinconsur.ui.theme.Tinta
-import com.example.rinconsur.viewmodel.MiSesionViewModel
 
 private fun accesoDe(accesos: List<Acceso>, sesion: SesionResumen): String =
     accesos.firstOrNull { it.id == sesion.idAcceso }?.let { it.codigo + " · " + it.nombre } ?: "Acceso sin asignar"
@@ -67,7 +67,7 @@ fun PantallaMiSesion(onIniciar: () -> Unit, onIrA: (String) -> Unit) {
     val hayProgramada = sesiones.any { it.estado == EstadoSesion.PROGRAMADA }
 
     Scaffold(
-        containerColor = Hueso,
+        containerColor = Fondo,
         topBar = {
             BarraApp(
                 titulo = "Mi sesión",

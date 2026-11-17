@@ -31,11 +31,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.rinconsur.ui.styles.EstilosCampo
 import com.example.rinconsur.ui.theme.Apagado
-import com.example.rinconsur.ui.theme.Blanco
-import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.Linea
-import com.example.rinconsur.ui.theme.RinconSurTheme
+import com.example.rinconsur.ui.theme.Superficie
 import com.example.rinconsur.ui.theme.Tinta
+import com.example.rinconsur.ui.theme.Dimens
+import com.example.rinconsur.ui.theme.RinconSurTheme
 
 @Composable
 fun CampoLista(
@@ -66,7 +66,7 @@ fun CampoLista(
                 Modifier
                     .fillMaxWidth()
                     .height(56.dp)
-                    .background(Blanco, EstilosCampo.forma)
+                    .background(Superficie, EstilosCampo.forma)
                     .border(1.dp, colorBorde, EstilosCampo.forma)
                     .clickable(enabled = habilitado) { abierto = true }
                     .padding(horizontal = 16.dp)

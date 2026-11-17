@@ -26,10 +26,10 @@ import com.example.rinconsur.ui.components.EtiquetaEstado
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaSeccion
-import com.example.rinconsur.ui.theme.Apagado
-import com.example.rinconsur.ui.theme.Hueso
-import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.SinSenalViewModel
+import com.example.rinconsur.ui.theme.Apagado
+import com.example.rinconsur.ui.theme.Fondo
+import com.example.rinconsur.ui.theme.Tinta
 
 @Composable
 fun PantallaSinSenal(onVolver: () -> Unit) {
@@ -40,7 +40,7 @@ fun PantallaSinSenal(onVolver: () -> Unit) {
     val mensaje by vm.mensaje.collectAsStateWithLifecycle()
 
     Scaffold(
-        containerColor = Hueso,
+        containerColor = Fondo,
     ) { pad ->
         Column(
             Modifier

@@ -32,13 +32,12 @@ import com.example.rinconsur.ui.components.CampoTexto
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaSeccion
-import com.example.rinconsur.ui.theme.Apagado
-import com.example.rinconsur.ui.theme.Aviso
-import com.example.rinconsur.ui.theme.Hueso
-import com.example.rinconsur.ui.theme.Info
-import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.RechazarViewModel
 import com.example.rinconsur.data.TEXTO_MAXIMO
+import com.example.rinconsur.ui.theme.Apagado
+import com.example.rinconsur.ui.theme.Aviso
+import com.example.rinconsur.ui.theme.Fondo
+import com.example.rinconsur.ui.theme.Tinta
 
 @Composable
 fun PantallaRechazar(idSesion: Long, onVolver: () -> Unit) {
@@ -51,7 +50,7 @@ fun PantallaRechazar(idSesion: Long, onVolver: () -> Unit) {
     LaunchedEffect(idSesion) { vm.cargar(idSesion) }
 
     Scaffold(
-        containerColor = Hueso,
+        containerColor = Fondo,
     ) { pad ->
         Column(
             Modifier

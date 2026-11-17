@@ -43,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import com.example.rinconsur.model.EventoDia
 import com.example.rinconsur.ui.components.EtiquetaEstado
-import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.data.TEXTO_MAXIMO
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -58,11 +57,11 @@ import com.example.rinconsur.ui.components.FilaFiltros
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaSeccion
-import com.example.rinconsur.ui.theme.Aviso
-import com.example.rinconsur.ui.theme.Hueso
-import com.example.rinconsur.ui.theme.Info
 import com.example.rinconsur.viewmodel.EventoViewModel
 import java.io.File
+import com.example.rinconsur.ui.theme.Aviso
+import com.example.rinconsur.ui.theme.Fondo
+import com.example.rinconsur.ui.theme.Tinta
 
 private const val LADO_FOTO_EVENTO = 512
 
@@ -100,7 +99,7 @@ fun PantallaEvento(onVolver: () -> Unit) {
     }
 
     Scaffold(
-        containerColor = Hueso,
+        containerColor = Fondo,
     ) { pad ->
         Column(
             Modifier

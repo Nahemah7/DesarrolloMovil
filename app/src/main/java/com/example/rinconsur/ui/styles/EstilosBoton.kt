@@ -11,10 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
-import com.example.rinconsur.ui.theme.Blanco
-import com.example.rinconsur.ui.theme.Burdeo
-import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.GrisDeshabilitado
+import com.example.rinconsur.ui.theme.Marino
+import com.example.rinconsur.ui.theme.Superficie
+import com.example.rinconsur.ui.theme.Dimens
 
 object EstilosBoton {
     val forma: Shape = RoundedCornerShape(Dimens.radioBoton)
@@ -22,10 +22,10 @@ object EstilosBoton {
 
     @Composable
     fun coloresPrincipal(): ButtonColors = ButtonDefaults.buttonColors(
-        containerColor = Burdeo,
-        contentColor = Blanco,
+        containerColor = Marino,
+        contentColor = Superficie,
         disabledContainerColor = GrisDeshabilitado,
-        disabledContentColor = Blanco
+        disabledContentColor = Superficie
     )
 
     @Composable

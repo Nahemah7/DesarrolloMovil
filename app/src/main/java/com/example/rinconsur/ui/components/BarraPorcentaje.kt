@@ -25,9 +25,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.rinconsur.ui.theme.Apagado
-import com.example.rinconsur.ui.theme.Burdeo
+import com.example.rinconsur.ui.theme.Linea
+import com.example.rinconsur.ui.theme.Marino
 import com.example.rinconsur.ui.theme.Dimens
-import com.example.rinconsur.ui.theme.FondoSuave
 import com.example.rinconsur.ui.theme.RinconSurTheme
 
 @Composable
@@ -35,7 +35,7 @@ fun BarraPorcentaje(
     etiqueta: String,
     valor: Float,
     textoValor: String,
-    color: Color = Burdeo,
+    color: Color = Marino,
     atenuada: Boolean = false
 ) {
     val relleno = remember { Animatable(0f) }
@@ -64,7 +64,7 @@ fun BarraPorcentaje(
                 .weight(1f)
                 .height(Dimens.altoBarra)
                 .clip(RoundedCornerShape(3.dp))
-                .background(FondoSuave)
+                .background(Linea)
         ) {
             Box(
                 Modifier

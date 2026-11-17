@@ -12,7 +12,21 @@ class FlujoDbHelper(context: Context) :
 
     companion object {
         private const val NOMBRE_BD = "rinconsur.db"
-        private const val VERSION_BD = 6
+        private const val VERSION_BD = 7
+
+        private val VISTAS = listOf(
+            "v_conversion_dia", "v_transito_bloque", "v_pendiente_medir",
+            "v_perfil_transito", "v_tipo_dia", "v_sesion_proporcion"
+        )
+
+        // Orden de borrado: primero las tablas que apuntan a otras y al final las que son
+        // referenciadas. Al reves, con las claves foraneas activas, el DROP TABLE falla.
+        private val TABLAS = listOf(
+            "registro_observacion", "respuesta_seguridad", "sesion_observacion", "evento_dia",
+            "conteo_ingreso", "transaccion_bloque", "meta_conversion", "usuario", "rol",
+            "pregunta_seguridad", "acceso", "bloque_horario", "estado_sesion", "clasificacion",
+            "rango_etario", "tipo_compania", "tipo_evento"
+        )
 
         const val ESTADO_PROGRAMADA = 1L
     const val ESTADO_EN_CURSO = 2L
@@ -44,7 +58,7 @@ class FlujoDbHelper(context: Context) :
     CONSTRAINT pk_rol PRIMARY KEY (id_rol),
     CONSTRAINT uq_rol_codigo UNIQUE (codigo),
     CONSTRAINT uq_rol_nombre UNIQUE (nombre),
-    CONSTRAINT ck_rol_codigo CHECK (codigo IN ('P-01','P-02','P-03','P-04'))
+    CONSTRAINT ck_rol_codigo CHECK (codigo IN ('P-01','P-02','P-03','P-04','P-05'))
 );""",
         """CREATE TABLE usuario (
     id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -336,7 +350,8 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
   (1, 'P-01', 'Jefa de tienda', 'Consulta indicadores, historial y perfil; registra la meta'),
   (2, 'P-02', 'Subgerente comercial', 'Administra sesiones, valida, carga ingresos y transacciones, gestiona colaboradores'),
   (3, 'P-03', 'Supervisor de piso', 'Programa y valida sesiones, registra eventos, puede observar'),
-  (4, 'P-04', 'Colaborador observador', 'Registra y anula sus propios registros en sesion en curso');""",
+  (4, 'P-04', 'Colaborador observador', 'Registra y anula sus propios registros en sesion en curso'),
+  (5, 'P-05', 'Administrador', 'Gestiona colaboradores y accesos; no registra conteos');""",
         """INSERT INTO usuario (id_usuario, id_rol, rut, nombres, apellido_paterno, apellido_materno, cargo, correo, telefono, password_hash, activo) VALUES
   (1, 1, '15.234.871-1', 'Carolina', 'Fuentes', 'Araya', 'Jefa de tienda', 'carolina.fuentes@rinconsur-ficticio.ejemplo', '+56 9 0000 0011', '${'$'}2a${'$'}10${'$'}semilla.demo.no.usar.en.produccion', 1),
   (2, 2, '13.987.442-0', 'Rodrigo', 'Saavedra', 'Munoz', 'Subgerente comercial', 'rodrigo.saavedra@rinconsur-ficticio.ejemplo', '+56 9 0000 0012', '${'$'}2a${'$'}10${'$'}semilla.demo.no.usar.en.produccion', 1),
@@ -344,7 +359,8 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
   (4, 3, '16.443.019-7', 'Matias', 'Contreras', 'Vidal', 'Supervisor de piso (turno tarde)', 'matias.contreras@rinconsur-ficticio.ejemplo', '+56 9 0000 0014', '${'$'}2a${'$'}10${'$'}semilla.demo.no.usar.en.produccion', 1),
   (5, 4, '19.876.345-4', 'Tamara', 'Rojas', 'Espinoza', 'Vendedora, Vestuario Mujer', 'tamara.rojas@rinconsur-ficticio.ejemplo', '+56 9 0000 0015', '${'$'}2a${'$'}10${'$'}semilla.demo.no.usar.en.produccion', 1),
   (6, 4, '20.145.678-9', 'Felipe', 'Ibarra', 'Soto', 'Vendedor, Hogar y Deco', 'felipe.ibarra@rinconsur-ficticio.ejemplo', '+56 9 0000 0016', '${'$'}2a${'$'}10${'$'}semilla.demo.no.usar.en.produccion', 1),
-  (7, 4, '18.322.904-4', 'Javiera', 'Morales', 'Caceres', 'Cajera, Cajas Centrales', 'javiera.morales@rinconsur-ficticio.ejemplo', '+56 9 0000 0017', '${'$'}2a${'$'}10${'$'}semilla.demo.no.usar.en.produccion', 1);""",
+  (7, 4, '18.322.904-4', 'Javiera', 'Morales', 'Caceres', 'Cajera, Cajas Centrales', 'javiera.morales@rinconsur-ficticio.ejemplo', '+56 9 0000 0017', '${'$'}2a${'$'}10${'$'}semilla.demo.no.usar.en.produccion', 1),
+  (8, 5, '20.543.219-1', 'Paula', 'Contreras', 'Mena', 'Administradora de usuarios', 'paula.contreras@rinconsur-ficticio.ejemplo', '+56 9 0000 0018', '${'$'}2a${'$'}10${'$'}semilla.demo.no.usar.en.produccion', 1);""",
         """INSERT INTO acceso (id_acceso, codigo, nombre, ubicacion, observacion) VALUES
   (1, 'A1', 'Acceso Principal', 'Frente al pasillo central del mall', 'Entrada natural de quienes vienen del mall'),
   (2, 'A2', 'Acceso Lateral', 'Costado del sector patio de comidas', 'Flujo alto a la hora de almuerzo'),
@@ -902,6 +918,7 @@ WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e
         """UPDATE usuario SET password_hash = '3be196465177bea9d42580f65fd1b71b26aca25fed5e2346470148c727bcbd00' WHERE rut = '18.322.904-4';""",
         """UPDATE usuario SET password_hash = 'e1553d2b50bf5930127ad34bc182803cf351ae61de120a71d85da0fa2a1c78f1' WHERE rut = '19.876.345-4';""",
         """UPDATE usuario SET password_hash = '640c5d498a480b562da0e3bd40334b2df49a24ddca1b41f9e52449534668d5ee' WHERE rut = '20.145.678-9';""",
+        """UPDATE usuario SET password_hash = '132948b7130fa027beaac82a2da35fa0e20f1f640973ec00d71430e0cc278aa1' WHERE rut = '20.543.219-1';""",
         """INSERT INTO pregunta_seguridad (id_pregunta, texto) VALUES
   (1, '¿Cuál es el nombre de tu primera mascota?'),
   (2, '¿En qué ciudad nació tu madre?'),
@@ -1004,45 +1021,12 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        if (oldVersion < 2) {
-            db.execSQL("ALTER TABLE evento_dia ADD COLUMN foto BLOB")
-        }
-        if (oldVersion < 4) {
-            db.execSQL("ALTER TABLE usuario ADD COLUMN foto BLOB")
-        }
-        if (oldVersion < 3) {
-            db.execSQL("""CREATE TABLE pregunta_seguridad (
-    id_pregunta INTEGER PRIMARY KEY AUTOINCREMENT,
-    texto       VARCHAR(120) NOT NULL,
-    activa      BOOLEAN      NOT NULL DEFAULT 1,
-    CONSTRAINT uq_pregunta_texto UNIQUE (texto)
-)""")
-            db.execSQL("""CREATE TABLE respuesta_seguridad (
-    id_usuario     INT          NOT NULL,
-    id_pregunta    INT          NOT NULL,
-    respuesta_hash VARCHAR(255) NOT NULL,
-    CONSTRAINT pk_respuesta_seguridad PRIMARY KEY (id_usuario, id_pregunta),
-    CONSTRAINT fk_respuesta_usuario FOREIGN KEY (id_usuario) REFERENCES usuario (id_usuario),
-    CONSTRAINT fk_respuesta_pregunta FOREIGN KEY (id_pregunta) REFERENCES pregunta_seguridad (id_pregunta)
-)""")
-            db.execSQL("""INSERT INTO pregunta_seguridad (id_pregunta, texto) VALUES
-  (1, '¿Cuál es el nombre de tu primera mascota?'),
-  (2, '¿En qué ciudad nació tu madre?'),
-  (3, '¿Cuál fue tu primer colegio?'),
-  (4, '¿Cuál fue tu primer trabajo?'),
-  (5, '¿Cuál es tu comida favorita?'),
-  (6, '¿Cómo se llamaba tu mejor amigo de la infancia?')""")
-        }
-        if (oldVersion < 5) {
-            db.execSQL("ALTER TABLE evento_dia ADD COLUMN anulado INTEGER NOT NULL DEFAULT 0")
-            db.execSQL("ALTER TABLE evento_dia ADD COLUMN motivo_anulacion VARCHAR(200)")
-            db.execSQL("ALTER TABLE evento_dia ADD COLUMN id_usuario_anula INT")
-            db.execSQL("ALTER TABLE evento_dia ADD COLUMN fecha_anulacion DATETIME")
-            db.execSQL("DROP VIEW IF EXISTS v_tipo_dia")
-            db.execSQL(SQL_VISTAS.first())
-        }
-        if (oldVersion < 6) {
-            SQL_DEMO_FIN_DE_SEMANA.forEach { db.execSQL(it) }
+        // Base limpia: no hay datos de cliente real, asi que en vez de encadenar migraciones se
+        // borran las vistas y las tablas y se reconstruye todo. El esquema y la semilla viven en onCreate.
+        if (oldVersion < 7) {
+            VISTAS.forEach { db.execSQL("DROP VIEW IF EXISTS " + it) }
+            TABLAS.forEach { db.execSQL("DROP TABLE IF EXISTS " + it) }
+            onCreate(db)
         }
     }
 
@@ -1203,6 +1187,9 @@ FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 3
             SQL_USUARIO + "WHERE u.id_rol = (SELECT id_rol FROM rol WHERE nombre LIKE '%observador%')",
             arrayOf()
         )
+
+    fun listarColaboradores(): List<Colaborador> =
+        consultarColaboradores(SQL_USUARIO + "ORDER BY u.id_rol, u.nombres", arrayOf())
 
     fun programarSesion(
         idAcceso: Long,

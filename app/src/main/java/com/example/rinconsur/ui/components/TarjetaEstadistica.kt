@@ -9,9 +9,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.example.rinconsur.ui.theme.Apagado
-import com.example.rinconsur.ui.theme.Dimens
-import com.example.rinconsur.ui.theme.RinconSurTheme
 import com.example.rinconsur.ui.theme.Tinta
+import com.example.rinconsur.ui.theme.RinconSurTheme
 
 @Composable
 fun TarjetaEstadistica(

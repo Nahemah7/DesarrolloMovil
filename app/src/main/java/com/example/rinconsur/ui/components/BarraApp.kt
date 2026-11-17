@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.rinconsur.ui.theme.Apagado
-import com.example.rinconsur.ui.theme.Burdeo
+import com.example.rinconsur.ui.theme.Marino
 import com.example.rinconsur.ui.theme.RinconSurTheme
 
 @Composable
@@ -22,7 +22,7 @@ fun BarraApp(
     titulo: String,
     subtitulo: String,
     etiqueta: String? = null,
-    colorEtiqueta: Color = Burdeo,
+    colorEtiqueta: Color = Marino,
     accion: (@Composable () -> Unit)? = null
 ) {
     Row(

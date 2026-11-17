@@ -66,6 +66,8 @@ class EncabezadoViewModel(application: Application) : AndroidViewModel(applicati
             ruta.startsWith("rechazar") ->
                 "Rechazar sesión" to (repositorio.sesion(idSesion?.toLongOrNull() ?: 0L)?.codigo ?: "")
 
+            ruta.startsWith("colaboradores") -> "Colaboradores" to "Usuarios de la tienda"
+
             ruta.startsWith("perfil") -> "Mi perfil" to quien
 
             else -> "Rincón Sur" to "Acceso al sistema"

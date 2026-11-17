@@ -9,8 +9,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
-import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.Linea
+import com.example.rinconsur.ui.theme.Dimens
 
 object EstilosTarjeta {
     val forma: Shape = RoundedCornerShape(Dimens.radioTarjeta)

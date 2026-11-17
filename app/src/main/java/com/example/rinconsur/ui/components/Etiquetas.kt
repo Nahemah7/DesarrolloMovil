@@ -14,20 +14,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.rinconsur.ui.theme.Apagado
+import com.example.rinconsur.ui.theme.AquaSuave
 import com.example.rinconsur.ui.theme.Aviso
 import com.example.rinconsur.ui.theme.AvisoSuave
-import com.example.rinconsur.ui.theme.Burdeo
-import com.example.rinconsur.ui.theme.BurdeoSuave
-import com.example.rinconsur.ui.theme.Dimens
-import com.example.rinconsur.ui.theme.FondoSuave
 import com.example.rinconsur.ui.theme.Info
 import com.example.rinconsur.ui.theme.InfoSuave
+import com.example.rinconsur.ui.theme.Linea
+import com.example.rinconsur.ui.theme.Marino
 import com.example.rinconsur.ui.theme.Ok
 import com.example.rinconsur.ui.theme.OkSuave
+import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.RinconSurTheme
 
 @Composable
-fun Etiqueta(texto: String, fondo: Color = FondoSuave, textoColor: Color = Apagado) {
+fun Etiqueta(texto: String, fondo: Color = Linea, textoColor: Color = Apagado) {
     Box(
         Modifier
             .clip(RoundedCornerShape(Dimens.radioEtiqueta))
@@ -49,8 +49,8 @@ fun EtiquetaEstado(texto: String, tipo: String = "neutro") {
         "ok" -> OkSuave to Ok
         "aviso" -> AvisoSuave to Aviso
         "info" -> InfoSuave to Info
-        "marca" -> BurdeoSuave to Burdeo
-        else -> FondoSuave to Apagado
+        "marca" -> AquaSuave to Marino
+        else -> Linea to Apagado
     }
     Box(
         Modifier

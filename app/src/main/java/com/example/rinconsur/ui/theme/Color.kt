@@ -2,34 +2,33 @@ package com.example.rinconsur.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Burdeo = Color(0xFF6B1F35)
-val BurdeoSuave = Color(0xFFF5E9EC)
-val Terracota = Color(0xFF9C4622)
-val TerracotaSuave = Color(0xFFFBF0E9)
+// Paleta Marino & Aqua. Contrastes verificados en DISENO_LOGIN.md:
+// blanco sobre marino 14,57 (AAA) · aqua sobre marino 5,68 (AA) · tinta sobre aqua suave 14,28 (AAA).
+// El aqua NO admite texto blanco encima (2,57): sobre aqua el texto va en marino.
+val Marino = Color(0xFF0E2A47)
+val MarinoClaro = Color(0xFF264668)
+val Aqua = Color(0xFF12B5A6)
+val AquaSuave = Color(0xFFDFF3F0)
+val AquaTenue = Color(0xFFEAF7F5)   // tono para secciones sobre superficie clara
 
+val Fondo = Color(0xFFF7F8F6)
+val Superficie = Color(0xFFFFFFFF)
 val Tinta = Color(0xFF16202B)
-val Apagado = Color(0xFF55636F)
-val Linea = Color(0xFFE9E7E2)
-val FondoSuave = Color(0xFFF3F1EC)
-val Hueso = Color(0xFFF8F7F3)
-val HuesoLinea = Color(0xFFE9E7E2)
-val HuesoApagado = Color(0xFF6E6A61)
-val GrisDeshabilitado = Color(0xFFBDBAC7)
-val Blanco = Color(0xFFFFFFFF)
+val Apagado = Color(0xFF5C6A78)
+val Linea = Color(0xFFE5E9EC)
+val GrisDeshabilitado = Color(0xFFB9C4CC)
 
-val Ok = Color(0xFF0F6B63)
-val OkSuave = Color(0xFFE7F2F1)
+val Ok = Color(0xFF0B7A6E)
+val OkSuave = Color(0xFFDFF3F0)
 val Aviso = Color(0xFF8A4500)
-
-val Peligro = Color(0xFFB3261E)
 val AvisoSuave = Color(0xFFFFF7E8)
-val Info = Color(0xFF123F73)
-val InfoSuave = Color(0xFFE8EEF6)
+val Peligro = Color(0xFFB3261E)
+val Info = Color(0xFF1F4E79)
+val InfoSuave = Color(0xFFE8EFF6)
 
-
-val EtiquetaNino = Color(0xFF123F73)
-val EtiquetaJoven = Color(0xFF0F6B63)
-val EtiquetaAdultoJoven = Color(0xFF5B21B6)
+val EtiquetaNino = Color(0xFF1F4E79)
+val EtiquetaJoven = Color(0xFF0B7A6E)
+val EtiquetaAdultoJoven = Color(0xFF4B3A8C)
 val EtiquetaAdulto = Color(0xFF8A4500)
 val EtiquetaTerceraEdad = Color(0xFF8C1340)
 val EtiquetaNoDeterminado = Color(0xFF3A4653)

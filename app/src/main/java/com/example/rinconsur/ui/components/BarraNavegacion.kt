@@ -36,6 +36,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.contentDescription
@@ -44,8 +46,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.rinconsur.model.PerfilUsuario
 import com.example.rinconsur.navigation.Ruta
-import com.example.rinconsur.ui.theme.Burdeo
-import com.example.rinconsur.ui.theme.Hueso
+import com.example.rinconsur.ui.theme.Aqua
+import com.example.rinconsur.ui.theme.Marino
+import com.example.rinconsur.ui.theme.Superficie
 
 
 data class OpcionMenu(
@@ -55,11 +58,11 @@ data class OpcionMenu(
     val iconoActivo: ImageVector
 )
 
-private val IconoInactivo = Color(0xFFD8C3CA)
-private val SubtituloBarra = Color(0xFFE9D9DE)
-private val FondoActivo = Hueso.copy(alpha = 0.20f)
-private val FondoVolver = Hueso.copy(alpha = 0.10f)
-private val BordeVolver = Hueso.copy(alpha = 0.30f)
+private val IconoInactivo = Color(0xFFB7C9D6)
+private val SubtituloBarra = Color(0xFFC3D6DF)
+private val FondoActivo = Aqua.copy(alpha = 0.24f)
+private val FondoVolver = Superficie.copy(alpha = 0.10f)
+private val BordeVolver = Superficie.copy(alpha = 0.30f)
 
 fun menuDe(perfil: PerfilUsuario): List<OpcionMenu> = when (perfil) {
     PerfilUsuario.OBSERVADOR -> listOf(
@@ -68,7 +71,19 @@ fun menuDe(perfil: PerfilUsuario): List<OpcionMenu> = when (perfil) {
         OpcionMenu("Perfil", Ruta.Perfil.ruta, Icons.Outlined.Person, Icons.Filled.Person)
     )
 
-    else -> listOf(
+    // El administrador no mide ni opera: gestiona personas.
+    PerfilUsuario.ADMINISTRADOR -> listOf(
+        OpcionMenu("Colaboradores", Ruta.Colaboradores.ruta, Icons.Outlined.Person, Icons.Filled.Person),
+        OpcionMenu("Perfil", Ruta.Perfil.ruta, Icons.Outlined.MoreHoriz, Icons.Filled.MoreHoriz)
+    )
+
+    // La jefatura lee y decide: entra por los indicadores, sin nada de escritura.
+    PerfilUsuario.JEFE_TIENDA, PerfilUsuario.SUBGERENTE -> listOf(
+        OpcionMenu("Indicadores", Ruta.Indicadores.ruta, Icons.Outlined.BarChart, Icons.Filled.BarChart),
+        OpcionMenu("Perfil", Ruta.Perfil.ruta, Icons.Outlined.Person, Icons.Filled.Person)
+    )
+
+    PerfilUsuario.SUPERVISOR -> listOf(
         OpcionMenu("Sesiones", Ruta.Sesiones.ruta, Icons.Outlined.List, Icons.Filled.List),
         OpcionMenu("Medir", Ruta.Evento.ruta, Icons.Outlined.Edit, Icons.Filled.Edit),
         OpcionMenu("Indicadores", Ruta.Indicadores.ruta, Icons.Outlined.BarChart, Icons.Filled.BarChart),
@@ -90,7 +105,8 @@ private fun esLaActiva(opcion: OpcionMenu, rutaActual: String): Boolean {
 
 fun esRaiz(ruta: String): Boolean =
     ruta.startsWith("mi_sesion") || ruta.startsWith("registro") || ruta.startsWith("sesiones") ||
-            ruta.startsWith("evento") || ruta.startsWith("perfil") || ruta.startsWith("indicadores")
+            ruta.startsWith("evento") || ruta.startsWith("perfil") || ruta.startsWith("indicadores") ||
+            ruta.startsWith("colaboradores")
 
 @Composable
 fun BarraNavegacion(
@@ -104,7 +120,22 @@ fun BarraNavegacion(
     Row(
         Modifier
             .fillMaxWidth()
-            .background(Burdeo)
+            .then(
+                Modifier.drawBehind {
+                    drawRect(Marino)
+                    // El corte diagonal del acceso se repite en la barra, mas discreto por la altura.
+                    val ancho = size.width
+                    val alto = size.height
+                    val cuna = Path().apply {
+                        moveTo(ancho * 0.86f, 0f)
+                        lineTo(ancho * 0.94f, 0f)
+                        lineTo(ancho * 0.70f, alto)
+                        lineTo(ancho * 0.62f, alto)
+                        close()
+                    }
+                    drawPath(cuna, Aqua.copy(alpha = 0.16f))
+                }
+            )
             .statusBarsPadding()
             .heightIn(min = 56.dp)
             .padding(start = 10.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
@@ -114,7 +145,7 @@ fun BarraNavegacion(
             BotonBarra(
                 icono = Icons.Filled.ArrowBack,
                 etiqueta = "Volver",
-                color = Hueso,
+                color = Superficie,
                 fondo = FondoVolver,
                 borde = BordeVolver,
                 onClick = onVolver
@@ -125,7 +156,7 @@ fun BarraNavegacion(
         Column(Modifier.weight(1f)) {
             Text(
                 text = titulo,
-                color = Hueso,
+                color = Superficie,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -148,7 +179,7 @@ fun BarraNavegacion(
             BotonBarra(
                 icono = if (activa) opcion.iconoActivo else opcion.icono,
                 etiqueta = opcion.etiqueta,
-                color = if (activa) Hueso else IconoInactivo,
+                color = if (activa) Superficie else IconoInactivo,
                 fondo = if (activa) FondoActivo else Color.Transparent,
                 borde = null,
                 onClick = { onIr(opcion.ruta) }

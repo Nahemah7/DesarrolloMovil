@@ -7,8 +7,8 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.Linea
+import com.example.rinconsur.ui.theme.Dimens
 
 object EstilosCampo {
     val forma: Shape = RoundedCornerShape(Dimens.radioCampo)

@@ -61,16 +61,15 @@ import com.example.rinconsur.ui.components.CampoTexto
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaSeccion
-import com.example.rinconsur.ui.theme.Apagado
-import com.example.rinconsur.ui.theme.Aviso
-import com.example.rinconsur.ui.theme.Burdeo
-import com.example.rinconsur.ui.theme.BurdeoSuave
-import com.example.rinconsur.ui.theme.Dimens
-import com.example.rinconsur.ui.theme.Hueso
-import com.example.rinconsur.ui.theme.Info
-import com.example.rinconsur.ui.theme.Ok
 import com.example.rinconsur.viewmodel.PerfilViewModel
 import java.io.File
+import com.example.rinconsur.ui.theme.Apagado
+import com.example.rinconsur.ui.theme.AquaSuave
+import com.example.rinconsur.ui.theme.Aviso
+import com.example.rinconsur.ui.theme.Fondo
+import com.example.rinconsur.ui.theme.Marino
+import com.example.rinconsur.ui.theme.Ok
+import com.example.rinconsur.ui.theme.Dimens
 
 @Composable
 fun PantallaPerfil(onSalir: () -> Unit, onDatosCambiados: () -> Unit = {}) {
@@ -97,7 +96,7 @@ fun PantallaPerfil(onSalir: () -> Unit, onDatosCambiados: () -> Unit = {}) {
     }
 
     Scaffold(
-        containerColor = Hueso,
+        containerColor = Fondo,
     ) { pad ->
         Column(
             Modifier
@@ -254,7 +253,7 @@ private fun Avatar(nombre: String, foto: ByteArray?) {
         .map { it.first().uppercaseChar() }.joinToString("")
     val imagen = remember(foto) { foto?.let { ConvertidorImagen.aBitmap(it) } }
     Box(
-        Modifier.size(80.dp).clip(RoundedCornerShape(99.dp)).background(BurdeoSuave),
+        Modifier.size(80.dp).clip(RoundedCornerShape(99.dp)).background(AquaSuave),
         contentAlignment = Alignment.Center
     ) {
         if (imagen != null) {
@@ -267,7 +266,7 @@ private fun Avatar(nombre: String, foto: ByteArray?) {
         } else {
             Text(
                 text = iniciales.ifEmpty { "?" },
-                color = Burdeo, fontWeight = FontWeight.Bold, fontSize = 26.sp
+                color = Marino, fontWeight = FontWeight.Bold, fontSize = 26.sp
             )
         }
     }

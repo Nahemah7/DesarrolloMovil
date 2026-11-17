@@ -41,11 +41,10 @@ import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaEstadistica
 import com.example.rinconsur.ui.components.TarjetaSeccion
-import com.example.rinconsur.ui.theme.Apagado
-import com.example.rinconsur.ui.theme.Burdeo
-import com.example.rinconsur.ui.theme.Hueso
-import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.IndicadoresViewModel
+import com.example.rinconsur.ui.theme.Apagado
+import com.example.rinconsur.ui.theme.Fondo
+import com.example.rinconsur.ui.theme.Tinta
 
 @Composable
 fun PantallaIndicadores(onIrA: (String) -> Unit) {
@@ -74,7 +73,7 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
 
     val maxIngresosAcceso = porAcceso.maxOfOrNull { it.ingresos }?.takeIf { it > 0 } ?: 1
 
-    Scaffold(containerColor = Hueso) { pad ->
+    Scaffold(containerColor = Fondo) { pad ->
         Column(
             modifier = Modifier
                 .padding(pad)

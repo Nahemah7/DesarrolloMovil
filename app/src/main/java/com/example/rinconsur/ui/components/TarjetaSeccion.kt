@@ -17,10 +17,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.rinconsur.ui.styles.EstilosTarjeta
-import com.example.rinconsur.ui.theme.HuesoLinea
+import com.example.rinconsur.ui.theme.Linea
+import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.RinconSurTheme
-import com.example.rinconsur.ui.theme.Tinta
 
 @Composable
 fun TarjetaSeccion(
@@ -33,7 +33,7 @@ fun TarjetaSeccion(
         shape = EstilosTarjeta.forma,
         colors = EstilosTarjeta.colores(),
         elevation = EstilosTarjeta.elevacion(),
-        border = BorderStroke(1.dp, HuesoLinea)
+        border = BorderStroke(1.dp, Linea)
     ) {
         Column(
             Modifier

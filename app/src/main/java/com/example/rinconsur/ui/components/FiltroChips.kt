@@ -18,8 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.rinconsur.ui.theme.Burdeo
-import com.example.rinconsur.ui.theme.BurdeoSuave
+import com.example.rinconsur.ui.theme.AquaSuave
+import com.example.rinconsur.ui.theme.Marino
 import com.example.rinconsur.ui.theme.RinconSurTheme
 
 @Composable
@@ -39,8 +39,8 @@ fun Filtro(texto: String, activo: Boolean, onClick: () -> Unit) {
         modifier = Modifier.height(if (activo) 38.dp else 32.dp),
         colors = FilterChipDefaults.filterChipColors(
             containerColor = Color.White,
-            selectedContainerColor = BurdeoSuave,
-            selectedLabelColor = Burdeo
+            selectedContainerColor = AquaSuave,
+            selectedLabelColor = Marino
         )
     )
 }

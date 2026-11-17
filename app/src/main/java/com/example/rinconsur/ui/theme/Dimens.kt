@@ -9,17 +9,19 @@ object Dimens {
     val espacioGrande = 24.dp
     val espacioPantalla = 16.dp
 
-    val alturaBoton = 48.dp
-    val alturaBotonAlto = 52.dp
+    val alturaBoton = 52.dp
+    val alturaBotonAlto = 56.dp
     val anchoBotonGuardar = 176.dp
-    val radioBoton = 10.dp
+    val radioBoton = 14.dp
     val bordeBoton = 1.dp
 
-    val radioCampo = 10.dp
-    val radioTarjeta = 10.dp
+    val radioCampo = 14.dp
+    val radioTarjeta = 20.dp
+    val radioTarjetaGrande = 24.dp
     val radioEtiqueta = 50.dp
 
     val altoBarra = 13.dp
     val anchoEtiquetaBarra = 74.dp
     val tamanoIcono = 18.dp
+    val anchoMaximoTarjeta = 420.dp
 }

@@ -59,24 +59,21 @@ import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaEstadistica
 import com.example.rinconsur.ui.components.TarjetaSeccion
+import androidx.compose.foundation.layout.ColumnScope
+import com.example.rinconsur.data.Vibracion
+import com.example.rinconsur.viewmodel.RegistroViewModel
+import kotlinx.coroutines.delay
 import com.example.rinconsur.ui.theme.Apagado
-import com.example.rinconsur.ui.theme.Aviso
-import com.example.rinconsur.ui.theme.Linea
-import com.example.rinconsur.ui.theme.Burdeo
+import com.example.rinconsur.ui.theme.AquaSuave
 import com.example.rinconsur.ui.theme.EtiquetaAdulto
 import com.example.rinconsur.ui.theme.EtiquetaAdultoJoven
 import com.example.rinconsur.ui.theme.EtiquetaJoven
 import com.example.rinconsur.ui.theme.EtiquetaNino
 import com.example.rinconsur.ui.theme.EtiquetaTerceraEdad
-import com.example.rinconsur.ui.theme.Ok
-import com.example.rinconsur.ui.theme.Hueso
-import com.example.rinconsur.ui.theme.HuesoLinea
-import com.example.rinconsur.ui.theme.HuesoApagado
-import androidx.compose.foundation.layout.ColumnScope
+import com.example.rinconsur.ui.theme.Fondo
+import com.example.rinconsur.ui.theme.Linea
+import com.example.rinconsur.ui.theme.Marino
 import com.example.rinconsur.ui.theme.Tinta
-import com.example.rinconsur.data.Vibracion
-import com.example.rinconsur.viewmodel.RegistroViewModel
-import kotlinx.coroutines.delay
 
 private fun nombreDe(rango: RangoEtario): String = when (rango) {
     RangoEtario.MENOR_18 -> "Niño/a"
@@ -101,12 +98,12 @@ private fun BotonPlantilla(numero: Int, tiene: Boolean, alTocar: () -> Unit, alM
         Modifier
             .size(48.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(if (tiene) com.example.rinconsur.ui.theme.BurdeoSuave else Color.White)
-            .border(1.dp, if (tiene) Burdeo else Linea, RoundedCornerShape(12.dp))
+            .background(if (tiene) com.example.rinconsur.ui.theme.AquaSuave else Color.White)
+            .border(1.dp, if (tiene) Marino else Linea, RoundedCornerShape(12.dp))
             .combinedClickable(onClick = alTocar, onLongClick = alMantener),
         contentAlignment = Alignment.Center
     ) {
-        Text(numero.toString(), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = if (tiene) Burdeo else Apagado)
+        Text(numero.toString(), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = if (tiene) Marino else Apagado)
     }
 }
 
@@ -118,7 +115,7 @@ private fun RowScope.BotonRango(nombre: String, rango: String, color: Color, ele
             .height(if (elegido) 62.dp else 54.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(if (elegido) color else Color.White)
-            .border(1.dp, if (elegido) color else HuesoLinea, RoundedCornerShape(10.dp))
+            .border(1.dp, if (elegido) color else Linea, RoundedCornerShape(10.dp))
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -138,7 +135,7 @@ private fun RowScope.BotonRango(nombre: String, rango: String, color: Color, ele
             )
             Text(
                 text = rango,
-                color = if (elegido) Color.White.copy(alpha = 0.9f) else HuesoApagado,
+                color = if (elegido) Color.White.copy(alpha = 0.9f) else Apagado,
                 fontSize = if (elegido) 12.sp else 10.5.sp,
                 textAlign = TextAlign.Center,
                 lineHeight = 12.sp
@@ -154,7 +151,7 @@ private fun Bloque(modifier: Modifier = Modifier, contenido: @Composable ColumnS
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
             .background(Color.White)
-            .border(1.dp, HuesoLinea, RoundedCornerShape(14.dp))
+            .border(1.dp, Linea, RoundedCornerShape(14.dp))
             .padding(horizontal = 12.dp, vertical = 11.dp),
         content = contenido
     )
@@ -201,7 +198,7 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
     }
 
     Scaffold(
-        containerColor = Hueso,
+        containerColor = Fondo,
         bottomBar = {
             Column(
                 Modifier
@@ -235,23 +232,23 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
                     fontSize = 34.sp, fontWeight = FontWeight.ExtraBold,
                     color = Tinta, letterSpacing = (-1).sp, lineHeight = 36.sp
                 )
-                Text("registros en esta sesión", style = MaterialTheme.typography.labelSmall, color = HuesoApagado)
+                Text("registros en esta sesión", style = MaterialTheme.typography.labelSmall, color = Apagado)
                 Spacer(Modifier.height(10.dp))
                 Box(
                     Modifier.fillMaxWidth().height(9.dp)
-                        .clip(RoundedCornerShape(99.dp)).background(HuesoLinea)
+                        .clip(RoundedCornerShape(99.dp)).background(Linea)
                 ) {
                     Box(
                         Modifier.fillMaxHeight()
                             .fillMaxWidth(fraction = ((estado.resumen.pctTransito ?: 0.0) / 100.0).toFloat().coerceIn(0.02f, 1f))
-                            .clip(RoundedCornerShape(99.dp)).background(Burdeo)
+                            .clip(RoundedCornerShape(99.dp)).background(Marino)
                     )
                 }
                 Spacer(Modifier.height(6.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Proporción de tránsito", style = MaterialTheme.typography.labelSmall, color = HuesoApagado)
+                    Text("Proporción de tránsito", style = MaterialTheme.typography.labelSmall, color = Apagado)
                     Text(pct + " · " + estado.resumen.transito + " en tránsito",
-                        style = MaterialTheme.typography.labelSmall, color = Burdeo)
+                        style = MaterialTheme.typography.labelSmall, color = Marino)
                 }
                 if (!estado.sinSesionEnCurso) {
                     Spacer(Modifier.height(10.dp))
@@ -262,7 +259,7 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
                     ) {
                         EtiquetaEstado("En curso", "ok")
                         TextButton(onClick = onCerrar) {
-                            Text("Enviar sesión", color = Burdeo, style = MaterialTheme.typography.labelSmall)
+                            Text("Enviar sesión", color = Marino, style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }
@@ -345,7 +342,7 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
                                 EtiquetaEstado("Anulado", "aviso")
                             } else if (estado.sesionEnCurso) {
                                 TextButton(onClick = { aAnular = r.id }) {
-                                    Text("Anular", style = MaterialTheme.typography.labelSmall, color = Burdeo)
+                                    Text("Anular", style = MaterialTheme.typography.labelSmall, color = Marino)
                                 }
                             }
                         }

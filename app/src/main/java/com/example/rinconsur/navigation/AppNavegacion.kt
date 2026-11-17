@@ -23,6 +23,7 @@ import com.example.rinconsur.ui.components.BarraNavegacion
 import com.example.rinconsur.ui.components.esRaiz
 import com.example.rinconsur.ui.components.menuDe
 import com.example.rinconsur.ui.screens.PantallaCierre
+import com.example.rinconsur.ui.screens.PantallaColaboradores
 import com.example.rinconsur.ui.screens.PantallaEvento
 import com.example.rinconsur.ui.screens.PantallaLogin
 import com.example.rinconsur.ui.screens.PantallaMiSesion
@@ -33,10 +34,10 @@ import com.example.rinconsur.ui.screens.PantallaRechazar
 import com.example.rinconsur.ui.screens.PantallaRegistro
 import com.example.rinconsur.ui.screens.PantallaSesiones
 import com.example.rinconsur.ui.screens.PantallaSinSenal
-import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.viewmodel.EncabezadoViewModel
 import com.example.rinconsur.viewmodel.LoginViewModel
 import com.example.rinconsur.ui.screens.PantallaIndicadores
+import com.example.rinconsur.ui.theme.Fondo
 
 @Composable
 fun AppNavegacion() {
@@ -64,7 +65,7 @@ fun AppNavegacion() {
     val conBarra = rutaActual != Ruta.Login.ruta
 
     Scaffold(
-        containerColor = Hueso,
+        containerColor = Fondo,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             if (conBarra) {
@@ -116,8 +117,12 @@ fun AppNavegacion() {
             composable(Ruta.Login.ruta) {
                 PantallaLogin(
                     onEntrar = { perfil ->
-                        val destino =
-                            if (perfil == PerfilUsuario.OBSERVADOR) Ruta.MiSesion.ruta else Ruta.Sesiones.ruta
+                        val destino = when (perfil) {
+                            PerfilUsuario.OBSERVADOR -> Ruta.MiSesion.ruta
+                            PerfilUsuario.ADMINISTRADOR -> Ruta.Colaboradores.ruta
+                            PerfilUsuario.SUPERVISOR -> Ruta.Sesiones.ruta
+                            else -> Ruta.Indicadores.ruta
+                        }
                         navController.navigate(destino) { popUpTo(Ruta.Login.ruta) { inclusive = true } }
                     }
                 )
@@ -184,6 +189,8 @@ fun AppNavegacion() {
                 )
             }
 
+            composable(Ruta.Colaboradores.ruta) { PantallaColaboradores() }
+
             composable(Ruta.Perfil.ruta) {
                 PantallaPerfil(
                     onSalir = {
@@ -204,6 +211,7 @@ private fun NavHostController.navegar(pestana: String) {
         "Indicadores" -> Ruta.Indicadores.ruta
         "Sesiones" -> Ruta.Sesiones.ruta
         "Medir" -> Ruta.Evento.ruta
+        "Colaboradores" -> Ruta.Colaboradores.ruta
         else -> Ruta.Perfil.ruta
     }
     navigate(destino) { launchSingleTop = true }

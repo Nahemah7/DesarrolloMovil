@@ -33,14 +33,12 @@ import com.example.rinconsur.ui.components.MensajeFlotante
 import com.example.rinconsur.ui.components.NavInferior
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.TarjetaSeccion
-import com.example.rinconsur.ui.theme.Hueso
-import com.example.rinconsur.ui.theme.Aviso
-import com.example.rinconsur.ui.theme.Apagado
-import com.example.rinconsur.ui.theme.Burdeo
-import com.example.rinconsur.ui.theme.Info
-import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.CierreViewModel
 import kotlinx.coroutines.delay
+import com.example.rinconsur.ui.theme.Apagado
+import com.example.rinconsur.ui.theme.Fondo
+import com.example.rinconsur.ui.theme.Marino
+import com.example.rinconsur.ui.theme.Tinta
 
 private fun pct(v: Double?): String =
     if (v == null) "—" else String.format("%.1f", v).replace('.', ',') + " %"
@@ -67,7 +65,7 @@ fun PantallaCierre(onEnviar: () -> Unit, onIrA: (String) -> Unit) {
     }
 
     Scaffold(
-        containerColor = Hueso,
+        containerColor = Fondo,
     ) { pad ->
         Box(Modifier.fillMaxSize()) {
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
@@ -93,7 +91,7 @@ fun PantallaCierre(onEnviar: () -> Unit, onIrA: (String) -> Unit) {
                     Text("Proporción de tránsito de la sesión", style = MaterialTheme.typography.labelMedium, color = Apagado)
                     Text(
                         resumen.transito.toString() + " ÷ (" + resumen.total + " − " + resumen.noDeterminado + ") = " + pct(resumen.pctTransito),
-                        fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Burdeo
+                        fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Marino
                     )
                     Text("Los anulados y los «no determinado» no entran en el denominador.",
                         style = MaterialTheme.typography.bodySmall, color = Apagado)

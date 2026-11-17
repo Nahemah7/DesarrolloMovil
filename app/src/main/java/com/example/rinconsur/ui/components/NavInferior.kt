@@ -10,8 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.rinconsur.ui.theme.BurdeoSuave
-import com.example.rinconsur.ui.theme.FondoSuave
+import com.example.rinconsur.ui.theme.Superficie
 import com.example.rinconsur.ui.theme.Tinta
 
 @Composable
@@ -21,7 +20,7 @@ fun NavInferior(
     onIr: (String) -> Unit
 ) {
     NavigationBar(
-        containerColor = FondoSuave,
+        containerColor = Superficie,
         tonalElevation = 0.dp
     ) {
         opciones.forEach { opcion ->

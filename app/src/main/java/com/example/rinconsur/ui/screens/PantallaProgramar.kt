@@ -47,17 +47,16 @@ import com.example.rinconsur.ui.components.NavInferior
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaSeccion
-import com.example.rinconsur.ui.theme.Hueso
-import com.example.rinconsur.ui.theme.Apagado
-import com.example.rinconsur.ui.theme.Aviso
-import com.example.rinconsur.ui.theme.Burdeo
-import com.example.rinconsur.ui.theme.Linea
-import com.example.rinconsur.ui.theme.Info
-import com.example.rinconsur.ui.theme.Ok
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.ProgramarViewModel
 import kotlinx.coroutines.delay
+import com.example.rinconsur.ui.theme.Apagado
+import com.example.rinconsur.ui.theme.Aviso
+import com.example.rinconsur.ui.theme.Fondo
+import com.example.rinconsur.ui.theme.Linea
+import com.example.rinconsur.ui.theme.Marino
+import com.example.rinconsur.ui.theme.Ok
+import com.example.rinconsur.ui.theme.Tinta
 
 private fun fechaLarga(fecha: String): String {
     val p = fecha.split("-")
@@ -74,7 +73,7 @@ fun PantallaProgramar(onIrA: (String) -> Unit) {
     }
 
     Scaffold(
-        containerColor = Hueso,
+        containerColor = Fondo,
     ) { pad ->
         Box(Modifier.fillMaxSize()) {
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
@@ -212,7 +211,7 @@ private fun BloqueHora(
                         text = {
                             Text(
                                 h,
-                                color = if (elegida) Burdeo else Tinta,
+                                color = if (elegida) Marino else Tinta,
                                 fontWeight = if (elegida) FontWeight.Bold else FontWeight.Normal
                             )
                         },

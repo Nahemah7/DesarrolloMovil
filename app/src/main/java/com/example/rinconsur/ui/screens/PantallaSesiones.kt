@@ -45,10 +45,10 @@ import com.example.rinconsur.ui.components.FilaFiltros
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaSeccion
-import com.example.rinconsur.ui.theme.Apagado
-import com.example.rinconsur.ui.theme.Hueso
-import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.SesionesViewModel
+import com.example.rinconsur.ui.theme.Apagado
+import com.example.rinconsur.ui.theme.Fondo
+import com.example.rinconsur.ui.theme.Tinta
 
 private fun fechaDiaMes(fecha: String): String {
     val p = fecha.split("-")
@@ -67,7 +67,7 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit) {
     val contexto = LocalContext.current
     val idRevisor = remember { SesionPreferencias(contexto).leer() }
 
-    Scaffold(containerColor = Hueso) { pad ->
+    Scaffold(containerColor = Fondo) { pad ->
         Column(
             Modifier
                 .padding(pad)

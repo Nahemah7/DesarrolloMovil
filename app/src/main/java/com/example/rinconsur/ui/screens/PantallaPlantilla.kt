@@ -43,13 +43,9 @@ import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaSeccion
 import com.example.rinconsur.ui.styles.EstilosBoton
 import com.example.rinconsur.ui.styles.estiloAltoBoton
-import com.example.rinconsur.ui.theme.Hueso
-import com.example.rinconsur.ui.theme.Apagado
-import com.example.rinconsur.ui.theme.Burdeo
-import com.example.rinconsur.ui.theme.Info
-import com.example.rinconsur.ui.theme.Peligro
-import com.example.rinconsur.ui.theme.Ok
 import com.example.rinconsur.viewmodel.PlantillaViewModel
+import com.example.rinconsur.ui.theme.Fondo
+import com.example.rinconsur.ui.theme.Peligro
 
 @Composable
 fun PantallaPlantilla(numero: Int, onVolver: () -> Unit) {
@@ -58,7 +54,7 @@ fun PantallaPlantilla(numero: Int, onVolver: () -> Unit) {
     val estado by vm.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
-        containerColor = Hueso,
+        containerColor = Fondo,
     ) { pad ->
         Box(Modifier.fillMaxSize()) {
         Column(

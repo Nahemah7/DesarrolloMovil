@@ -31,23 +31,23 @@ import com.example.rinconsur.ui.components.CampoTexto
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaSeccion
-import com.example.rinconsur.ui.theme.Aviso
-import com.example.rinconsur.ui.theme.Burdeo
-import com.example.rinconsur.ui.theme.Dimens
-import com.example.rinconsur.ui.theme.Hueso
 import com.example.rinconsur.viewmodel.RecuperarViewModel
+import com.example.rinconsur.ui.theme.Aviso
+import com.example.rinconsur.ui.theme.Fondo
+import com.example.rinconsur.ui.theme.Marino
+import com.example.rinconsur.ui.theme.Dimens
 
 @Composable
 fun PantallaRecuperar(onVolver: () -> Unit) {
     val vm: RecuperarViewModel = viewModel()
     val estado by vm.uiState.collectAsStateWithLifecycle()
 
-    Scaffold(containerColor = Hueso) { pad ->
+    Scaffold(containerColor = Fondo) { pad ->
         Column(
             Modifier.padding(pad).imePadding().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)
         ) {
             Spacer(Modifier.height(Dimens.espacioGrande))
-            Text("RINCÓN SUR", style = MaterialTheme.typography.labelMedium, color = Burdeo)
+            Text("RINCÓN SUR", style = MaterialTheme.typography.labelMedium, color = Marino)
             Text("Recuperar tu clave", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(Dimens.espacioMedio))
 
