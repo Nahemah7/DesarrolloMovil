@@ -76,7 +76,7 @@ JOIN clasificacion c ON c.id_clasificacion = r.id_clasificacion
 JOIN rango_etario rg ON rg.id_rango = r.id_rango
 JOIN tipo_compania tc ON tc.id_tipo_compania = r.id_tipo_compania
 LEFT JOIN v_tipo_dia td ON td.fecha = s.fecha
-WHERE r.anulado = 0 AND e.id_estado = 4 AND c.id_clasificacion = 'Transito'
+WHERE r.anulado = 0 AND e.id_estado = 4 AND c.id_clasificacion = 1
 GROUP BY a.codigo, s.fecha, td.tipo_dia, rg.nombre, tc.nombre, r.compras_otra_tienda;;
 
 CREATE VIEW v_pendiente_medir AS

@@ -67,6 +67,7 @@ import com.example.rinconsur.ui.theme.Apagado
 import com.example.rinconsur.ui.theme.AquaSuave
 import com.example.rinconsur.ui.theme.EtiquetaAdulto
 import com.example.rinconsur.ui.theme.EtiquetaAdultoJoven
+import com.example.rinconsur.ui.theme.colorDeRango
 import com.example.rinconsur.ui.theme.EtiquetaJoven
 import com.example.rinconsur.ui.theme.EtiquetaNino
 import com.example.rinconsur.ui.theme.EtiquetaTerceraEdad
@@ -83,13 +84,7 @@ private fun nombreDe(rango: RangoEtario): String = when (rango) {
     RangoEtario.DE_61_O_MAS -> "Tercera edad"
 }
 
-private fun colorDe(rango: RangoEtario): Color = when (rango) {
-    RangoEtario.MENOR_18 -> EtiquetaNino
-    RangoEtario.DE_18_A_25 -> EtiquetaJoven
-    RangoEtario.DE_26_A_40 -> EtiquetaAdultoJoven
-    RangoEtario.DE_41_A_60 -> EtiquetaAdulto
-    RangoEtario.DE_61_O_MAS -> EtiquetaTerceraEdad
-}
+private fun colorDe(rango: RangoEtario): Color = colorDeRango(rango)
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

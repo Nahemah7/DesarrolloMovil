@@ -99,9 +99,10 @@ que pedir uno nuevo.
 
 ### Leer y decidir
 
-- **Reporte**: la pantalla de entrada de la jefatura. Arriba la meta de conversión del mes con su avance;
-  después la comparación por mes, las horas punta por bloque y el perfil del tránsito por rango de edad,
-  compañía y compra en otra tienda.
+- **Reporte**: la pantalla de entrada de la jefatura. La meta del mes se dibuja como un anillo de avance;
+  la comparación por mes y las horas punta, como barras; y el perfil del tránsito, como tres donuts con su
+  leyenda (rango de edad, compañía y compra en otra tienda). Los gráficos se dibujan con Compose, sin
+  librerías externas, así usan la misma paleta y el mismo peso visual que el resto de la aplicación.
 - **Meta del mes**: solo la jefa la registra, entre 0 y 100 por ciento. Si el mes no tiene días cargados,
   el avance dice que no hay dato en vez de mostrar un cero.
 - **Horas punta**: marca el bloque de mayor tránsito medido y distingue con texto las horas que todavía no

@@ -26,6 +26,18 @@ val Peligro = Color(0xFFB3261E)
 val Info = Color(0xFF1F4E79)
 val InfoSuave = Color(0xFFE8EFF6)
 
+// Series de los gráficos de una sola medida (barras): marino y aqua de la marca.
+val AquaMedio = Color(0xFF0F8C82)
+val MarinoTenue = Color(0xFF6E8CA8)
+val SerieGraficos = listOf(Marino, Aqua, MarinoClaro, AquaMedio, MarinoTenue)
+
+// Para repartos: las porciones tienen que distinguirse entre sí de un vistazo, así que se suman
+// dos tonos de otra familia (mostaza y ciruela) en vez de tres variantes del mismo azul.
+val Mostaza = Color(0xFFB7791F)
+val Ciruela = Color(0xFF6B2D5C)
+val SerieCategorica = listOf(Marino, Aqua, Mostaza, Ciruela, MarinoClaro)
+val ColoresCompras = listOf(Aqua, MarinoTenue)
+
 val EtiquetaNino = Color(0xFF1F4E79)
 val EtiquetaJoven = Color(0xFF0B7A6E)
 val EtiquetaAdultoJoven = Color(0xFF4B3A8C)
