@@ -57,7 +57,8 @@ CREATE TABLE bloque_horario (
 
 CREATE TABLE conteo_ingreso (
     id_conteo INTEGER PRIMARY KEY AUTOINCREMENT,
-    id_acceso            INT      NOT NULL,
+    -- Nulo = el bloque se cargó como total del local, sin repartir entre accesos.
+    id_acceso            INT      NULL,
     fecha                DATE     NOT NULL,
     id_bloque            INT      NOT NULL,
     cantidad             INT      NOT NULL,
@@ -65,7 +66,6 @@ CREATE TABLE conteo_ingreso (
     fecha_carga          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     id_usuario_correccion INT     NULL,
     fecha_correccion     DATETIME NULL,
-    CONSTRAINT uq_conteo_bloque UNIQUE (id_acceso, fecha, id_bloque),
     CONSTRAINT ck_conteo_cantidad CHECK (cantidad >= 0),
     CONSTRAINT ck_conteo_correccion CHECK ((id_usuario_correccion IS NULL) = (fecha_correccion IS NULL)),
     CONSTRAINT fk_conteo_acceso FOREIGN KEY (id_acceso) REFERENCES acceso (id_acceso),
@@ -81,7 +81,10 @@ CREATE TABLE transaccion_bloque (
     cantidad         INT      NOT NULL,
     id_usuario_carga INT      NOT NULL,
     fecha_carga      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id_usuario_correccion INT     NULL,
+    fecha_correccion DATETIME NULL,
     CONSTRAINT uq_transaccion_bloque UNIQUE (fecha, id_bloque),
+    CONSTRAINT fk_transaccion_corrige FOREIGN KEY (id_usuario_correccion) REFERENCES usuario (id_usuario),
     CONSTRAINT ck_transaccion_cantidad CHECK (cantidad >= 0),
     CONSTRAINT fk_transaccion_bloque FOREIGN KEY (id_bloque) REFERENCES bloque_horario (id_bloque),
     CONSTRAINT fk_transaccion_carga FOREIGN KEY (id_usuario_carga) REFERENCES usuario (id_usuario)
@@ -224,3 +227,10 @@ CREATE TABLE respuesta_seguridad (
     CONSTRAINT fk_respuesta_usuario FOREIGN KEY (id_usuario) REFERENCES usuario (id_usuario),
     CONSTRAINT fk_respuesta_pregunta FOREIGN KEY (id_pregunta) REFERENCES pregunta_seguridad (id_pregunta)
 );;
+
+-- Un bloque se carga de una sola forma: repartido entre accesos, o como total sin detalle.
+CREATE UNIQUE INDEX ux_conteo_con_detalle
+    ON conteo_ingreso (id_acceso, fecha, id_bloque) WHERE id_acceso IS NOT NULL;;
+
+CREATE UNIQUE INDEX ux_conteo_sin_detalle
+    ON conteo_ingreso (fecha, id_bloque) WHERE id_acceso IS NULL;;

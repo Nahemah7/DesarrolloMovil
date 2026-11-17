@@ -23,6 +23,7 @@ import com.example.rinconsur.ui.components.BarraNavegacion
 import com.example.rinconsur.ui.components.esRaiz
 import com.example.rinconsur.ui.components.menuDe
 import com.example.rinconsur.ui.screens.PantallaCierre
+import com.example.rinconsur.ui.screens.PantallaCargaDia
 import com.example.rinconsur.ui.screens.PantallaColaboradores
 import com.example.rinconsur.ui.screens.PantallaNuevaPersona
 import com.example.rinconsur.ui.screens.PantallaPrimerAcceso
@@ -203,6 +204,8 @@ fun AppNavegacion() {
 
             composable(Ruta.Reporte.ruta) { PantallaReporte() }
 
+            composable(Ruta.Carga.ruta) { PantallaCargaDia() }
+
             composable(Ruta.Colaboradores.ruta) {
                 PantallaColaboradores(
                     onNuevaPersona = { navController.navigate(Ruta.NuevaPersona.ruta) }
@@ -239,6 +242,7 @@ private fun NavHostController.navegar(pestana: String) {
         "Mis sesiones" -> Ruta.MiSesion.ruta
         "Indicadores" -> Ruta.Indicadores.ruta
         "Reporte" -> Ruta.Reporte.ruta
+        "Carga" -> Ruta.Carga.ruta
         "Sesiones" -> Ruta.Sesiones.ruta
         "Medir" -> Ruta.Evento.ruta
         "Colaboradores" -> Ruta.Colaboradores.ruta
@@ -253,5 +257,5 @@ internal fun inicioDe(perfil: PerfilUsuario): String = when (perfil) {
     PerfilUsuario.ADMINISTRADOR -> Ruta.Colaboradores.ruta
     PerfilUsuario.SUPERVISOR -> Ruta.Sesiones.ruta
     PerfilUsuario.JEFE_TIENDA -> Ruta.Reporte.ruta
-    PerfilUsuario.SUBGERENTE -> Ruta.Indicadores.ruta
+    PerfilUsuario.SUBGERENTE -> Ruta.Carga.ruta
 }

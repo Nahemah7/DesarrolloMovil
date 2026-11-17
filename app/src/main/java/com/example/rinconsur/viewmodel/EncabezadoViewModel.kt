@@ -60,6 +60,7 @@ class EncabezadoViewModel(application: Application) : AndroidViewModel(applicati
             ruta.startsWith("sesion/") -> "Sesión" to "Detalle y segmentación"
 
             ruta.startsWith("indicadores") -> "Indicadores" to repositorio.fechaHoy()
+            ruta.startsWith("carga") -> "Carga del día" to "Ingresos y boletas por bloque"
             ruta.startsWith("reporte") -> "Reporte" to "Meta, comparación y tránsito"
             ruta.startsWith("nueva_persona") -> "Nueva persona" to "Alta de cuenta"
             ruta.startsWith("colaboradores") -> "Colaboradores" to "Personas de la tienda"

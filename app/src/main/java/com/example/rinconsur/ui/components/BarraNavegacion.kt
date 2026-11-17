@@ -87,8 +87,9 @@ fun menuDe(perfil: PerfilUsuario): List<OpcionMenu> = when (perfil) {
         OpcionMenu("Perfil", Ruta.Perfil.ruta, Icons.Outlined.Person, Icons.Filled.Person)
     )
 
-    // El subgerente responde por el reporte operativo: mira el día y la comparación por mes.
+    // El subgerente carga los números del día y responde por el reporte operativo.
     PerfilUsuario.SUBGERENTE -> listOf(
+        OpcionMenu("Carga", Ruta.Carga.ruta, Icons.Outlined.Edit, Icons.Filled.Edit),
         OpcionMenu("Indicadores", Ruta.Indicadores.ruta, Icons.Outlined.BarChart, Icons.Filled.BarChart),
         OpcionMenu("Reporte", Ruta.Reporte.ruta, Icons.Outlined.Star, Icons.Filled.Star),
         OpcionMenu("Perfil", Ruta.Perfil.ruta, Icons.Outlined.Person, Icons.Filled.Person)

@@ -6,6 +6,7 @@ import com.example.rinconsur.model.PreguntaSeguridad
 import com.example.rinconsur.model.Acceso
 import com.example.rinconsur.model.BloqueHorario
 import com.example.rinconsur.model.Clasificacion
+import com.example.rinconsur.model.CargaDia
 import com.example.rinconsur.model.Colaborador
 import com.example.rinconsur.model.Compania
 import com.example.rinconsur.model.EstadoSesion
@@ -28,6 +29,7 @@ class FlujoRepository(context: Context) {
     private val sesionDao = SesionDao(db)
     private val indicadorDao = IndicadorDao(db)
     private val eventoDao = EventoDao(db)
+    private val cargaDao = CargaDao(db)
 
     companion object {
         const val MINIMO_REGISTROS = FlujoDbHelper.MINIMO_REGISTROS
@@ -127,6 +129,11 @@ class FlujoRepository(context: Context) {
     fun bloquesPendientes(fecha: String): List<String> = indicadorDao.bloquesPendientes(fecha)
 
     fun reporteJefatura(): ReporteJefatura = indicadorDao.reporteJefatura(fechaHoy())
+
+    fun cargaDelDia(fecha: String = fechaHoy()): CargaDia = cargaDao.cargaDeFecha(fecha)
+
+    fun guardarCargaDelDia(carga: CargaDia, idUsuario: Long): Boolean =
+        cargaDao.guardar(carga, idUsuario, ahora())
 
     fun guardarMeta(anio: Int, mes: Int, porcentaje: Double, idUsuario: Long): Boolean =
         indicadorDao.guardarMeta(anio, mes, porcentaje, idUsuario)

@@ -28,7 +28,7 @@ LEFT JOIN clasificacion c ON c.id_clasificacion = r.id_clasificacion
 GROUP BY s.id_sesion, s.codigo, s.id_acceso, s.fecha, CAST(strftime('%H', s.hora_inicio_prog) AS INTEGER), e.nombre;;
 
 CREATE VIEW v_transito_bloque AS
-SELECT ci.fecha, td.tipo_dia, a.codigo AS acceso, bh.id_bloque, bh.hora_inicio, ci.cantidad AS ingresos,
+SELECT ci.fecha, td.tipo_dia, COALESCE(a.codigo, 'Sin detalle') AS acceso, bh.id_bloque, bh.hora_inicio, ci.cantidad AS ingresos,
        MAX(CASE WHEN sv.fecha = ci.fecha THEN sv.pct_transito END) AS pct_sesion,
        ROUND(AVG(CASE WHEN sv.fecha < ci.fecha THEN sv.pct_transito END), 1) AS pct_promedio,
        CASE WHEN MAX(CASE WHEN sv.fecha = ci.fecha THEN sv.pct_transito END) IS NOT NULL THEN 'medido'
@@ -37,7 +37,7 @@ SELECT ci.fecha, td.tipo_dia, a.codigo AS acceso, bh.id_bloque, bh.hora_inicio, 
        ROUND(ci.cantidad * COALESCE(MAX(CASE WHEN sv.fecha = ci.fecha THEN sv.pct_transito END),
                                     AVG(CASE WHEN sv.fecha < ci.fecha THEN sv.pct_transito END)) / 100) AS transito_estimado
 FROM conteo_ingreso ci
-JOIN acceso a ON a.id_acceso = ci.id_acceso
+LEFT JOIN acceso a ON a.id_acceso = ci.id_acceso
 JOIN bloque_horario bh ON bh.id_bloque = ci.id_bloque
 JOIN v_tipo_dia td ON td.fecha = ci.fecha
 LEFT JOIN v_sesion_proporcion sv
@@ -45,19 +45,19 @@ LEFT JOIN v_sesion_proporcion sv
       AND ( (sv.fecha = ci.fecha AND sv.hora_bloque = CAST(strftime('%H', bh.hora_inicio) AS INTEGER))
          OR (sv.fecha < ci.fecha AND sv.fecha >= date(ci.fecha, '-28 day')
              AND EXISTS (SELECT 1 FROM v_tipo_dia t2 WHERE t2.fecha = sv.fecha AND t2.tipo_dia = td.tipo_dia)) )
-GROUP BY ci.fecha, td.tipo_dia, a.codigo, bh.id_bloque, bh.hora_inicio, ci.cantidad;;
+GROUP BY ci.fecha, td.tipo_dia, COALESCE(a.codigo, 'Sin detalle'), bh.id_bloque, bh.hora_inicio, ci.cantidad;;
 
 CREATE VIEW v_conversion_dia AS
 SELECT i.fecha, td.tipo_dia, i.ingresos, t.transacciones,
        ROUND(100.0 * t.transacciones / NULLIF(i.ingresos, 0), 1) AS conversion_bruta,
-       CASE WHEN b.bloques = 44 AND b.accesos = 4 AND tb.bloques_tx = 11 THEN 'completo' ELSE 'incompleto' END AS dia,
+       CASE WHEN b.bloques = 11 AND tb.bloques_tx = 11 THEN 'completo' ELSE 'incompleto' END AS dia,
        tr.transito, i.ingresos - tr.transito AS flujo_sin_transito,
        CASE WHEN tr.sin_informacion = 0
             THEN ROUND(100.0 * t.transacciones / NULLIF(i.ingresos - tr.transito, 0), 1) END AS conversion_sin_transito,
        tr.medidos, tr.estimados, tr.sin_informacion
 FROM (SELECT fecha, SUM(cantidad) AS ingresos FROM conteo_ingreso GROUP BY fecha) i
 JOIN (SELECT fecha, SUM(cantidad) AS transacciones FROM transaccion_bloque GROUP BY fecha) t ON t.fecha = i.fecha
-JOIN (SELECT fecha, COUNT(*) AS bloques, COUNT(DISTINCT id_acceso) AS accesos FROM conteo_ingreso GROUP BY fecha) b ON b.fecha = i.fecha
+JOIN (SELECT fecha, COUNT(DISTINCT id_bloque) AS bloques, COUNT(DISTINCT id_acceso) AS accesos FROM conteo_ingreso GROUP BY fecha) b ON b.fecha = i.fecha
 LEFT JOIN (SELECT fecha, COUNT(*) AS bloques_tx FROM transaccion_bloque GROUP BY fecha) tb ON tb.fecha = i.fecha
 LEFT JOIN (SELECT fecha, SUM(transito_estimado) AS transito,
                   SUM(origen = 'medido') AS medidos, SUM(origen = 'estimado') AS estimados,

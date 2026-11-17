@@ -27,7 +27,7 @@ La aplicación entra con RUT y clave, y cada perfil ve solo lo que le correspond
 |---|---|
 | **Colaborador observador** | Mide en el acceso: registra a cada persona con un toque, anula un registro mal tomado y cierra la sesión para enviarla a validación |
 | **Supervisor de piso** | Opera el día: programa sesiones, entra por la lista «Por validar», valida o rechaza con motivo, registra eventos y consulta los indicadores |
-| **Subgerente comercial** | Responde por el reporte operativo: indicadores del día por tipo de día, comparación por mes y perfil del tránsito. La carga de ingresos y boletas del día está en desarrollo |
+| **Subgerente comercial** | Carga los ingresos y las boletas del día, bloque por bloque, y responde por el reporte operativo: indicadores, comparación por mes y perfil del tránsito |
 | **Jefa de tienda** | Lee y decide: reporte del mes con la meta de conversión, la comparación por mes, las horas punta y el perfil del tránsito |
 | **Administrador** | Crea las cuentas de la tienda y entrega un código temporal. Cada persona define su propia clave y su pregunta de seguridad al entrar por primera vez |
 
@@ -83,6 +83,19 @@ La cuenta no nace con una clave definitiva. Al entrar con el RUT y el código te
 deja pasar: pide la contraseña nueva, repetida, y **una** pregunta de seguridad con su respuesta. Recién
 ahí el código deja de servir y la persona entra a su menú. Si el código venció, el login lo dice y hay
 que pedir uno nuevo.
+
+### Cargar el día
+
+- **Carga del día**: once bloques horarios con dos datos cada uno, ingresos del local y boletas del
+  punto de venta. Se escribe leyendo el reporte de caja, con el total y la conversión calculándose al pie
+  mientras se avanza.
+- **Reparto por acceso, opcional**: un bloque se puede repartir entre A1 y A4 cuando el dato existe; la
+  suma tiene que dar el total del bloque y, si no cuadra, no deja guardar. Si no se reparte, el bloque
+  queda como total del local y los informes lo dicen en vez de inventar un reparto.
+- **Bloques a medias**: si un bloque tiene ingresos y le faltan boletas, la pantalla avisa, porque sin los
+  dos datos no hay conversión para ese día.
+- **Corrección**: volver a guardar un día ya cargado reemplaza los valores y deja marcado quién corrigió y
+  cuándo, tanto en los ingresos como en las boletas.
 
 ### Leer y decidir
 
@@ -160,6 +173,7 @@ app/src/main/java/com/example/rinconsur/
     EventoDao       eventos del día
     CatalogoDao     accesos, bloques, rangos, compañías y fechas
     BaseDao         lectura de cursores y marca de tiempo
+    CargaDao        carga diaria de ingresos y boletas
 app/src/main/assets/sql/
     01_esquema.sql      tablas, claves y restricciones
     02_vistas.sql       las seis vistas de indicadores
@@ -187,11 +201,21 @@ que el esquema y la semilla no se mezclan con las consultas.
 ./gradlew testDebugUnitTest
 ```
 
-Hay **70 pruebas unitarias** sobre reglas que no dependen de Android: formato y dígito verificador del
+Hay **80 pruebas unitarias** sobre reglas que no dependen de Android: formato y dígito verificador del
 RUT, reglas de la clave, largo del texto libre, reglas de programación de sesiones (duración y cruces),
 filtros del listado de sesiones, armado del detalle de una sesión, cálculo del avance de la meta frente a
-su objetivo, separación de un script SQL en sentencias, formato del código temporal y validaciones del
-primer acceso y del alta de una persona.
+su objetivo, separación de un script SQL en sentencias, formato del código temporal, validaciones del
+primer acceso y del alta de una persona, y las reglas de la carga diaria (totales, conversión, reparto por
+acceso y bloques incompletos).
+
+```bash
+./gradlew connectedDebugAndroidTest
+```
+
+Ocho pruebas instrumentadas corren sobre la base del propio teléfono: las tres del anexo (proporción de
+tránsito de S-0001 y S-0002, conversión del 15-09 y tránsito estimado del A4 a las 13:00) y cuatro de la
+carga del día, que guardan, releen, comprueban que las métricas del día reflejan lo cargado y que volver a
+guardar no duplica filas.
 
 ## Decisiones del grupo
 
@@ -217,6 +241,11 @@ Quedan anotadas acá porque explican el porqué de lo que se ve en pantalla.
   dónde mirar.
 - **«Solo las mías» son las sesiones que medí yo**, no las que programé: el supervisor programa casi
   todas, así que filtrar por programador no acotaría nada.
+- **La boleta no tiene acceso; el ingreso sí.** Una venta no entra por una puerta, así que las boletas
+  son once por día (una por bloque) y los ingresos, cuando hay detalle, cuatro por bloque. El reparto por
+  acceso es opcional porque la mayoría de las tiendas no tiene contador en cada vano.
+- **Sin ingresos y boletas del mismo bloque no hay conversión.** El día queda como incompleto y la
+  pantalla lo avisa antes de guardar, en vez de mostrar un porcentaje calculado con la mitad de los datos.
 - **Ninguna cuenta nace con una clave definitiva.** El administrador crea la persona y la app genera un
   código temporal que vence en siete días; el primer acceso obliga a dejar una clave propia y una
   pregunta de seguridad. En la base queda el hash del código, nunca el código.
@@ -236,7 +265,7 @@ con Swagger, y el cliente Android consumiendo la API con Retrofit. La aplicació
 señal sobre la base local, y las pantallas que faltan de cada perfil se construyen sobre ese mismo
 contrato:
 
-- Carga diaria de ingresos y boletas, con importación del archivo del punto de venta.
+- Importación del archivo del punto de venta para llenar la carga del día de una vez.
 - Pantallas de jefatura: meta del mes, comparación de períodos, horas punta y perfil del tránsito.
 - Gestión de colaboradores: edición de datos, activación y desactivación de una cuenta.
 - Recuperación de clave eligiendo la pregunta de seguridad del catálogo, y hash de clave con sal
