@@ -1,6 +1,7 @@
 package com.example.rinconsur.data
 
 import android.content.Context
+import com.example.rinconsur.model.NuevaPersona
 import com.example.rinconsur.model.PreguntaSeguridad
 import com.example.rinconsur.model.Acceso
 import com.example.rinconsur.model.BloqueHorario
@@ -144,6 +145,27 @@ class FlujoRepository(context: Context) {
     fun contarTodosLosEventos(): Int = eventoDao.contarTodosLosEventos()
 
     fun preguntas(): List<PreguntaSeguridad> = usuarioDao.listarPreguntas()
+
+    // El administrador crea la cuenta con un código temporal que vence en una semana.
+    fun crearColaborador(datos: NuevaPersona, codigo: String): Long? =
+        usuarioDao.crearColaborador(
+            datos,
+            Clave.hash(Rut.formatear(datos.rut), codigo),
+            vencimientoDeCodigo()
+        )
+
+    fun regenerarCodigo(idUsuario: Long, rut: String, codigo: String): Boolean =
+        usuarioDao.regenerarCodigo(idUsuario, Clave.hash(rut, codigo), vencimientoDeCodigo())
+
+    fun definirClaveDefinitiva(idUsuario: Long, rut: String, clave: String, idPregunta: Long, respuesta: String): Boolean {
+        val claveOk = usuarioDao.definirClaveDefinitiva(idUsuario, Clave.hash(rut, clave)) ||
+            return false
+        usuarioDao.guardarRespuestas(idUsuario, rut, listOf(idPregunta to respuesta))
+        return claveOk
+    }
+
+    private fun vencimientoDeCodigo(): String =
+        java.time.LocalDate.now().plusDays(7).toString()
     fun preguntasDe(idUsuario: Long): List<PreguntaSeguridad> = usuarioDao.listarPreguntasDe(idUsuario)
     fun tienePreguntas(idUsuario: Long): Boolean = usuarioDao.tienePreguntas(idUsuario)
     fun guardarRespuestas(idUsuario: Long, rut: String, respuestas: List<Pair<Long, String>>) =

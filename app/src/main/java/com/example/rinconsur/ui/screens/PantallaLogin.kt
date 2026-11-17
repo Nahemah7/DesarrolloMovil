@@ -52,7 +52,7 @@ import com.example.rinconsur.ui.theme.Superficie
 import com.example.rinconsur.ui.theme.Dimens
 
 @Composable
-fun PantallaLogin(onEntrar: (PerfilUsuario) -> Unit) {
+fun PantallaLogin(onEntrar: (PerfilUsuario, Boolean) -> Unit) {
     var recuperando by rememberSaveable { mutableStateOf(false) }
     if (recuperando) {
         PantallaRecuperar(onVolver = { recuperando = false })
@@ -161,7 +161,9 @@ fun PantallaLogin(onEntrar: (PerfilUsuario) -> Unit) {
                         icono = Icons.Filled.Login,
                         onClick = {
                             val rol = vm.entrar()
-                            if (rol != null) onEntrar(rol)
+                            // La bandera se lee del mismo ViewModel que acaba de entrar: el
+                            // contenedor de navegación tiene otra instancia.
+                            if (rol != null) onEntrar(rol, vm.usuario.value?.debeCambiarClave == true)
                         }
                     )
 

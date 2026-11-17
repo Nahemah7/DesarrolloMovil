@@ -2,6 +2,7 @@ package com.example.rinconsur.navigation
 
 sealed class Ruta(val ruta: String) {
     data object Login : Ruta("login")
+    data object PrimerAcceso : Ruta("primer_acceso")
 
     data object Sesiones : Ruta("sesiones")
     data object Programar : Ruta("programar")
@@ -19,6 +20,7 @@ sealed class Ruta(val ruta: String) {
     data object Perfil : Ruta("perfil")
 
     data object Colaboradores : Ruta("colaboradores")
+    data object NuevaPersona : Ruta("nueva_persona")
     data object SesionDetalle : Ruta("sesion/{idSesion}")
 }
 

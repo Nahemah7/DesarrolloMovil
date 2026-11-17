@@ -61,6 +61,8 @@ class EncabezadoViewModel(application: Application) : AndroidViewModel(applicati
 
             ruta.startsWith("indicadores") -> "Indicadores" to repositorio.fechaHoy()
             ruta.startsWith("reporte") -> "Reporte" to "Meta, comparación y tránsito"
+            ruta.startsWith("nueva_persona") -> "Nueva persona" to "Alta de cuenta"
+            ruta.startsWith("colaboradores") -> "Colaboradores" to "Personas de la tienda"
 
             ruta.startsWith("programar") -> "Programar sesión" to "Nueva sesión de conteo"
 

@@ -24,6 +24,10 @@ CREATE TABLE usuario (
     correo         VARCHAR(100) NOT NULL,
     telefono       VARCHAR(20)  NULL,
     password_hash  VARCHAR(255) NOT NULL,
+    -- La cuenta nace con un código temporal del administrador: mientras esté en 1,
+    -- el login no deja pasar sin cambiar la clave y definir su pregunta.
+    debe_cambiar_clave BOOLEAN  NOT NULL DEFAULT 0,
+    codigo_vence   DATETIME     NULL,
     activo         BOOLEAN      NOT NULL DEFAULT 1,
     foto           BLOB         NULL,
     fecha_creacion DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,

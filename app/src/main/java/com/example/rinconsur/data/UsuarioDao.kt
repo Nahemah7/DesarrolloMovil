@@ -3,6 +3,7 @@ package com.example.rinconsur.data
 import android.content.ContentValues
 import com.example.rinconsur.model.Colaborador
 import com.example.rinconsur.model.PreguntaSeguridad
+import com.example.rinconsur.model.NuevaPersona
 import com.example.rinconsur.model.PerfilUsuario
 
 internal class UsuarioDao(private val helper: FlujoDbHelper) {
@@ -126,11 +127,60 @@ internal class UsuarioDao(private val helper: FlujoDbHelper) {
                         cargo = c.texto("cargo"),
                         perfil = PerfilUsuario.porCodigo(c.texto("rol_codigo")) ?: PerfilUsuario.OBSERVADOR,
                         activo = c.entero("activo") == 1,
-                        passwordHash = c.texto("password_hash")
+                        passwordHash = c.texto("password_hash"),
+                        debeCambiarClave = c.entero("debe_cambiar_clave") == 1,
+                        codigoVence = c.textoOpcional("codigo_vence")
                     )
                 )
             }
         }
         return lista
     }
+
+    // ==================== alta y primer acceso ====================
+
+    fun crearColaborador(datos: NuevaPersona, codigoHash: String, vence: String): Long? {
+        val perfil = datos.rol ?: return null
+        val idRol = idRolDe(perfil) ?: return null
+        val valores = ContentValues().apply {
+            put("id_rol", idRol)
+            put("rut", Rut.formatear(datos.rut))
+            put("nombres", datos.nombres.trim())
+            put("apellido_paterno", datos.apellidoPaterno.trim())
+            put("apellido_materno", datos.apellidoMaterno.trim().ifBlank { null })
+            put("cargo", perfil.etiqueta)
+            put("correo", datos.correo.trim().lowercase())
+            put("telefono", datos.telefono.trim().ifBlank { null })
+            put("password_hash", codigoHash)
+            put("debe_cambiar_clave", 1)
+            put("codigo_vence", vence)
+            put("activo", 1)
+        }
+        val id = helper.writableDatabase.insert("usuario", null, valores)
+        return if (id > 0) id else null
+    }
+
+    fun regenerarCodigo(idUsuario: Long, codigoHash: String, vence: String): Boolean {
+        val valores = ContentValues().apply {
+            put("password_hash", codigoHash)
+            put("debe_cambiar_clave", 1)
+            put("codigo_vence", vence)
+        }
+        return helper.writableDatabase.update("usuario", valores, "id_usuario = ?", arrayOf(idUsuario.toString())) > 0
+    }
+
+    // Cierra el primer acceso: clave propia, sin código que venza y con la pregunta ya guardada.
+    fun definirClaveDefinitiva(idUsuario: Long, claveHash: String): Boolean {
+        val valores = ContentValues().apply {
+            put("password_hash", claveHash)
+            put("debe_cambiar_clave", 0)
+            put("codigo_vence", null as String?)
+        }
+        return helper.writableDatabase.update("usuario", valores, "id_usuario = ?", arrayOf(idUsuario.toString())) > 0
+    }
+
+    private fun idRolDe(perfil: PerfilUsuario): Long? =
+        helper.readableDatabase.rawQuery(
+            "SELECT id_rol FROM rol WHERE codigo = ?", arrayOf(perfil.codigo)
+        ).use { c -> if (c.moveToFirst()) c.getLong(0) else null }
 }

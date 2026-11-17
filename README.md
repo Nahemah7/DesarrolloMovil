@@ -29,7 +29,7 @@ La aplicación entra con RUT y clave, y cada perfil ve solo lo que le correspond
 | **Supervisor de piso** | Opera el día: programa sesiones, entra por la lista «Por validar», valida o rechaza con motivo, registra eventos y consulta los indicadores |
 | **Subgerente comercial** | Responde por el reporte operativo: indicadores del día por tipo de día, comparación por mes y perfil del tránsito. La carga de ingresos y boletas del día está en desarrollo |
 | **Jefa de tienda** | Lee y decide: reporte del mes con la meta de conversión, la comparación por mes, las horas punta y el perfil del tránsito |
-| **Administrador** | Gestiona personas: hoy consulta la lista de colaboradores por rol y estado; el alta, la edición y el reseteo de clave están en desarrollo |
+| **Administrador** | Crea las cuentas de la tienda y entrega un código temporal. Cada persona define su propia clave y su pregunta de seguridad al entrar por primera vez |
 
 ## Qué hace la aplicación
 
@@ -66,6 +66,23 @@ La aplicación entra con RUT y clave, y cada perfil ve solo lo que le correspond
 - **Indicadores**: hoy, días hábiles o fines de semana, con la semana navegable. Muestra el avance de la
   medición, lo que la tienda registró (ingresos, transacciones y conversión bruta), el tránsito medido,
   los ingresos por acceso y la conversión sin tránsito cuando el día está completo.
+
+### Administrar personas
+
+- **Colaboradores**: la lista completa por perfil y estado, con la marca de quienes todavía no
+  entraron nunca.
+- **Nueva persona**: RUT, nombres, apellidos, correo y teléfono, y el perfil elegido de una lista. El
+  cargo sale del perfil, no se escribe aparte.
+- **Código temporal**: la app lo genera al crear la cuenta y se muestra una sola vez; en la base queda
+  su hash y su vencimiento, siete días. Si la persona lo pierde sin haber entrado nunca, el
+  administrador genera uno nuevo desde la lista.
+
+### Primer acceso
+
+La cuenta no nace con una clave definitiva. Al entrar con el RUT y el código temporal, la aplicación no
+deja pasar: pide la contraseña nueva, repetida, y **una** pregunta de seguridad con su respuesta. Recién
+ahí el código deja de servir y la persona entra a su menú. Si el código venció, el login lo dice y hay
+que pedir uno nuevo.
 
 ### Leer y decidir
 
@@ -170,10 +187,11 @@ que el esquema y la semilla no se mezclan con las consultas.
 ./gradlew testDebugUnitTest
 ```
 
-Hay **60 pruebas unitarias** sobre reglas que no dependen de Android: formato y dígito verificador del
+Hay **70 pruebas unitarias** sobre reglas que no dependen de Android: formato y dígito verificador del
 RUT, reglas de la clave, largo del texto libre, reglas de programación de sesiones (duración y cruces),
 filtros del listado de sesiones, armado del detalle de una sesión, cálculo del avance de la meta frente a
-su objetivo y separación de un script SQL en sentencias.
+su objetivo, separación de un script SQL en sentencias, formato del código temporal y validaciones del
+primer acceso y del alta de una persona.
 
 ## Decisiones del grupo
 
@@ -199,6 +217,13 @@ Quedan anotadas acá porque explican el porqué de lo que se ve en pantalla.
   dónde mirar.
 - **«Solo las mías» son las sesiones que medí yo**, no las que programé: el supervisor programa casi
   todas, así que filtrar por programador no acotaría nada.
+- **Ninguna cuenta nace con una clave definitiva.** El administrador crea la persona y la app genera un
+  código temporal que vence en siete días; el primer acceso obliga a dejar una clave propia y una
+  pregunta de seguridad. En la base queda el hash del código, nunca el código.
+- **El cargo no se escribe: sale del perfil.** Pedir el puesto dos veces permitía escribir «Vendedora»
+  para una cuenta de administrador.
+- **No se siembran respuestas de seguridad ni cuentas de relleno.** Los datos de ejemplo son los del
+  anexo y las siete personas del caso; lo demás lo crea el administrador y lo configura cada persona.
 - **El esquema y la semilla son archivos `.sql`**, no texto dentro de Kotlin: se editan, se revisan y se
   pueden correr con cualquier cliente. La clase de la base solo sabe de versiones y de leerlos, y el
   separador de sentencias respeta los punto y coma que van dentro de un texto.
@@ -213,7 +238,7 @@ contrato:
 
 - Carga diaria de ingresos y boletas, con importación del archivo del punto de venta.
 - Pantallas de jefatura: meta del mes, comparación de períodos, horas punta y perfil del tránsito.
-- Gestión de colaboradores desde la aplicación: alta, edición, activación y reseteo de clave.
+- Gestión de colaboradores: edición de datos, activación y desactivación de una cuenta.
 - Recuperación de clave eligiendo la pregunta de seguridad del catálogo, y hash de clave con sal
   aleatoria por usuario.
 

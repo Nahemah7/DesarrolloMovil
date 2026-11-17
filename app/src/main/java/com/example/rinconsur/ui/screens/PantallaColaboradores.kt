@@ -14,11 +14,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,6 +38,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rinconsur.model.Colaborador
+import com.example.rinconsur.ui.components.BotonPrincipal
+import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.TarjetaSeccion
 import com.example.rinconsur.viewmodel.ColaboradoresViewModel
 import com.example.rinconsur.ui.theme.Apagado
@@ -40,11 +49,15 @@ import com.example.rinconsur.ui.theme.Marino
 import com.example.rinconsur.ui.theme.Ok
 import com.example.rinconsur.ui.theme.OkSuave
 import com.example.rinconsur.ui.theme.Dimens
+import com.example.rinconsur.ui.theme.Fondo
 
 @Composable
-fun PantallaColaboradores() {
+fun PantallaColaboradores(onNuevaPersona: () -> Unit) {
     val vm: ColaboradoresViewModel = viewModel()
     val lista by vm.colaboradores.collectAsStateWithLifecycle()
+    val codigo by vm.codigo.collectAsStateWithLifecycle()
+    val host = remember { SnackbarHostState() }
+    LaunchedEffect(Unit) { vm.aviso.collect { host.showSnackbar(it) } }
 
     val ciclo = LocalLifecycleOwner.current
     DisposableEffect(ciclo) {
@@ -55,12 +68,16 @@ fun PantallaColaboradores() {
         onDispose { ciclo.lifecycle.removeObserver(observador) }
     }
 
+    Scaffold(containerColor = Fondo, snackbarHost = { SnackbarHost(host) }) { pad ->
     Column(
         Modifier
             .fillMaxSize()
+            .padding(pad)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = Dimens.espacioPantalla, vertical = Dimens.espacioChico)
     ) {
+        BotonPrincipal(texto = "Nueva persona", onClick = onNuevaPersona)
+        Spacer(Modifier.height(Dimens.espacioChico))
         Text(
             text = if (lista.size == 1) "1 colaborador" else lista.size.toString() + " colaboradores",
             style = MaterialTheme.typography.labelSmall,
@@ -79,11 +96,48 @@ fun PantallaColaboradores() {
             gente.forEach { colaborador ->
                 TarjetaSeccion(modifier = Modifier.padding(bottom = Dimens.espacioChico)) {
                     FilaColaborador(colaborador)
+                    if (colaborador.debeCambiarClave) {
+                        Row(
+                            Modifier.fillMaxWidth().padding(top = Dimens.espacioMini),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Sin primer acceso",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Aviso
+                            )
+                            TextButton(onClick = { vm.regenerarCodigo(colaborador) }) {
+                                Text("Generar código")
+                            }
+                        }
+                    }
                 }
             }
         }
 
         Spacer(Modifier.height(Dimens.espacioGrande))
+    }
+    }
+
+    if (codigo != null) {
+        AlertDialog(
+            onDismissRequest = { vm.cerrarCodigo() },
+            title = { Text("Código temporal") },
+            text = {
+                Column {
+                    Text(
+                        text = codigo!!,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Marino
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Nota("Entrégalo a la persona con su RUT. Vence en siete días.")
+                }
+            },
+            confirmButton = { TextButton(onClick = { vm.cerrarCodigo() }) { Text("Entendido") } }
+        )
     }
 }
 

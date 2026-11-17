@@ -8,5 +8,11 @@ data class Colaborador(
     val cargo: String,
     val perfil: PerfilUsuario,
     val activo: Boolean,
-    val passwordHash: String
-)
+    val passwordHash: String,
+    val debeCambiarClave: Boolean = false,
+    val codigoVence: String? = null
+) {
+    val codigoVencido: Boolean
+        get() = debeCambiarClave && codigoVence != null &&
+            codigoVence.substringBefore(' ') < java.time.LocalDate.now().toString()
+}

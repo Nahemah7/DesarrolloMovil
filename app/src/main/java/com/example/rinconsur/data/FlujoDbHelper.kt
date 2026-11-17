@@ -11,7 +11,7 @@ class FlujoDbHelper(private val contexto: Context) :
 
     companion object {
         private const val NOMBRE_BD = "rinconsur.db"
-        private const val VERSION_BD = 7
+        private const val VERSION_BD = 8
 
         private const val CARPETA = "sql"
         private const val SCRIPT_ESQUEMA = "01_esquema.sql"
@@ -70,7 +70,7 @@ internal const val SQL_SESIONES =
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         // Base limpia: no hay datos de cliente real, así que en vez de encadenar migraciones se
         // borran las vistas y las tablas y se reconstruye todo desde los scripts.
-        if (oldVersion < 7) {
+        if (oldVersion < VERSION_BD) {
             VISTAS.forEach { db.execSQL("DROP VIEW IF EXISTS " + it) }
             TABLAS.forEach { db.execSQL("DROP TABLE IF EXISTS " + it) }
             onCreate(db)

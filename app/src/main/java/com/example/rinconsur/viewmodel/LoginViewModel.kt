@@ -77,6 +77,16 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             }
             return null
         }
+        if (encontrado.codigoVencido) {
+            _uiState.update {
+                it.copy(
+                    errorRut = null,
+                    errorClave = null,
+                    errorGeneral = "El código temporal venció. Pídele uno nuevo al administrador."
+                )
+            }
+            return null
+        }
 
         sesion.guardar(encontrado.id)
         _usuario.value = encontrado

@@ -24,6 +24,8 @@ import com.example.rinconsur.ui.components.esRaiz
 import com.example.rinconsur.ui.components.menuDe
 import com.example.rinconsur.ui.screens.PantallaCierre
 import com.example.rinconsur.ui.screens.PantallaColaboradores
+import com.example.rinconsur.ui.screens.PantallaNuevaPersona
+import com.example.rinconsur.ui.screens.PantallaPrimerAcceso
 import com.example.rinconsur.ui.screens.PantallaReporte
 import com.example.rinconsur.ui.screens.PantallaDetalleSesion
 import com.example.rinconsur.ui.screens.PantallaEvento
@@ -118,15 +120,21 @@ fun AppNavegacion() {
 
             composable(Ruta.Login.ruta) {
                 PantallaLogin(
-                    onEntrar = { perfil ->
-                        val destino = when (perfil) {
-                            PerfilUsuario.OBSERVADOR -> Ruta.MiSesion.ruta
-                            PerfilUsuario.ADMINISTRADOR -> Ruta.Colaboradores.ruta
-                            PerfilUsuario.SUPERVISOR -> Ruta.Sesiones.ruta
-                            PerfilUsuario.JEFE_TIENDA -> Ruta.Reporte.ruta
-                            else -> Ruta.Indicadores.ruta
-                        }
+                    onEntrar = { perfil, pendiente ->
+                        // Si la cuenta se creó con un código temporal, primero define su clave
+                        // y su pregunta: nadie trabaja con la clave que dejó el administrador.
+                        val destino = if (pendiente) Ruta.PrimerAcceso.ruta else inicioDe(perfil)
                         navController.navigate(destino) { popUpTo(Ruta.Login.ruta) { inclusive = true } }
+                    }
+                )
+            }
+
+            composable(Ruta.PrimerAcceso.ruta) {
+                PantallaPrimerAcceso(
+                    onListo = { perfil ->
+                        navController.navigate(inicioDe(perfil)) {
+                            popUpTo(Ruta.PrimerAcceso.ruta) { inclusive = true }
+                        }
                     }
                 )
             }
@@ -195,7 +203,15 @@ fun AppNavegacion() {
 
             composable(Ruta.Reporte.ruta) { PantallaReporte() }
 
-            composable(Ruta.Colaboradores.ruta) { PantallaColaboradores() }
+            composable(Ruta.Colaboradores.ruta) {
+                PantallaColaboradores(
+                    onNuevaPersona = { navController.navigate(Ruta.NuevaPersona.ruta) }
+                )
+            }
+
+            composable(Ruta.NuevaPersona.ruta) {
+                PantallaNuevaPersona(onVolver = { navController.navigateUp() })
+            }
 
             composable(Ruta.SesionDetalle.ruta) { entrada ->
                 PantallaDetalleSesion(
@@ -229,4 +245,13 @@ private fun NavHostController.navegar(pestana: String) {
         else -> Ruta.Perfil.ruta
     }
     navigate(destino) { launchSingleTop = true }
+}
+
+// Pantalla de entrada según el perfil, compartida por el login y el primer acceso.
+internal fun inicioDe(perfil: PerfilUsuario): String = when (perfil) {
+    PerfilUsuario.OBSERVADOR -> Ruta.MiSesion.ruta
+    PerfilUsuario.ADMINISTRADOR -> Ruta.Colaboradores.ruta
+    PerfilUsuario.SUPERVISOR -> Ruta.Sesiones.ruta
+    PerfilUsuario.JEFE_TIENDA -> Ruta.Reporte.ruta
+    PerfilUsuario.SUBGERENTE -> Ruta.Indicadores.ruta
 }
