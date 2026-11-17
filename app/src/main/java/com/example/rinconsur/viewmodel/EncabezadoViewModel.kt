@@ -34,7 +34,7 @@ class EncabezadoViewModel(application: Application) : AndroidViewModel(applicati
     fun actualizar(ruta: String, numeroPlantilla: String? = null, idSesion: String? = null) {
         val usuario = usuarioActual()
         _perfil.value = usuario?.perfil ?: PerfilUsuario.OBSERVADOR
-        val quien = usuario?.let { it.nombre + " · " + it.perfil.etiqueta } ?: ""
+        val quien = usuario?.let { it.nombre + " · " + it.cargo } ?: ""
         val sesion = usuario?.let { repositorio.sesionEnCursoDe(it.id) }
         val acceso = sesion?.let { s ->
             repositorio.accesos().firstOrNull { it.id == s.idAcceso }?.etiquetaCorta
@@ -63,6 +63,7 @@ class EncabezadoViewModel(application: Application) : AndroidViewModel(applicati
             ruta.startsWith("carga") -> "Carga del día" to "Ingresos y boletas por bloque"
             ruta.startsWith("reporte") -> "Reporte" to "Meta, comparación y tránsito"
             ruta.startsWith("nueva_persona") -> "Nueva persona" to "Alta de cuenta"
+            ruta.startsWith("colaborador/") -> "Editar persona" to "Datos, perfil y estado"
             ruta.startsWith("colaboradores") -> "Colaboradores" to "Personas de la tienda"
 
             ruta.startsWith("programar") -> "Programar sesión" to "Nueva sesión de conteo"

@@ -4,12 +4,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.rinconsur.ui.styles.EstilosBoton
@@ -22,8 +24,30 @@ fun BotonSecundario(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     habilitado: Boolean = true,
-    icono: ImageVector? = null
+    icono: ImageVector? = null,
+    fondo: Color? = null,
+    colorTexto: Color? = null
 ) {
+    // Con fondo se dibuja relleno (acción secundaria con color); sin fondo, con borde.
+    if (fondo != null) {
+        Button(
+            onClick = onClick,
+            modifier = modifier.height(Dimens.alturaBoton),
+            enabled = habilitado,
+            shape = EstilosBoton.forma,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = fondo,
+                contentColor = colorTexto ?: fondo
+            )
+        ) {
+            if (icono != null) {
+                Icon(icono, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+            }
+            Text(text = texto)
+        }
+        return
+    }
     OutlinedButton(
         onClick = onClick,
         modifier = modifier.height(Dimens.alturaBoton),

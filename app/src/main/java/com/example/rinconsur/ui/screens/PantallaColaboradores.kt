@@ -1,6 +1,7 @@
 package com.example.rinconsur.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -52,7 +54,7 @@ import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.Fondo
 
 @Composable
-fun PantallaColaboradores(onNuevaPersona: () -> Unit) {
+fun PantallaColaboradores(onNuevaPersona: () -> Unit, onEditar: (Long) -> Unit) {
     val vm: ColaboradoresViewModel = viewModel()
     val lista by vm.colaboradores.collectAsStateWithLifecycle()
     val codigo by vm.codigo.collectAsStateWithLifecycle()
@@ -72,6 +74,7 @@ fun PantallaColaboradores(onNuevaPersona: () -> Unit) {
     Column(
         Modifier
             .fillMaxSize()
+            .navigationBarsPadding()
             .padding(pad)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = Dimens.espacioPantalla, vertical = Dimens.espacioChico)
@@ -87,14 +90,18 @@ fun PantallaColaboradores(onNuevaPersona: () -> Unit) {
 
         lista.groupBy { it.perfil }.forEach { (perfil, gente) ->
             Text(
-                text = perfil.etiqueta.uppercase(),
+                text = perfil.grupo.uppercase(),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = Marino,
                 modifier = Modifier.padding(top = Dimens.espacioMedio, bottom = Dimens.espacioMini)
             )
             gente.forEach { colaborador ->
-                TarjetaSeccion(modifier = Modifier.padding(bottom = Dimens.espacioChico)) {
+                TarjetaSeccion(
+                    modifier = Modifier
+                        .padding(bottom = Dimens.espacioChico)
+                        .clickable { onEditar(colaborador.id) }
+                ) {
                     FilaColaborador(colaborador)
                     if (colaborador.debeCambiarClave) {
                         Row(

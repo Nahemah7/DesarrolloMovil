@@ -37,7 +37,8 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
                     apellido = p.apellido,
                     rut = p.rut,
                     cargo = p.cargo,
-                    perfil = p.perfil.etiqueta,
+                    perfil = p.cargo,
+                    telefono = p.telefono,
                     foto = repositorio.fotoDe(p.id),
                     catalogo = repositorio.preguntas(),
                     // La app usa una sola pregunta: si venia con dos guardadas se toma la primera.

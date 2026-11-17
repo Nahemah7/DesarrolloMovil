@@ -7,7 +7,7 @@ object Dimens {
     val espacioChico = 8.dp
     val espacioMedio = 16.dp
     val espacioGrande = 24.dp
-    val espacioPantalla = 16.dp
+    val espacioPantalla = 20.dp
 
     val alturaBoton = 52.dp
     val alturaBotonAlto = 56.dp

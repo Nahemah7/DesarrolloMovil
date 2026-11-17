@@ -71,7 +71,7 @@ fun PantallaMiSesion(onIniciar: () -> Unit, onIrA: (String) -> Unit) {
         topBar = {
             BarraApp(
                 titulo = "Mi sesión",
-                subtitulo = usuario?.let { it.nombre + " · " + it.perfil.etiqueta } ?: "",
+                subtitulo = usuario?.let { it.nombre + " · " + it.cargo } ?: "",
                 etiqueta = when {
                     hayEnCurso -> "En curso"
                     hayProgramada -> "Programada"

@@ -182,6 +182,7 @@ data class PerfilUiState(
     val rut: String = "",
     val cargo: String = "",
     val perfil: String = "",
+    val telefono: String? = null,
     val foto: ByteArray? = null,
     val claveActual: String = "",
     val claveNueva: String = "",

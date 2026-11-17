@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.example.rinconsur.data.CodigoTemporal
 import com.example.rinconsur.data.FlujoRepository
+import com.example.rinconsur.model.Genero
 import com.example.rinconsur.model.NuevaPersona
 import com.example.rinconsur.model.PerfilUsuario
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +34,7 @@ class NuevaPersonaViewModel(application: Application) : AndroidViewModel(applica
     fun onCorreoCambia(valor: String) = _persona.update { it.copy(correo = valor) }
     fun onTelefonoCambia(valor: String) = _persona.update { it.copy(telefono = valor) }
     fun onRolCambia(perfil: PerfilUsuario) = _persona.update { it.copy(rol = perfil) }
+    fun onGeneroCambia(genero: Genero) = _persona.update { it.copy(genero = genero) }
 
     fun crear(): Boolean {
         val datos = _persona.value

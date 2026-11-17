@@ -2,11 +2,13 @@ package com.example.rinconsur.data
 
 import android.content.Context
 import com.example.rinconsur.model.NuevaPersona
+import com.example.rinconsur.model.PerfilUsuario
 import com.example.rinconsur.model.PreguntaSeguridad
 import com.example.rinconsur.model.Acceso
 import com.example.rinconsur.model.BloqueHorario
 import com.example.rinconsur.model.Clasificacion
 import com.example.rinconsur.model.CargaDia
+import com.example.rinconsur.model.Genero
 import com.example.rinconsur.model.Colaborador
 import com.example.rinconsur.model.Compania
 import com.example.rinconsur.model.EstadoSesion
@@ -160,6 +162,14 @@ class FlujoRepository(context: Context) {
             Clave.hash(Rut.formatear(datos.rut), codigo),
             vencimientoDeCodigo()
         )
+
+    fun actualizarColaborador(
+        idUsuario: Long,
+        datos: NuevaPersona,
+        perfil: PerfilUsuario,
+        genero: Genero,
+        activo: Boolean
+    ): Boolean = usuarioDao.actualizarColaborador(idUsuario, datos, perfil, genero, activo)
 
     fun regenerarCodigo(idUsuario: Long, rut: String, codigo: String): Boolean =
         usuarioDao.regenerarCodigo(idUsuario, Clave.hash(rut, codigo), vencimientoDeCodigo())

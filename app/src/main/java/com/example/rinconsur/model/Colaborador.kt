@@ -5,10 +5,13 @@ data class Colaborador(
     val rut: String,
     val nombre: String,
     val apellido: String = "",
-    val cargo: String,
-    val perfil: PerfilUsuario,
-    val activo: Boolean,
-    val passwordHash: String,
+    val cargo: String = "",
+    val perfil: PerfilUsuario = PerfilUsuario.OBSERVADOR,
+    val activo: Boolean = true,
+    val passwordHash: String = "",
+    val genero: Genero = Genero.FEMENINO,
+    val correo: String = "",
+    val telefono: String? = null,
     val debeCambiarClave: Boolean = false,
     val codigoVence: String? = null
 ) {

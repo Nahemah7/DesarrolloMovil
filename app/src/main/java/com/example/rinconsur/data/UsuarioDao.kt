@@ -3,6 +3,7 @@ package com.example.rinconsur.data
 import android.content.ContentValues
 import com.example.rinconsur.model.Colaborador
 import com.example.rinconsur.model.PreguntaSeguridad
+import com.example.rinconsur.model.Genero
 import com.example.rinconsur.model.NuevaPersona
 import com.example.rinconsur.model.PerfilUsuario
 
@@ -127,6 +128,9 @@ internal class UsuarioDao(private val helper: FlujoDbHelper) {
                         cargo = c.texto("cargo"),
                         perfil = PerfilUsuario.porCodigo(c.texto("rol_codigo")) ?: PerfilUsuario.OBSERVADOR,
                         activo = c.entero("activo") == 1,
+                        genero = Genero.porCodigo(c.textoOpcional("genero")),
+                        correo = c.texto("correo"),
+                        telefono = c.textoOpcional("telefono"),
                         passwordHash = c.texto("password_hash"),
                         debeCambiarClave = c.entero("debe_cambiar_clave") == 1,
                         codigoVence = c.textoOpcional("codigo_vence")
@@ -148,7 +152,8 @@ internal class UsuarioDao(private val helper: FlujoDbHelper) {
             put("nombres", datos.nombres.trim())
             put("apellido_paterno", datos.apellidoPaterno.trim())
             put("apellido_materno", datos.apellidoMaterno.trim().ifBlank { null })
-            put("cargo", perfil.etiqueta)
+            put("genero", datos.genero.codigo)
+            put("cargo", perfil.etiqueta(datos.genero))
             put("correo", datos.correo.trim().lowercase())
             put("telefono", datos.telefono.trim().ifBlank { null })
             put("password_hash", codigoHash)
@@ -183,4 +188,28 @@ internal class UsuarioDao(private val helper: FlujoDbHelper) {
         helper.readableDatabase.rawQuery(
             "SELECT id_rol FROM rol WHERE codigo = ?", arrayOf(perfil.codigo)
         ).use { c -> if (c.moveToFirst()) c.getLong(0) else null }
+
+    // Edición de una cuenta: datos, perfil, género y estado. El cargo se recalcula con el perfil
+    // y el género, para que no quede "Jefa" en una cuenta que ahora es de un jefe.
+    fun actualizarColaborador(
+        idUsuario: Long,
+        datos: NuevaPersona,
+        perfil: PerfilUsuario,
+        genero: Genero,
+        activo: Boolean
+    ): Boolean {
+        val idRol = idRolDe(perfil) ?: return false
+        val valores = ContentValues().apply {
+            put("id_rol", idRol)
+            put("nombres", datos.nombres.trim())
+            put("apellido_paterno", datos.apellidoPaterno.trim())
+            put("apellido_materno", datos.apellidoMaterno.trim().ifBlank { null })
+            put("genero", genero.codigo)
+            put("cargo", perfil.etiqueta(genero))
+            put("correo", datos.correo.trim().lowercase())
+            put("telefono", datos.telefono.trim().ifBlank { null })
+            put("activo", if (activo) 1 else 0)
+        }
+        return helper.writableDatabase.update("usuario", valores, "id_usuario = ?", arrayOf(idUsuario.toString())) > 0
+    }
 }

@@ -24,6 +24,7 @@ import com.example.rinconsur.ui.components.esRaiz
 import com.example.rinconsur.ui.components.menuDe
 import com.example.rinconsur.ui.screens.PantallaCierre
 import com.example.rinconsur.ui.screens.PantallaCargaDia
+import com.example.rinconsur.ui.screens.PantallaEditarPersona
 import com.example.rinconsur.ui.screens.PantallaColaboradores
 import com.example.rinconsur.ui.screens.PantallaNuevaPersona
 import com.example.rinconsur.ui.screens.PantallaPrimerAcceso
@@ -210,12 +211,20 @@ fun AppNavegacion() {
 
             composable(Ruta.Colaboradores.ruta) {
                 PantallaColaboradores(
-                    onNuevaPersona = { navController.navigate(Ruta.NuevaPersona.ruta) }
+                    onNuevaPersona = { navController.navigate(Ruta.NuevaPersona.ruta) },
+                    onEditar = { idColaborador -> navController.navigate(rutaDeEditarColaborador(idColaborador)) }
                 )
             }
 
             composable(Ruta.NuevaPersona.ruta) {
                 PantallaNuevaPersona(onVolver = { navController.navigateUp() })
+            }
+
+            composable(Ruta.ColaboradorEditar.ruta) { entrada ->
+                PantallaEditarPersona(
+                    idUsuario = entrada.arguments?.getString("idColaborador")?.toLongOrNull() ?: 0L,
+                    onVolver = { navController.navigateUp() }
+                )
             }
 
             composable(Ruta.SesionDetalle.ruta) { entrada ->

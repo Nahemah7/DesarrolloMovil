@@ -121,7 +121,7 @@ fun PantallaProgramar(onIrA: (String) -> Unit) {
             estado.observadores.forEach { o ->
                 Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
                     Filtro(o.nombre, estado.idObservador == o.id) { vm.onObservador(o.id) }
-                    Text("  " + o.perfil.etiqueta, style = MaterialTheme.typography.bodySmall, color = Apagado)
+                    Text("  " + o.cargo, style = MaterialTheme.typography.bodySmall, color = Apagado)
                 }
             }
 

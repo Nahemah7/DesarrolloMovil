@@ -20,6 +20,8 @@ CREATE TABLE usuario (
     nombres        VARCHAR(60)  NOT NULL,
     apellido_paterno VARCHAR(40) NOT NULL,
     apellido_materno VARCHAR(40) NULL,
+    -- El cargo se escribe según la persona (jefa o jefe), así que se guarda el género.
+    genero         CHAR(1)      NOT NULL DEFAULT 'F',
     cargo          VARCHAR(60)  NOT NULL,
     correo         VARCHAR(100) NOT NULL,
     telefono       VARCHAR(20)  NULL,
@@ -33,6 +35,7 @@ CREATE TABLE usuario (
     fecha_creacion DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uq_usuario_rut UNIQUE (rut),
     CONSTRAINT uq_usuario_correo UNIQUE (correo),
+    CONSTRAINT ck_usuario_genero CHECK (genero IN ('F', 'M')),
     CONSTRAINT fk_usuario_rol FOREIGN KEY (id_rol) REFERENCES rol (id_rol)
 );;
 

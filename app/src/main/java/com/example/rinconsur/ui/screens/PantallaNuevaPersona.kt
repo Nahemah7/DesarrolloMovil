@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.rinconsur.model.Genero
 import com.example.rinconsur.model.PerfilUsuario
 import com.example.rinconsur.ui.components.BotonPrincipal
 import com.example.rinconsur.ui.components.CampoTexto
@@ -47,6 +49,7 @@ fun PantallaNuevaPersona(onVolver: () -> Unit) {
     Column(
         Modifier
             .fillMaxSize()
+            .navigationBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = Dimens.espacioPantalla)
     ) {
@@ -77,6 +80,31 @@ fun PantallaNuevaPersona(onVolver: () -> Unit) {
             )
         }
 
+        Seccion("Género")
+        TarjetaSeccion {
+            Genero.entries.forEach { genero ->
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .selectable(
+                            selected = persona.genero == genero,
+                            onClick = { vm.onGeneroCambia(genero) }
+                        )
+                        .padding(vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(selected = persona.genero == genero, onClick = { vm.onGeneroCambia(genero) })
+                    Text(
+                        text = genero.etiqueta,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Tinta,
+                        modifier = Modifier.padding(start = 6.dp)
+                    )
+                }
+            }
+            Nota("El cargo se escribe según el género: jefa de tienda o jefe de tienda.")
+        }
+
         Seccion("Perfil y cargo")
         TarjetaSeccion {
             PerfilUsuario.entries.forEach { perfil ->
@@ -92,7 +120,11 @@ fun PantallaNuevaPersona(onVolver: () -> Unit) {
                 ) {
                     RadioButton(selected = persona.rol == perfil, onClick = { vm.onRolCambia(perfil) })
                     Column(Modifier.padding(start = 6.dp)) {
-                        Text(perfil.etiqueta, style = MaterialTheme.typography.bodySmall, color = Tinta)
+                        Text(
+                            text = perfil.etiqueta(persona.genero),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Tinta
+                        )
                         Text(
                             perfil.codigo + " · queda registrado con ese cargo",
                             style = MaterialTheme.typography.labelSmall,

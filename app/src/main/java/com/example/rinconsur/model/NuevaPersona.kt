@@ -11,7 +11,8 @@ data class NuevaPersona(
     val apellidoMaterno: String = "",
     val correo: String = "",
     val telefono: String = "",
-    val rol: PerfilUsuario? = null
+    val rol: PerfilUsuario? = null,
+    val genero: Genero = Genero.FEMENINO
 ) {
     val errores: List<String>
         get() = buildList {

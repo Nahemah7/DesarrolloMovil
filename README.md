@@ -71,8 +71,12 @@ La aplicación entra con RUT y clave, y cada perfil ve solo lo que le correspond
 
 - **Colaboradores**: la lista completa por perfil y estado, con la marca de quienes todavía no
   entraron nunca.
-- **Nueva persona**: RUT, nombres, apellidos, correo y teléfono, y el perfil elegido de una lista. El
-  cargo sale del perfil, no se escribe aparte.
+- **Nueva persona**: RUT, nombres, apellidos, correo y teléfono, el género y el perfil elegido de una
+  lista. El cargo sale del perfil y del género —jefa de tienda o jefe de tienda, supervisora o supervisor—,
+  no se escribe aparte.
+- **Editar persona**: tocar una fila abre sus datos para corregir nombres, correo o teléfono, cambiarle el
+  perfil, cambiar el género o desactivar la cuenta cuando la persona deja la tienda. Desactivar no borra
+  nada: sus sesiones y registros se conservan, solo deja de poder entrar.
 - **Código temporal**: la app lo genera al crear la cuenta y se muestra una sola vez; en la base queda
   su hash y su vencimiento, siete días. Si la persona lo pierde sin haber entrado nunca, el
   administrador genera uno nuevo desde la lista.
@@ -110,7 +114,10 @@ que pedir uno nuevo.
 
 ### Transversal
 
-- **Perfil**: foto, cambio de nombre y cambio de clave.
+- **Perfil**: la foto con su botón de cámara encima, el nombre con su cargo, y una ficha de seguridad
+  con tres filas —clave (con «Cambiar clave» que abre el diálogo), teléfono y cargo—. Cerrar sesión va
+  arriba, como acción de borde, y no al final del scroll. La pregunta de seguridad se elige de una lista y
+  se guarda con su botón.
 - **Avisos en tres niveles**: error pegado al campo que hay que corregir, aviso flotante cuando una
   acción no se puede completar, y resultado de lo que sí se hizo, como aviso al pie.
 
@@ -202,7 +209,7 @@ que el esquema y la semilla no se mezclan con las consultas.
 ./gradlew testDebugUnitTest
 ```
 
-Hay **80 pruebas unitarias** sobre reglas que no dependen de Android: formato y dígito verificador del
+Hay **100 pruebas unitarias** sobre reglas que no dependen de Android: formato y dígito verificador del
 RUT, reglas de la clave, largo del texto libre, reglas de programación de sesiones (duración y cruces),
 filtros del listado de sesiones, armado del detalle de una sesión, cálculo del avance de la meta frente a
 su objetivo, separación de un script SQL en sentencias, formato del código temporal, validaciones del
@@ -213,10 +220,11 @@ acceso y bloques incompletos).
 ./gradlew connectedDebugAndroidTest
 ```
 
-Ocho pruebas instrumentadas corren sobre la base del propio teléfono: las tres del anexo (proporción de
-tránsito de S-0001 y S-0002, conversión del 15-09 y tránsito estimado del A4 a las 13:00) y cuatro de la
+Once pruebas instrumentadas corren sobre la base del propio teléfono: las tres del anexo (proporción de
+tránsito de S-0001 y S-0002, conversión del 15-09 y tránsito estimado del A4 a las 13:00) cuatro de la
 carga del día, que guardan, releen, comprueban que las métricas del día reflejan lo cargado y que volver a
-guardar no duplica filas.
+guardar no duplica filas, y tres del alta y la edición de una persona (el cargo según el perfil y el género,
+el cambio de perfil y la desactivación de una cuenta).
 
 ## Decisiones del grupo
 

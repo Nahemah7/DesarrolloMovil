@@ -38,7 +38,7 @@ fun TarjetaSeccion(
         Column(
             Modifier
                 .fillMaxWidth()
-                .padding(Dimens.espacioMedio - 6.dp)
+                .padding(Dimens.espacioMedio)
         ) {
             if (titulo != null) {
                 Text(
