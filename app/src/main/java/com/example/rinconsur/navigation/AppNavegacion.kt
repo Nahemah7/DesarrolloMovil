@@ -24,6 +24,7 @@ import com.example.rinconsur.ui.components.esRaiz
 import com.example.rinconsur.ui.components.menuDe
 import com.example.rinconsur.ui.screens.PantallaCierre
 import com.example.rinconsur.ui.screens.PantallaColaboradores
+import com.example.rinconsur.ui.screens.PantallaReporte
 import com.example.rinconsur.ui.screens.PantallaDetalleSesion
 import com.example.rinconsur.ui.screens.PantallaEvento
 import com.example.rinconsur.ui.screens.PantallaLogin
@@ -122,6 +123,7 @@ fun AppNavegacion() {
                             PerfilUsuario.OBSERVADOR -> Ruta.MiSesion.ruta
                             PerfilUsuario.ADMINISTRADOR -> Ruta.Colaboradores.ruta
                             PerfilUsuario.SUPERVISOR -> Ruta.Sesiones.ruta
+                            PerfilUsuario.JEFE_TIENDA -> Ruta.Reporte.ruta
                             else -> Ruta.Indicadores.ruta
                         }
                         navController.navigate(destino) { popUpTo(Ruta.Login.ruta) { inclusive = true } }
@@ -191,6 +193,8 @@ fun AppNavegacion() {
                 )
             }
 
+            composable(Ruta.Reporte.ruta) { PantallaReporte() }
+
             composable(Ruta.Colaboradores.ruta) { PantallaColaboradores() }
 
             composable(Ruta.SesionDetalle.ruta) { entrada ->
@@ -218,6 +222,7 @@ private fun NavHostController.navegar(pestana: String) {
         "Registrar" -> Ruta.Registro.ruta
         "Mis sesiones" -> Ruta.MiSesion.ruta
         "Indicadores" -> Ruta.Indicadores.ruta
+        "Reporte" -> Ruta.Reporte.ruta
         "Sesiones" -> Ruta.Sesiones.ruta
         "Medir" -> Ruta.Evento.ruta
         "Colaboradores" -> Ruta.Colaboradores.ruta

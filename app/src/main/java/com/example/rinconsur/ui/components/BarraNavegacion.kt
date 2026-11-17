@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.DateRange
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -77,9 +79,18 @@ fun menuDe(perfil: PerfilUsuario): List<OpcionMenu> = when (perfil) {
         OpcionMenu("Perfil", Ruta.Perfil.ruta, Icons.Outlined.MoreHoriz, Icons.Filled.MoreHoriz)
     )
 
-    // La jefatura lee y decide: entra por los indicadores, sin nada de escritura.
-    PerfilUsuario.JEFE_TIENDA, PerfilUsuario.SUBGERENTE -> listOf(
+    // La jefatura lee y decide: entra por el reporte (meta, comparación, horas punta y perfil
+    // del tránsito) y desde ahí baja a los indicadores del día.
+    PerfilUsuario.JEFE_TIENDA -> listOf(
+        OpcionMenu("Reporte", Ruta.Reporte.ruta, Icons.Outlined.Star, Icons.Filled.Star),
         OpcionMenu("Indicadores", Ruta.Indicadores.ruta, Icons.Outlined.BarChart, Icons.Filled.BarChart),
+        OpcionMenu("Perfil", Ruta.Perfil.ruta, Icons.Outlined.Person, Icons.Filled.Person)
+    )
+
+    // El subgerente responde por el reporte operativo: mira el día y la comparación por mes.
+    PerfilUsuario.SUBGERENTE -> listOf(
+        OpcionMenu("Indicadores", Ruta.Indicadores.ruta, Icons.Outlined.BarChart, Icons.Filled.BarChart),
+        OpcionMenu("Reporte", Ruta.Reporte.ruta, Icons.Outlined.Star, Icons.Filled.Star),
         OpcionMenu("Perfil", Ruta.Perfil.ruta, Icons.Outlined.Person, Icons.Filled.Person)
     )
 

@@ -40,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rinconsur.model.DetalleSesion
 import com.example.rinconsur.model.EstadoSesion
 import com.example.rinconsur.model.GrupoConteo
+import com.example.rinconsur.ui.components.BloquesConteo
 import com.example.rinconsur.ui.components.BotonPrincipal
 import com.example.rinconsur.ui.components.BotonSecundario
 import com.example.rinconsur.ui.components.EtiquetaEstado
@@ -144,20 +145,20 @@ fun PantallaDetalleSesion(idSesion: Long, onRechazar: (Long) -> Unit) {
                     }
                 } else {
                     Seccion("Clasificación")
-                    TarjetaSeccion { Bloques(d.porClasificacion) }
+                    TarjetaSeccion { BloquesConteo(d.porClasificacion) }
 
                     Seccion("Rango etario")
-                    TarjetaSeccion { Bloques(d.porRango) }
+                    TarjetaSeccion { BloquesConteo(d.porRango) }
 
                     Seccion("Compañía")
-                    TarjetaSeccion { Bloques(d.porCompania) }
+                    TarjetaSeccion { BloquesConteo(d.porCompania) }
 
                     Seccion("Compras en otra tienda")
-                    TarjetaSeccion { Bloques(d.comprasOtraTienda) }
+                    TarjetaSeccion { BloquesConteo(d.comprasOtraTienda) }
 
                     if (d.destinosTransito.isNotEmpty()) {
                         Seccion("Destino del tránsito")
-                        TarjetaSeccion { Bloques(d.destinosTransito) }
+                        TarjetaSeccion { BloquesConteo(d.destinosTransito) }
                     }
                 }
 
@@ -230,39 +231,5 @@ private fun FilaDato(etiqueta: String, valor: String) {
             fontWeight = FontWeight.SemiBold,
             color = Tinta
         )
-    }
-}
-
-@Composable
-private fun Bloques(grupos: List<GrupoConteo>) {
-    grupos.forEach { grupo ->
-        Row(
-            Modifier.fillMaxWidth().padding(vertical = 3.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(grupo.etiqueta, style = MaterialTheme.typography.bodySmall, color = Tinta)
-            Text(
-                grupo.cantidad.toString() + " · " + grupo.porcentajeTexto,
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.SemiBold,
-                color = Tinta
-            )
-        }
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .height(6.dp)
-                .clip(RoundedCornerShape(3.dp))
-                .background(Linea)
-        ) {
-            Box(
-                Modifier
-                    .fillMaxWidth(grupo.fraccion)
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp))
-                    .background(Aqua)
-            )
-        }
     }
 }

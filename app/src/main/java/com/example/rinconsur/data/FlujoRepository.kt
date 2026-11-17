@@ -15,6 +15,7 @@ import com.example.rinconsur.model.Registro
 import com.example.rinconsur.model.ResumenSesion
 import com.example.rinconsur.model.DetalleSesion
 import com.example.rinconsur.model.SesionResumen
+import com.example.rinconsur.model.ReporteJefatura
 import com.example.rinconsur.model.TransitoPorAcceso
 
 class FlujoRepository(context: Context) {
@@ -123,6 +124,11 @@ class FlujoRepository(context: Context) {
     fun transitoPorAcceso(fecha: String): List<TransitoPorAcceso> = indicadorDao.transitoPorAcceso(fecha)
 
     fun bloquesPendientes(fecha: String): List<String> = indicadorDao.bloquesPendientes(fecha)
+
+    fun reporteJefatura(): ReporteJefatura = indicadorDao.reporteJefatura(fechaHoy())
+
+    fun guardarMeta(anio: Int, mes: Int, porcentaje: Double, idUsuario: Long): Boolean =
+        indicadorDao.guardarMeta(anio, mes, porcentaje, idUsuario)
 
     // ---- eventos del dia ----
 

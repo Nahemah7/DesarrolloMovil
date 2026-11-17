@@ -27,8 +27,8 @@ La aplicación entra con RUT y clave, y cada perfil ve solo lo que le correspond
 |---|---|
 | **Colaborador observador** | Mide en el acceso: registra a cada persona con un toque, anula un registro mal tomado y cierra la sesión para enviarla a validación |
 | **Supervisor de piso** | Opera el día: programa sesiones, entra por la lista «Por validar», valida o rechaza con motivo, registra eventos y consulta los indicadores |
-| **Subgerente comercial** | Mira los indicadores del período y responde por el reporte operativo. La carga de ingresos y boletas del día está en desarrollo |
-| **Jefa de tienda** | Lee y decide: indicadores y, más adelante, meta del mes, comparación de períodos, horas punta y perfil del tránsito |
+| **Subgerente comercial** | Responde por el reporte operativo: indicadores del día por tipo de día, comparación por mes y perfil del tránsito. La carga de ingresos y boletas del día está en desarrollo |
+| **Jefa de tienda** | Lee y decide: reporte del mes con la meta de conversión, la comparación por mes, las horas punta y el perfil del tránsito |
 | **Administrador** | Gestiona personas: hoy consulta la lista de colaboradores por rol y estado; el alta, la edición y el reseteo de clave están en desarrollo |
 
 ## Qué hace la aplicación
@@ -66,6 +66,16 @@ La aplicación entra con RUT y clave, y cada perfil ve solo lo que le correspond
 - **Indicadores**: hoy, días hábiles o fines de semana, con la semana navegable. Muestra el avance de la
   medición, lo que la tienda registró (ingresos, transacciones y conversión bruta), el tránsito medido,
   los ingresos por acceso y la conversión sin tránsito cuando el día está completo.
+
+### Leer y decidir
+
+- **Reporte**: la pantalla de entrada de la jefatura. Arriba la meta de conversión del mes con su avance;
+  después la comparación por mes, las horas punta por bloque y el perfil del tránsito por rango de edad,
+  compañía y compra en otra tienda.
+- **Meta del mes**: solo la jefa la registra, entre 0 y 100 por ciento. Si el mes no tiene días cargados,
+  el avance dice que no hay dato en vez de mostrar un cero.
+- **Horas punta**: marca el bloque de mayor tránsito medido y distingue con texto las horas que todavía no
+  tienen sesión validada, en lugar de esconderlas.
 
 ### Transversal
 
@@ -125,13 +135,19 @@ app/src/main/java/com/example/rinconsur/
   viewmodel/     un ViewModel por pantalla, con estado inmutable (StateFlow)
   model/         modelos de datos y estados de la interfaz
   data/          base, repositorio y reglas puras de negocio
-    FlujoDbHelper   esquema, semilla y migraciones (1.031 líneas)
+    FlujoDbHelper   versión, orden de borrado y lectura de los scripts (77 líneas)
+    ScriptsSql      separa un script SQL en sentencias
     SesionDao       sesiones, registros, cierre, revisión y detalle
     IndicadorDao    indicadores, tránsito y bloques pendientes
     UsuarioDao      colaboradores, preguntas de seguridad, foto y clave
     EventoDao       eventos del día
     CatalogoDao     accesos, bloques, rangos, compañías y fechas
     BaseDao         lectura de cursores y marca de tiempo
+app/src/main/assets/sql/
+    01_esquema.sql      tablas, claves y restricciones
+    02_vistas.sql       las seis vistas de indicadores
+    03_datos.sql        catálogos, personas y datos del anexo
+    04_demo_sabado.sql  un sábado completo para mostrar el fin de semana
 app/src/test/    pruebas unitarias
 ```
 
@@ -154,9 +170,10 @@ que el esquema y la semilla no se mezclan con las consultas.
 ./gradlew testDebugUnitTest
 ```
 
-Hay **47 pruebas unitarias** sobre reglas que no dependen de Android: formato y dígito verificador del
+Hay **60 pruebas unitarias** sobre reglas que no dependen de Android: formato y dígito verificador del
 RUT, reglas de la clave, largo del texto libre, reglas de programación de sesiones (duración y cruces),
-filtros del listado de sesiones y armado del detalle de una sesión.
+filtros del listado de sesiones, armado del detalle de una sesión, cálculo del avance de la meta frente a
+su objetivo y separación de un script SQL en sentencias.
 
 ## Decisiones del grupo
 
@@ -182,6 +199,9 @@ Quedan anotadas acá porque explican el porqué de lo que se ve en pantalla.
   dónde mirar.
 - **«Solo las mías» son las sesiones que medí yo**, no las que programé: el supervisor programa casi
   todas, así que filtrar por programador no acotaría nada.
+- **El esquema y la semilla son archivos `.sql`**, no texto dentro de Kotlin: se editan, se revisan y se
+  pueden correr con cualquier cliente. La clase de la base solo sabe de versiones y de leerlos, y el
+  separador de sentencias respeta los punto y coma que van dentro de un texto.
 
 ## Lo que viene
 

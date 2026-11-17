@@ -1,7 +1,12 @@
 package com.example.rinconsur.data
 
 import android.content.ContentValues
+import com.example.rinconsur.model.ConversionMes
+import com.example.rinconsur.model.GrupoConteo
+import com.example.rinconsur.model.HoraPunta
 import com.example.rinconsur.model.IndicadoresDia
+import com.example.rinconsur.model.MetaDelMes
+import com.example.rinconsur.model.ReporteJefatura
 import com.example.rinconsur.model.TransitoPorAcceso
 import com.example.rinconsur.model.OrigenTransito
 
@@ -136,5 +141,116 @@ internal class IndicadorDao(private val helper: FlujoDbHelper) {
             }
         }
         return lista
+    }
+
+    // ==================== reporte de jefatura ====================
+
+    fun reporteJefatura(hoy: String): ReporteJefatura {
+        val db = helper.readableDatabase
+        val periodo = hoy.take(7)
+
+        var objetivo: Double? = null
+        db.rawQuery(
+            "SELECT porcentaje FROM meta_conversion WHERE substr(?, 1, 4) = anio AND substr(?, 6, 2) = mes",
+            arrayOf(periodo, periodo)
+        ).use { c -> if (c.moveToNext()) objetivo = c.decimalOpcional("porcentaje") }
+
+        var actual: Double? = null
+        var dias = 0
+        db.rawQuery(
+            "SELECT COUNT(*) AS dias, ROUND(100.0 * SUM(transacciones) / NULLIF(SUM(ingresos), 0), 1) AS conversion " +
+                "FROM v_conversion_dia WHERE substr(fecha, 1, 7) = ?",
+            arrayOf(periodo)
+        ).use { c ->
+            if (c.moveToNext()) {
+                dias = c.entero("dias")
+                actual = c.decimalOpcional("conversion")
+            }
+        }
+
+        val meses = mutableListOf<ConversionMes>()
+        db.rawQuery(
+            "SELECT substr(fecha, 1, 7) AS mes, SUM(ingresos) AS ingresos, SUM(transacciones) AS boletas, " +
+                "ROUND(100.0 * SUM(transacciones) / NULLIF(SUM(ingresos), 0), 1) AS conversion, " +
+                "COUNT(*) AS dias FROM v_conversion_dia GROUP BY substr(fecha, 1, 7) ORDER BY mes DESC LIMIT 6",
+            arrayOf()
+        ).use { c ->
+            while (c.moveToNext()) {
+                meses.add(
+                    ConversionMes(
+                        mes = c.texto("mes"),
+                        ingresos = c.entero("ingresos"),
+                        boletas = c.entero("boletas"),
+                        conversion = c.decimalOpcional("conversion"),
+                        dias = c.entero("dias")
+                    )
+                )
+            }
+        }
+
+        val horas = mutableListOf<HoraPunta>()
+        db.rawQuery(
+            "SELECT hora_inicio AS hora, SUM(ingresos) AS ingresos, SUM(transito_estimado) AS transito, " +
+                "SUM(CASE WHEN origen = 'medido' THEN 1 ELSE 0 END) AS medidos, COUNT(*) AS bloques " +
+                "FROM v_transito_bloque GROUP BY hora_inicio ORDER BY hora_inicio",
+            arrayOf()
+        ).use { c ->
+            while (c.moveToNext()) {
+                horas.add(
+                    HoraPunta(
+                        hora = c.texto("hora").take(5),
+                        ingresos = c.entero("ingresos"),
+                        transito = c.entero("transito"),
+                        medidos = c.entero("medidos"),
+                        bloques = c.entero("bloques")
+                    )
+                )
+            }
+        }
+
+        fun grupos(columna: String, orden: String): List<GrupoConteo> {
+            val lista = mutableListOf<GrupoConteo>()
+            db.rawQuery(
+                "SELECT " + columna + " AS etiqueta, SUM(personas) AS cantidad, " +
+                    "ROUND(100.0 * SUM(personas) / NULLIF((SELECT SUM(personas) FROM v_perfil_transito), 0), 1) AS porcentaje " +
+                    "FROM v_perfil_transito GROUP BY " + columna + " ORDER BY " + orden,
+                arrayOf()
+            ).use { c ->
+                while (c.moveToNext()) {
+                    lista.add(GrupoConteo(c.texto("etiqueta"), c.entero("cantidad"), c.decimalOpcional("porcentaje")))
+                }
+            }
+            return lista
+        }
+
+        return ReporteJefatura(
+            meta = MetaDelMes(
+                anio = periodo.take(4).toIntOrNull() ?: 0,
+                mes = periodo.takeLast(2).toIntOrNull() ?: 0,
+                objetivo = objetivo,
+                actual = actual,
+                dias = dias
+            ),
+            meses = meses,
+            horas = horas,
+            porRango = grupos("rango_etario", "cantidad DESC"),
+            porCompania = grupos("compania", "cantidad DESC"),
+            compras = grupos(
+                "CASE WHEN compras_otra_tienda = 1 THEN 'Compró en otra tienda' ELSE 'No compró en otra tienda' END",
+                "compras_otra_tienda DESC"
+            )
+        )
+    }
+
+    fun guardarMeta(anio: Int, mes: Int, porcentaje: Double, idUsuario: Long): Boolean {
+        val valores = ContentValues().apply {
+            put("anio", anio)
+            put("mes", mes)
+            put("porcentaje", porcentaje)
+            put("id_usuario_registra", idUsuario)
+        }
+        return helper.writableDatabase.insertWithOnConflict(
+            "meta_conversion", null, valores, android.database.sqlite.SQLiteDatabase.CONFLICT_REPLACE
+        ) > 0
     }
 }
