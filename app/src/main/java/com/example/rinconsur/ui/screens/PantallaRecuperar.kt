@@ -27,6 +27,7 @@ import com.example.rinconsur.model.PasoRecuperar
 import com.example.rinconsur.ui.components.BotonPrincipal
 import com.example.rinconsur.ui.components.BotonSecundario
 import com.example.rinconsur.ui.components.CampoContrasena
+import com.example.rinconsur.ui.components.CampoLista
 import com.example.rinconsur.ui.components.CampoTexto
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
@@ -70,8 +71,15 @@ fun PantallaRecuperar(onVolver: () -> Unit) {
 
                 PasoRecuperar.PREGUNTAS -> {
                     Seccion("Tu pregunta de seguridad")
-                    estado.preguntas.forEachIndexed { i, p ->
-                        Text(p.texto, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                    Nota("Elige la pregunta que guardaste en tu perfil y respóndela.")
+                    estado.elegidas.forEachIndexed { i, posicion ->
+                        CampoLista(
+                            etiqueta = if (estado.elegidas.size == 1) "Pregunta" else "Pregunta " + (i + 1),
+                            textoElegido = estado.catalogo.getOrNull(posicion)?.texto ?: "",
+                            opciones = estado.catalogo.map { it.texto },
+                            alElegir = { vm.onPreguntaElegida(i, it) },
+                            marcador = "Elige tu pregunta"
+                        )
                         Spacer(Modifier.height(Dimens.espacioMini))
                         CampoTexto(
                             valor = estado.respuestas.getOrElse(i) { "" },
