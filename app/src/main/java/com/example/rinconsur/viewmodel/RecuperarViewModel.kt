@@ -37,8 +37,8 @@ class RecuperarViewModel(application: Application) : AndroidViewModel(applicatio
         }
         val rut = Rut.formatear(escrito)
         val encontrado = repositorio.colaboradorPorRut(rut)
-        val preguntas = encontrado?.let { repositorio.preguntasDe(it.id) } ?: emptyList()
-        if (encontrado == null || preguntas.isEmpty()) {
+        val cantidad = encontrado?.let { repositorio.preguntasDe(it.id).size } ?: 0
+        if (encontrado == null || cantidad == 0) {
             _uiState.update {
                 it.copy(
                     errorGeneral = "No pudimos validar tus datos. Revisa el RUT o consulta con tu supervisor.",
@@ -51,12 +51,21 @@ class RecuperarViewModel(application: Application) : AndroidViewModel(applicatio
         _uiState.update {
             it.copy(
                 paso = PasoRecuperar.PREGUNTAS,
-                preguntas = preguntas,
-                respuestas = List(preguntas.size) { "" },
+                catalogo = repositorio.preguntas(),
+                elegidas = List(cantidad) { -1 },
+                respuestas = List(cantidad) { "" },
                 errorGeneral = null
             )
         }
         return true
+    }
+
+    fun onPreguntaElegida(indice: Int, posicion: Int) {
+        _uiState.update {
+            val nuevas = it.elegidas.toMutableList()
+            if (indice in nuevas.indices) nuevas[indice] = posicion
+            it.copy(elegidas = nuevas, errorRespuestas = null, errorGeneral = null)
+        }
     }
 
     fun onRespuestaCambia(indice: Int, valor: String) {
@@ -70,13 +79,23 @@ class RecuperarViewModel(application: Application) : AndroidViewModel(applicatio
     fun verificar(): Boolean {
         val estado = _uiState.value
         val persona = persona ?: return false
+        if (estado.elegidas.any { it !in estado.catalogo.indices }) {
+            _uiState.update { it.copy(errorRespuestas = "Elige tu pregunta de seguridad.") }
+            return false
+        }
+        if (estado.elegidas.toSet().size != estado.elegidas.size) {
+            _uiState.update { it.copy(errorRespuestas = "Elige preguntas distintas.") }
+            return false
+        }
         if (estado.respuestas.any { it.isBlank() }) {
             _uiState.update { it.copy(errorRespuestas = "Responde tu pregunta.") }
             return false
         }
-        val pares = estado.preguntas.mapIndexed { i, p -> p.id to estado.respuestas[i] }
+        val pares = estado.elegidas.mapIndexed { i, posicion -> estado.catalogo[posicion].id to estado.respuestas[i] }
         if (!repositorio.verificarRespuestas(persona.id, persona.rut, pares)) {
-            _uiState.update { it.copy(errorRespuestas = "La respuesta no coincide. Revísala.") }
+            _uiState.update {
+                it.copy(errorRespuestas = "La pregunta o la respuesta no coinciden. Revísalas.")
+            }
             return false
         }
         _uiState.update { it.copy(paso = PasoRecuperar.CLAVE, errorRespuestas = null) }
