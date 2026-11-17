@@ -115,10 +115,10 @@ private fun esLaActiva(opcion: OpcionMenu, rutaActual: String): Boolean {
     }
 }
 
-fun esRaiz(ruta: String): Boolean =
-    ruta.startsWith("mi_sesion") || ruta.startsWith("registro") || ruta.startsWith("sesiones") ||
-            ruta.startsWith("evento") || ruta.startsWith("perfil") || ruta.startsWith("indicadores") ||
-            ruta.startsWith("colaboradores")
+// Una pantalla es raíz si es una de las pestañas del perfil: así una pestaña nueva
+// no necesita acordarse de agregarse acá, que es como se colaba la flecha de retroceso.
+fun esRaiz(ruta: String, opciones: List<OpcionMenu>): Boolean =
+    opciones.any { it.ruta == ruta }
 
 @Composable
 fun BarraNavegacion(

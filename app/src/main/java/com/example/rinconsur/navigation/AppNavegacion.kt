@@ -65,7 +65,9 @@ fun AppNavegacion() {
         )
     }
 
-    val volver: (() -> Unit)? = if (esRaiz(rutaActual)) null else ({ navController.navigateUp() })
+    val opciones = menuDe(perfil)
+    val volver: (() -> Unit)? =
+        if (esRaiz(rutaActual, opciones)) null else ({ navController.navigateUp() })
 
     val conBarra = rutaActual != Ruta.Login.ruta
 
@@ -77,7 +79,7 @@ fun AppNavegacion() {
                 BarraNavegacion(
                     titulo = titulo,
                     subtitulo = subtitulo,
-                    opciones = menuDe(perfil),
+                    opciones = opciones,
                     rutaActual = rutaActual,
                     onIr = { destino ->
                         if (!navController.popBackStack(destino, inclusive = false)) {
