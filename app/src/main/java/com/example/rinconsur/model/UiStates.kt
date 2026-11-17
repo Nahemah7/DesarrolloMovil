@@ -26,7 +26,7 @@ data class RegistroUiState(
     val mensaje: String? = null
 ) {
     val puedeGuardar: Boolean get() = rangoEtario != null &&
-        (clasificacion != Clasificacion.TRANSITO || destino != null)
+            (clasificacion != Clasificacion.TRANSITO || destino != null)
 }
 
 data class SesionesUiState(
@@ -53,10 +53,10 @@ data class SesionesUiState(
     val visibles: List<SesionResumen>
         get() = base.filter { s ->
             (idAcceso == null || s.idAcceso == idAcceso) &&
-                (idObservador == null || s.idObservador == idObservador) &&
-                // "Solo las mías" son las que medí yo: el supervisor programa casi todas,
-                // así que filtrar por programador no acotaría nada.
-                (!soloMias || s.idObservador == miId)
+                    (idObservador == null || s.idObservador == idObservador) &&
+                    // "Solo las mías" son las que medí yo: el supervisor programa casi todas,
+                    // así que filtrar por programador no acotaría nada.
+                    (!soloMias || s.idObservador == miId)
         }
 
     val hayFiltrosActivos: Boolean
@@ -161,7 +161,8 @@ enum class PasoRecuperar { RUT, PREGUNTAS, CLAVE, LISTO }
 data class RecuperarUiState(
     val paso: PasoRecuperar = PasoRecuperar.RUT,
     val rut: String = "",
-    val preguntas: List<PreguntaSeguridad> = emptyList(),
+    val catalogo: List<PreguntaSeguridad> = emptyList(),
+    val elegidas: List<Int> = emptyList(),
     val respuestas: List<String> = listOf("", ""),
     val clave: String = "",
     val repetir: String = "",
