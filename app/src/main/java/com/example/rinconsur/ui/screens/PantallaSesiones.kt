@@ -1,19 +1,6 @@
 package com.example.rinconsur.ui.screens
 
 import androidx.compose.foundation.clickable
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.text.style.TextAlign
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,32 +10,49 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.rinconsur.data.SesionPreferencias
 import com.example.rinconsur.model.EstadoSesion
+import com.example.rinconsur.model.SesionResumen
 import com.example.rinconsur.ui.components.BotonPrincipal
 import com.example.rinconsur.ui.components.BotonSecundario
 import com.example.rinconsur.ui.components.EtiquetaEstado
 import com.example.rinconsur.ui.components.FilaFiltros
+import com.example.rinconsur.ui.components.Filtro
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaSeccion
-import com.example.rinconsur.viewmodel.SesionesViewModel
 import com.example.rinconsur.ui.theme.Apagado
 import com.example.rinconsur.ui.theme.Fondo
 import com.example.rinconsur.ui.theme.Tinta
+import com.example.rinconsur.viewmodel.SesionesViewModel
 
 private fun fechaDiaMes(fecha: String): String {
     val p = fecha.split("-")
@@ -56,34 +60,28 @@ private fun fechaDiaMes(fecha: String): String {
 }
 
 @Composable
-fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit) {
+fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit, onAbrir: (Long) -> Unit) {
     val vm: SesionesViewModel = viewModel()
     val estado by vm.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) { vm.recargar() }
 
     var abrirCalendario by remember { mutableStateOf(false) }
+    var porValidar by remember { mutableStateOf<SesionResumen?>(null) }
 
-    val contexto = LocalContext.current
-    val idRevisor = remember { SesionPreferencias(contexto).leer() }
+    val host = remember { SnackbarHostState() }
+    LaunchedEffect(Unit) { vm.aviso.collect { host.showSnackbar(it) } }
 
-    Scaffold(containerColor = Fondo) { pad ->
+    Scaffold(containerColor = Fondo, snackbarHost = { SnackbarHost(host) }) { pad ->
         Column(
             Modifier
                 .padding(pad)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = vm::diaAnterior) {
-                    Icon(
-                        Icons.Filled.KeyboardArrowLeft,
-                        contentDescription = "Día anterior",
-                        tint = Tinta
-                    )
+                    Icon(Icons.Filled.KeyboardArrowLeft, contentDescription = "Día anterior", tint = Tinta)
                 }
                 Text(
                     text = if (estado.fechaLarga.isEmpty()) "Elegir día" else estado.fechaLarga,
@@ -96,11 +94,7 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit) {
                         .padding(vertical = 10.dp)
                 )
                 IconButton(onClick = vm::diaSiguiente) {
-                    Icon(
-                        Icons.Filled.KeyboardArrowRight,
-                        contentDescription = "Día siguiente",
-                        tint = Tinta
-                    )
+                    Icon(Icons.Filled.KeyboardArrowRight, contentDescription = "Día siguiente", tint = Tinta)
                 }
             }
 
@@ -110,7 +104,7 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 FilaFiltros(
-                    opciones = listOf("Día", "Por validar"),
+                    opciones = listOf("Por validar", "Día", "Semana"),
                     elegido = estado.filtro,
                     modifier = Modifier.weight(1f)
                 ) { vm.filtrar(it) }
@@ -119,114 +113,118 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit) {
                 }
             }
 
+            TarjetaSeccion {
+                Text(
+                    text = "Filtros",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Apagado
+                )
+                Spacer(Modifier.height(6.dp))
+                FilaFiltros(
+                    opciones = listOf("Todos") + vm.accesos.map { it.codigo },
+                    elegido = vm.accesos.firstOrNull { it.id == estado.idAcceso }?.codigo ?: "Todos"
+                ) { elegido ->
+                    vm.filtrarAcceso(vm.accesos.firstOrNull { it.codigo == elegido }?.id)
+                }
+                Spacer(Modifier.height(6.dp))
+                FilaFiltros(
+                    opciones = listOf("Todos") + vm.observadores.map { it.nombre.substringBefore(" ") },
+                    elegido = vm.observadores.firstOrNull { it.id == estado.idObservador }?.nombre?.substringBefore(" ")
+                        ?: "Todos"
+                ) { elegido ->
+                    vm.filtrarObservador(vm.observadores.firstOrNull { it.nombre.substringBefore(" ") == elegido }?.id)
+                }
+                Spacer(Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Filtro(texto = "Solo las mías", activo = estado.soloMias, onClick = vm::alternarSoloMias)
+                    if (estado.hayFiltrosActivos) {
+                        TextButton(onClick = vm::limpiarFiltros) {
+                            Text("Limpiar", style = MaterialTheme.typography.labelMedium, color = Apagado)
+                        }
+                    }
+                }
+            }
+
             if (estado.porValidar.isNotEmpty() && estado.filtro != "Por validar") {
                 Nota(
                     "Hay " + estado.porValidar.size +
-                            if (estado.porValidar.size == 1) " sesión esperando revisión: está en el filtro Por validar."
-                            else " sesiones esperando revisión: están en el filtro Por validar."
+                        if (estado.porValidar.size == 1) " sesión esperando revisión."
+                        else " sesiones esperando revisión."
                 )
             }
 
             if (estado.bloquesPendientes > 0) {
                 Nota(
                     "Bloques por medir: " + estado.bloquesPendientes +
-                            if (estado.pendienteMasAtrasado.isNotEmpty()) " · el más atrasado: " + estado.pendienteMasAtrasado else ""
+                        if (estado.pendienteMasAtrasado.isNotEmpty()) " · el más atrasado: " + estado.pendienteMasAtrasado else ""
                 )
             }
 
             Spacer(Modifier.height(8.dp))
             BotonSecundario("Programar sesión", onClick = onProgramar, modifier = Modifier.fillMaxWidth())
 
-            Seccion(
-                if (estado.filtro == "Por validar")
-                    "Por validar · " + estado.visibles.size +
-                        if (estado.visibles.size == 1) " sesión" else " sesiones"
-                else "Sesiones del día · " + estado.visibles.size
-            )
+            val titulo = when (estado.filtro) {
+                "Por validar" -> "Por validar · " + estado.visibles.size +
+                    if (estado.visibles.size == 1) " sesión" else " sesiones"
+                "Semana" -> "Últimos 7 días · " + estado.visibles.size
+                else -> "Sesiones del día · " + estado.visibles.size
+            }
+            Seccion(titulo)
+
             if (estado.visibles.isEmpty()) {
-                TarjetaSeccion { Nota("No hay sesiones en este filtro.") }
+                TarjetaSeccion { Nota("No hay sesiones con estos filtros.") }
             }
 
             estado.visibles.forEach { s ->
-                val acceso = vm.accesos.firstOrNull { it.id == s.idAcceso }?.etiquetaCorta ?: ""
+                val acceso = vm.accesos.firstOrNull { it.id == s.idAcceso }?.codigo ?: ""
                 Spacer(Modifier.height(8.dp))
-                TarjetaSeccion {
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
-                            Text(
-                                s.codigo + " · " + acceso,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Tinta
-                            )
-                            Text(
-                                fechaDiaMes(s.fecha) + " · " + s.horaInicioCorta + "–" + s.horaFinCorta +
-                                        " · " + s.nombreObservador,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Apagado
-                            )
-                        }
-                        EtiquetaEstado(
-                            s.estado.etiqueta,
-                            when (s.estado) {
-                                EstadoSesion.VALIDADA -> "ok"
-                                EstadoSesion.RECHAZADA -> "aviso"
-                                EstadoSesion.FINALIZADA -> "marca"
-                                EstadoSesion.EN_CURSO -> "info"
-                                else -> "neutro"
-                            }
-                        )
-                    }
-
-                    if (s.registrosValidos > 0) {
-                        val pct = s.pctTransito?.let { String.format("%.1f %%", it) } ?: "sin dato"
-                        Nota(s.registrosValidos.toString() + " registros · tránsito " + pct)
-                    }
-                    s.motivoRechazo?.let { Nota("Motivo del rechazo: " + it) }
-
-                    if (s.estado.esperaRevision) {
-                        when {
-                            s.idObservador == idRevisor ->
-                                Nota("Es tu propia sesión: la revisa otra persona.")
-                            else -> {
-                                if (!s.sePuedeValidar) {
-                                    Nota("Faltan registros para validar: mínimo 30 y hay " + s.registrosValidos + ".")
-                                }
-                                Spacer(Modifier.height(6.dp))
-                                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    BotonPrincipal(
-                                        texto = "Validar",
-                                        onClick = { vm.validar(s.id) },
-                                        modifier = Modifier.weight(1f),
-                                        habilitado = s.sePuedeValidar
-                                    )
-                                    BotonSecundario(
-                                        texto = "Rechazar",
-                                        onClick = { onRechazar(s.id) },
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                TarjetaSesion(
+                    sesion = s,
+                    acceso = acceso,
+                    esMia = s.idObservador == estado.miId,
+                    onAbrir = { onAbrir(s.id) },
+                    onValidar = { porValidar = s },
+                    onRechazar = { onRechazar(s.id) }
+                )
             }
             Spacer(Modifier.height(20.dp))
         }
     }
+
+    porValidar?.let { s ->
+        AlertDialog(
+            onDismissRequest = { porValidar = null },
+            title = { Text("Validar " + s.codigo) },
+            text = {
+                Text(
+                    "Queda validada con " + s.registrosValidos + " registros" +
+                        (s.pctTransito?.let { " y " + String.format("%.1f", it) + " % de tránsito" } ?: "") +
+                        ". No se puede deshacer."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    vm.validar(s.id, s.codigo)
+                    porValidar = null
+                }) { Text("Validar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { porValidar = null }) { Text("Cancelar") }
+            }
+        )
+    }
+
     if (abrirCalendario) {
         val formatoDia = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
             .apply { timeZone = java.util.TimeZone.getTimeZone("UTC") }
-        val estadoDia = rememberDatePickerState(
-            initialSelectedDateMillis = formatoDia.parse(estado.fecha)?.time
-        )
+        val estadoDia = rememberDatePickerState(initialSelectedDateMillis = formatoDia.parse(estado.fecha)?.time)
 
         DatePickerDialog(
             onDismissRequest = { abrirCalendario = false },
             confirmButton = {
                 TextButton(onClick = {
-                    estadoDia.selectedDateMillis?.let { milisegundos ->
-                        vm.elegirFecha(formatoDia.format(java.util.Date(milisegundos)))
-                    }
+                    estadoDia.selectedDateMillis?.let { ms -> vm.elegirFecha(formatoDia.format(java.util.Date(ms))) }
                     abrirCalendario = false
                 }) { Text("Elegir") }
             },
@@ -237,5 +235,83 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit) {
             DatePicker(state = estadoDia)
         }
     }
+}
 
+@Composable
+private fun TarjetaSesion(
+    sesion: SesionResumen,
+    acceso: String,
+    esMia: Boolean,
+    onAbrir: () -> Unit,
+    onValidar: () -> Unit,
+    onRechazar: () -> Unit
+) {
+    TarjetaSeccion(modifier = Modifier.clickable { onAbrir() }) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    sesion.codigo + if (acceso.isEmpty()) "" else " · " + acceso,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Tinta
+                )
+                Text(
+                    fechaDiaMes(sesion.fecha) + " · " + sesion.horaInicioCorta + "–" + sesion.horaFinCorta,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Apagado
+                )
+                Text(
+                    sesion.nombreObservador.ifEmpty { "Sin observador" },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Apagado
+                )
+            }
+            EtiquetaEstado(
+                sesion.estado.etiqueta,
+                when (sesion.estado) {
+                    EstadoSesion.VALIDADA -> "ok"
+                    EstadoSesion.RECHAZADA -> "aviso"
+                    EstadoSesion.FINALIZADA -> "marca"
+                    EstadoSesion.EN_CURSO -> "info"
+                    else -> "neutro"
+                }
+            )
+        }
+
+        if (sesion.registrosValidos > 0) {
+            val pct = sesion.pctTransito?.let { String.format("%.1f %%", it) } ?: "sin dato"
+            Text(
+                text = sesion.registrosValidos.toString() + " registros · tránsito " + pct,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.SemiBold,
+                color = Tinta
+            )
+        }
+        sesion.motivoRechazo?.let { Nota("Motivo del rechazo: " + it) }
+
+        if (sesion.estado.esperaRevision) {
+            when {
+                esMia -> Nota("Es tu propia sesión: la revisa otra persona.")
+                else -> {
+                    if (!sesion.sePuedeValidar) {
+                        Nota("Faltan registros para validar: mínimo 30 y hay " + sesion.registrosValidos + ".")
+                    }
+                    Spacer(Modifier.height(6.dp))
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        BotonPrincipal(
+                            texto = "Validar",
+                            onClick = onValidar,
+                            modifier = Modifier.weight(1f),
+                            habilitado = sesion.sePuedeValidar
+                        )
+                        BotonSecundario(
+                            texto = "Rechazar",
+                            onClick = onRechazar,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+        }
+    }
 }

@@ -35,15 +35,32 @@ data class SesionesUiState(
     val deLaSemana: List<SesionResumen> = emptyList(),
     val bloquesPendientes: Int = 0,
     val pendienteMasAtrasado: String = "",
-    val filtro: String = "Día",
+    val filtro: String = "Por validar",
+    val idAcceso: Long? = null,
+    val idObservador: Long? = null,
+    val soloMias: Boolean = false,
+    val miId: Long = 0,
     val fecha: String = "",
     val fechaLarga: String = ""
 ) {
-    val visibles: List<SesionResumen>
+    private val base: List<SesionResumen>
         get() = when (filtro) {
-            "Por validar" -> porValidar
-            else -> sesiones
+            "Semana" -> deLaSemana
+            "Día" -> sesiones
+            else -> porValidar
         }
+
+    val visibles: List<SesionResumen>
+        get() = base.filter { s ->
+            (idAcceso == null || s.idAcceso == idAcceso) &&
+                (idObservador == null || s.idObservador == idObservador) &&
+                // "Solo las mías" son las que medí yo: el supervisor programa casi todas,
+                // así que filtrar por programador no acotaría nada.
+                (!soloMias || s.idObservador == miId)
+        }
+
+    val hayFiltrosActivos: Boolean
+        get() = idAcceso != null || idObservador != null || soloMias
 }
 
 data class IndicadoresUiState(

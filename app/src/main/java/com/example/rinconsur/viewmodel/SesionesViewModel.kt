@@ -5,10 +5,14 @@ import androidx.lifecycle.AndroidViewModel
 import com.example.rinconsur.data.FlujoRepository
 import com.example.rinconsur.data.SesionPreferencias
 import com.example.rinconsur.model.Acceso
+import com.example.rinconsur.model.Colaborador
 import com.example.rinconsur.model.EstadoSesion
 import com.example.rinconsur.model.SesionesUiState
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class SesionesViewModel(application: Application) : AndroidViewModel(application) {
@@ -23,10 +27,14 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
 
     private val idRevisor: Long = sesion.leer()
 
-    private val _uiState = MutableStateFlow(SesionesUiState())
+    private val _uiState = MutableStateFlow(SesionesUiState(miId = idRevisor))
     val uiState: StateFlow<SesionesUiState> = _uiState.asStateFlow()
 
+    private val _aviso = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val aviso: SharedFlow<String> = _aviso.asSharedFlow()
+
     val accesos: List<Acceso> = repositorio.accesos()
+    val observadores: List<Colaborador> = repositorio.observadores()
 
     init {
         recargar()
@@ -34,14 +42,18 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
 
     fun recargar() {
         val pendientes = repositorio.bloquesPendientes(fechaElegida)
-        val filtroActual = _uiState.value.filtro
+        val anterior = _uiState.value
         _uiState.value = SesionesUiState(
             sesiones = repositorio.sesionesDeFecha(fechaElegida),
             porValidar = repositorio.sesionesPorValidar(),
             deLaSemana = repositorio.sesionesDeLosUltimosDias(fechaElegida, 7),
             bloquesPendientes = pendientes.size,
             pendienteMasAtrasado = pendientes.firstOrNull() ?: "",
-            filtro = filtroActual,
+            filtro = anterior.filtro,
+            idAcceso = anterior.idAcceso,
+            idObservador = anterior.idObservador,
+            soloMias = anterior.soloMias,
+            miId = idRevisor,
             fecha = fechaElegida,
             fechaLarga = fechaLarga(fechaElegida)
         )
@@ -77,9 +89,31 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
         _uiState.value = _uiState.value.copy(filtro = filtro)
     }
 
-    fun validar(idSesion: Long) {
-        repositorio.revisarSesion(idSesion, EstadoSesion.VALIDADA, idRevisor)
+    fun filtrarAcceso(idAcceso: Long?) {
+        val actual = _uiState.value.idAcceso
+        _uiState.value = _uiState.value.copy(idAcceso = if (actual == idAcceso) null else idAcceso)
+    }
+
+    fun filtrarObservador(idObservador: Long?) {
+        val actual = _uiState.value.idObservador
+        _uiState.value = _uiState.value.copy(idObservador = if (actual == idObservador) null else idObservador)
+    }
+
+    fun alternarSoloMias() {
+        _uiState.value = _uiState.value.copy(soloMias = !_uiState.value.soloMias)
+    }
+
+    fun limpiarFiltros() {
+        _uiState.value = _uiState.value.copy(idAcceso = null, idObservador = null, soloMias = false)
+    }
+
+    fun validar(idSesion: Long, codigo: String) {
+        val filas = repositorio.revisarSesion(idSesion, EstadoSesion.VALIDADA, idRevisor)
         recargar()
+        _aviso.tryEmit(
+            if (filas > 0) "Sesión " + codigo + " validada."
+            else "No se pudo validar " + codigo + ": la sesión cambió de estado."
+        )
     }
 
     fun rechazar(idSesion: Long, motivo: String) {

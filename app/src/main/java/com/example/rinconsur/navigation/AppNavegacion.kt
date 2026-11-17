@@ -24,6 +24,7 @@ import com.example.rinconsur.ui.components.esRaiz
 import com.example.rinconsur.ui.components.menuDe
 import com.example.rinconsur.ui.screens.PantallaCierre
 import com.example.rinconsur.ui.screens.PantallaColaboradores
+import com.example.rinconsur.ui.screens.PantallaDetalleSesion
 import com.example.rinconsur.ui.screens.PantallaEvento
 import com.example.rinconsur.ui.screens.PantallaLogin
 import com.example.rinconsur.ui.screens.PantallaMiSesion
@@ -171,7 +172,8 @@ fun AppNavegacion() {
             composable(Ruta.Sesiones.ruta) {
                 PantallaSesiones(
                     onRechazar = { idSesion -> navController.navigate(rutaDeRechazar(idSesion)) },
-                    onProgramar = { navController.navigate(Ruta.Programar.ruta) }
+                    onProgramar = { navController.navigate(Ruta.Programar.ruta) },
+                    onAbrir = { idSesion -> navController.navigate(rutaDeDetalleSesion(idSesion)) }
                 )
             }
             composable(Ruta.Programar.ruta) { PantallaProgramar(onIrA = { navController.navegar(it) }) }
@@ -190,6 +192,13 @@ fun AppNavegacion() {
             }
 
             composable(Ruta.Colaboradores.ruta) { PantallaColaboradores() }
+
+            composable(Ruta.SesionDetalle.ruta) { entrada ->
+                PantallaDetalleSesion(
+                    idSesion = entrada.arguments?.getString("idSesion")?.toLongOrNull() ?: 0L,
+                    onRechazar = { idSesion -> navController.navigate(rutaDeRechazar(idSesion)) }
+                )
+            }
 
             composable(Ruta.Perfil.ruta) {
                 PantallaPerfil(

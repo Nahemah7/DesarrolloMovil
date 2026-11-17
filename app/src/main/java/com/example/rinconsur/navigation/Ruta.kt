@@ -18,8 +18,11 @@ sealed class Ruta(val ruta: String) {
     data object Perfil : Ruta("perfil")
 
     data object Colaboradores : Ruta("colaboradores")
+    data object SesionDetalle : Ruta("sesion/{idSesion}")
 }
 
 fun rutaDePlantilla(numero: Int): String = "plantilla/" + numero
 
 fun rutaDeRechazar(idSesion: Long): String = "rechazar/" + idSesion
+
+fun rutaDeDetalleSesion(idSesion: Long): String = "sesion/" + idSesion

@@ -13,6 +13,7 @@ import com.example.rinconsur.model.IndicadoresDia
 import com.example.rinconsur.model.RangoEtario
 import com.example.rinconsur.model.Registro
 import com.example.rinconsur.model.ResumenSesion
+import com.example.rinconsur.model.DetalleSesion
 import com.example.rinconsur.model.SesionResumen
 import com.example.rinconsur.model.TransitoPorAcceso
 
@@ -20,54 +21,62 @@ class FlujoRepository(context: Context) {
 
     private val db = FlujoDbHelper(context)
 
+    private val catalogoDao = CatalogoDao(db)
+    private val usuarioDao = UsuarioDao(db)
+    private val sesionDao = SesionDao(db)
+    private val indicadorDao = IndicadorDao(db)
+    private val eventoDao = EventoDao(db)
+
     companion object {
         const val MINIMO_REGISTROS = FlujoDbHelper.MINIMO_REGISTROS
     }
 
     // ---- catalogos y datos de referencia ----
 
-    fun accesos(): List<Acceso> = db.listarAccesos()
+    fun accesos(): List<Acceso> = catalogoDao.listarAccesos()
 
-    fun bloques(): List<BloqueHorario> = db.listarBloques()
+    fun bloques(): List<BloqueHorario> = catalogoDao.listarBloques()
 
-    fun rangosEtarios(): List<Pair<RangoEtario, String>> = db.listarRangosEtarios()
+    fun rangosEtarios(): List<Pair<RangoEtario, String>> = catalogoDao.listarRangosEtarios()
 
-    fun companias(): List<Compania> = db.listarCompanias()
+    fun companias(): List<Compania> = catalogoDao.listarCompanias()
 
-    fun fechaHoy(): String = db.fechaHoy()
+    fun fechaHoy(): String = catalogoDao.fechaHoy()
 
-    fun fechaDeTrabajo(): String = db.fechaDeTrabajo()
+    fun fechaDeTrabajo(): String = catalogoDao.fechaDeTrabajo()
 
     // ---- personas ----
 
-    fun colaboradorPorRut(rut: String): Colaborador? = db.buscarColaboradorPorRut(rut)
+    fun colaboradorPorRut(rut: String): Colaborador? = usuarioDao.buscarColaboradorPorRut(rut)
 
-    fun colaboradorPorId(id: Long): Colaborador? = db.buscarColaboradorPorId(id)
+    fun colaboradorPorId(id: Long): Colaborador? = usuarioDao.buscarColaboradorPorId(id)
 
     fun cambiarNombre(idUsuario: Long, nombres: String, apellidoPaterno: String): Boolean =
-        db.cambiarNombre(idUsuario, nombres, apellidoPaterno) > 0
+        usuarioDao.cambiarNombre(idUsuario, nombres, apellidoPaterno) > 0
 
     // ---- sesiones de conteo ----
 
-    fun sesionEnCursoDe(idObservador: Long): SesionResumen? = db.sesionEnCursoDe(idObservador)
+    fun sesionEnCursoDe(idObservador: Long): SesionResumen? = sesionDao.sesionEnCursoDe(idObservador)
 
-    fun sesionesDeFecha(fecha: String): List<SesionResumen> = db.sesionesDeFecha(fecha)
+    fun sesionesDeFecha(fecha: String): List<SesionResumen> = sesionDao.sesionesDeFecha(fecha)
 
-    fun sesion(idSesion: Long): SesionResumen? = db.buscarSesion(idSesion)
+    fun sesion(idSesion: Long): SesionResumen? = sesionDao.buscarSesion(idSesion)
 
-    fun sesionesPorValidar(): List<SesionResumen> = db.sesionesPorValidarTodas()
+    fun detalleDeSesion(idSesion: Long): DetalleSesion? = sesionDao.detalleDeSesion(idSesion)
 
-    fun sesionesPorValidar(fecha: String): List<SesionResumen> = db.sesionesPorValidar(fecha)
+    fun sesionesPorValidar(): List<SesionResumen> = sesionDao.sesionesPorValidarTodas()
+
+    fun sesionesPorValidar(fecha: String): List<SesionResumen> = sesionDao.sesionesPorValidar(fecha)
 
     fun sesionesDeLosUltimosDias(desde: String, dias: Int): List<SesionResumen> =
-        db.sesionesDeLosUltimosDias(desde, dias)
+        sesionDao.sesionesDeLosUltimosDias(desde, dias)
 
-    fun resumenDeSesion(idSesion: Long): ResumenSesion = db.resumenDeSesion(idSesion)
+    fun resumenDeSesion(idSesion: Long): ResumenSesion = sesionDao.resumenDeSesion(idSesion)
 
-    fun iniciarSesion(idSesion: Long, hora: String): Int = db.iniciarSesion(idSesion, hora)
-    fun observadores(): List<Colaborador> = db.listarObservadores()
+    fun iniciarSesion(idSesion: Long, hora: String): Int = sesionDao.iniciarSesion(idSesion, hora)
+    fun observadores(): List<Colaborador> = usuarioDao.listarObservadores()
 
-    fun colaboradores(): List<Colaborador> = db.listarColaboradores()
+    fun colaboradores(): List<Colaborador> = usuarioDao.listarColaboradores()
 
     fun programarSesion(
         idAcceso: Long,
@@ -76,12 +85,12 @@ class FlujoRepository(context: Context) {
         horaFin: String,
         idObservador: Long,
         idProgramador: Long
-    ): String = db.programarSesion(idAcceso, fecha, horaInicio, horaFin, idObservador, idProgramador)
+    ): String = sesionDao.programarSesion(idAcceso, fecha, horaInicio, horaFin, idObservador, idProgramador)
 
-    fun cerrarSesion(idSesion: Long, hora: String): Int = db.cerrarSesionReal(idSesion, hora)
+    fun cerrarSesion(idSesion: Long, hora: String): Int = sesionDao.cerrarSesionReal(idSesion, hora)
 
     fun revisarSesion(idSesion: Long, estado: EstadoSesion, idRevisor: Long, motivo: String? = null): Int =
-        db.revisarSesion(idSesion, estado, idRevisor, motivo)
+        sesionDao.revisarSesion(idSesion, estado, idRevisor, motivo)
 
     // ---- registros ----
 
@@ -92,54 +101,54 @@ class FlujoRepository(context: Context) {
         compania: Compania,
         comprasOtraTienda: Boolean,
         seDirige: Long? = null
-    ): Long = db.insertarRegistro(idSesion, clasificacion, rangoEtario, compania, comprasOtraTienda, seDirige)
+    ): Long = sesionDao.insertarRegistro(idSesion, clasificacion, rangoEtario, compania, comprasOtraTienda, seDirige)
 
     fun anularRegistro(idRegistro: Long, motivo: String, idColaborador: Long): Int =
-        db.anularRegistro(idRegistro, motivo, idColaborador)
+        sesionDao.anularRegistro(idRegistro, motivo, idColaborador)
 
     fun ultimosRegistros(idSesion: Long, limite: Int = 8): List<Registro> =
-        db.ultimosRegistros(idSesion, limite)
+        sesionDao.ultimosRegistros(idSesion, limite)
 
-    fun indicadoresDeFecha(fecha: String): IndicadoresDia? = db.indicadoresDeFecha(fecha)
+    fun indicadoresDeFecha(fecha: String): IndicadoresDia? = indicadorDao.indicadoresDeFecha(fecha)
 
     fun indicadoresDeTipoDia(tipo: String, desde: String? = null, hasta: String? = null): IndicadoresDia? =
-        db.indicadoresDeTipoDia(tipo, desde, hasta)
+        indicadorDao.indicadoresDeTipoDia(tipo, desde, hasta)
 
     fun transitoPorAccesoDeTipo(tipo: String, desde: String? = null, hasta: String? = null): List<TransitoPorAcceso> =
-        db.transitoPorAccesoDeTipo(tipo, desde, hasta)
+        indicadorDao.transitoPorAccesoDeTipo(tipo, desde, hasta)
 
-    fun semanasConDatos(): List<Pair<String, String>> = db.semanasConDatos()
+    fun semanasConDatos(): List<Pair<String, String>> = indicadorDao.semanasConDatos()
 
 
-    fun transitoPorAcceso(fecha: String): List<TransitoPorAcceso> = db.transitoPorAcceso(fecha)
+    fun transitoPorAcceso(fecha: String): List<TransitoPorAcceso> = indicadorDao.transitoPorAcceso(fecha)
 
-    fun bloquesPendientes(fecha: String): List<String> = db.bloquesPendientes(fecha)
+    fun bloquesPendientes(fecha: String): List<String> = indicadorDao.bloquesPendientes(fecha)
 
     // ---- eventos del dia ----
 
-    fun registrarEvento(evento: EventoDia): Long = db.registrarEvento(evento)
+    fun registrarEvento(evento: EventoDia): Long = eventoDao.registrarEvento(evento)
 
-    fun eventosRegistrados(): List<EventoDia> = db.eventosRegistrados()
+    fun eventosRegistrados(): List<EventoDia> = eventoDao.eventosRegistrados()
 
     fun anularEvento(idEvento: Long, motivo: String, idColaborador: Long): Int =
-        db.anularEvento(idEvento, motivo, idColaborador)
+        eventoDao.anularEvento(idEvento, motivo, idColaborador)
 
-    fun contarEventos(fecha: String): Int = db.contarEventos(fecha)
+    fun contarEventos(fecha: String): Int = eventoDao.contarEventos(fecha)
 
-    fun contarTodosLosEventos(): Int = db.contarTodosLosEventos()
+    fun contarTodosLosEventos(): Int = eventoDao.contarTodosLosEventos()
 
-    fun preguntas(): List<PreguntaSeguridad> = db.listarPreguntas()
-    fun preguntasDe(idUsuario: Long): List<PreguntaSeguridad> = db.listarPreguntasDe(idUsuario)
-    fun tienePreguntas(idUsuario: Long): Boolean = db.tienePreguntas(idUsuario)
+    fun preguntas(): List<PreguntaSeguridad> = usuarioDao.listarPreguntas()
+    fun preguntasDe(idUsuario: Long): List<PreguntaSeguridad> = usuarioDao.listarPreguntasDe(idUsuario)
+    fun tienePreguntas(idUsuario: Long): Boolean = usuarioDao.tienePreguntas(idUsuario)
     fun guardarRespuestas(idUsuario: Long, rut: String, respuestas: List<Pair<Long, String>>) =
-        db.guardarRespuestas(idUsuario, rut, respuestas)
+        usuarioDao.guardarRespuestas(idUsuario, rut, respuestas)
     fun verificarRespuestas(idUsuario: Long, rut: String, respuestas: List<Pair<Long, String>>): Boolean =
-        db.verificarRespuestas(idUsuario, rut, respuestas)
-    fun cambiarClave(idUsuario: Long, nuevoHash: String): Boolean = db.cambiarClave(idUsuario, nuevoHash)
+        usuarioDao.verificarRespuestas(idUsuario, rut, respuestas)
+    fun cambiarClave(idUsuario: Long, nuevoHash: String): Boolean = usuarioDao.cambiarClave(idUsuario, nuevoHash)
 
-    fun fotoDe(idUsuario: Long): ByteArray? = db.fotoDe(idUsuario)
+    fun fotoDe(idUsuario: Long): ByteArray? = usuarioDao.fotoDe(idUsuario)
 
-    fun guardarFoto(idUsuario: Long, foto: ByteArray?): Boolean = db.guardarFoto(idUsuario, foto)
+    fun guardarFoto(idUsuario: Long, foto: ByteArray?): Boolean = usuarioDao.guardarFoto(idUsuario, foto)
 
     fun cerrar() = db.close()
 }

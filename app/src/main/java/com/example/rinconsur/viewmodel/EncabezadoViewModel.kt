@@ -57,6 +57,8 @@ class EncabezadoViewModel(application: Application) : AndroidViewModel(applicati
 
             ruta.startsWith("sesiones") -> "Sesiones" to "Validar · rechazar"
 
+            ruta.startsWith("sesion/") -> "Sesión" to "Detalle y segmentación"
+
             ruta.startsWith("indicadores") -> "Indicadores" to repositorio.fechaHoy()
 
             ruta.startsWith("programar") -> "Programar sesión" to "Nueva sesión de conteo"

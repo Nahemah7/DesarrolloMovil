@@ -1,0 +1,52 @@
+package com.example.rinconsur.viewmodel
+
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import com.example.rinconsur.data.FlujoRepository
+import com.example.rinconsur.data.SesionPreferencias
+import com.example.rinconsur.model.DetalleSesion
+import com.example.rinconsur.model.EstadoSesion
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+class DetalleSesionViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val repositorio = FlujoRepository(application)
+    private val sesion = SesionPreferencias(application)
+    private val idRevisor: Long = sesion.leer()
+
+    private val _detalle = MutableStateFlow<DetalleSesion?>(null)
+    val detalle: StateFlow<DetalleSesion?> = _detalle.asStateFlow()
+
+    private val _aviso = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val aviso: SharedFlow<String> = _aviso.asSharedFlow()
+
+    fun cargar(idSesion: Long) {
+        _detalle.value = repositorio.detalleDeSesion(idSesion)
+    }
+
+    fun recargar(idSesion: Long) = cargar(idSesion)
+
+    fun validar(idSesion: Long, codigo: String) {
+        val filas = repositorio.revisarSesion(idSesion, EstadoSesion.VALIDADA, idRevisor)
+        cargar(idSesion)
+        _aviso.tryEmit(
+            if (filas > 0) "Sesión " + codigo + " validada."
+            else "No se pudo validar " + codigo + ": la sesión cambió de estado."
+        )
+    }
+
+    fun puedeRevisar(): Boolean {
+        val d = _detalle.value ?: return false
+        return d.sesion.estado.esperaRevision && d.sesion.idObservador != idRevisor && d.sesion.sePuedeValidar
+    }
+
+    override fun onCleared() {
+        repositorio.cerrar()
+        super.onCleared()
+    }
+}
