@@ -37,12 +37,14 @@ import com.example.rinconsur.model.IndicadoresDia
 import com.example.rinconsur.model.TipoPeriodo
 import com.example.rinconsur.ui.components.BarraPorcentaje
 import com.example.rinconsur.ui.components.FilaFiltros
+import com.example.rinconsur.ui.components.EtiquetaEjemplo
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaEstadistica
 import com.example.rinconsur.ui.components.TarjetaSeccion
 import com.example.rinconsur.viewmodel.IndicadoresViewModel
 import com.example.rinconsur.ui.theme.Apagado
+import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.Fondo
 import com.example.rinconsur.ui.theme.Tinta
 
@@ -117,6 +119,11 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                 TipoPeriodo.entries.firstOrNull { it.etiqueta == etiqueta }?.let { vm.onPeriodo(it) }
             }
             Spacer(Modifier.height(10.dp))
+
+            if (state.deEjemplo) {
+                EtiquetaEjemplo()
+                Spacer(Modifier.height(Dimens.espacioMini))
+            }
 
             if (ind == null) {
                 Nota(cabecera)

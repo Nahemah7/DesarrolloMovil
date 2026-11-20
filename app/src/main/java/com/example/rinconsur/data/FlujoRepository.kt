@@ -32,6 +32,7 @@ class FlujoRepository(context: Context) {
     private val indicadorDao = IndicadorDao(db)
     private val eventoDao = EventoDao(db)
     private val cargaDao = CargaDao(db)
+    private val mantenimientoDao = MantenimientoDao(db)
 
     companion object {
         const val MINIMO_REGISTROS = FlujoDbHelper.MINIMO_REGISTROS
@@ -131,6 +132,11 @@ class FlujoRepository(context: Context) {
     fun bloquesPendientes(fecha: String): List<String> = indicadorDao.bloquesPendientes(fecha)
 
     fun reporteJefatura(): ReporteJefatura = indicadorDao.reporteJefatura(fechaHoy())
+
+    // Mientras haya datos de ejemplo, los informes lo dicen y el administrador puede borrarlos.
+    fun datosDeEjemplo(): Boolean = mantenimientoDao.datosDeEjemplo()
+
+    fun borrarDatosDeEjemplo(): Boolean = mantenimientoDao.borrarDatosDeEjemplo()
 
     fun cargaDelDia(fecha: String = fechaHoy()): CargaDia = cargaDao.cargaDeFecha(fecha)
 

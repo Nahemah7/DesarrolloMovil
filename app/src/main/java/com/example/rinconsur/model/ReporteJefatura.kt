@@ -59,6 +59,7 @@ data class HoraPunta(
 
 data class ReporteJefatura(
     val meta: MetaDelMes,
+    val deEjemplo: Boolean = false,
     val meses: List<ConversionMes> = emptyList(),
     val horas: List<HoraPunta> = emptyList(),
     val porRango: List<GrupoConteo> = emptyList(),

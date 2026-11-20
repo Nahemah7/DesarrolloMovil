@@ -46,6 +46,7 @@ import com.example.rinconsur.model.formatoPorcentaje
 import com.example.rinconsur.ui.components.AnilloProgreso
 import com.example.rinconsur.ui.components.BarrasVerticales
 import com.example.rinconsur.ui.components.Donut
+import com.example.rinconsur.ui.components.EtiquetaEjemplo
 import com.example.rinconsur.ui.components.LeyendaGrafico
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
@@ -94,6 +95,11 @@ fun PantallaReporte() {
             if (r == null) {
                 Nota("Cargando el reporte.")
                 return@Column
+            }
+
+            if (r.deEjemplo) {
+                EtiquetaEjemplo()
+                Spacer(Modifier.height(Dimens.espacioMini))
             }
 
             Seccion("Meta del mes")

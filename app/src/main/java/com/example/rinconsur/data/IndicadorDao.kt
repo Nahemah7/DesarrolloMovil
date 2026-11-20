@@ -224,6 +224,9 @@ internal class IndicadorDao(private val helper: FlujoDbHelper) {
         }
 
         return ReporteJefatura(
+            deEjemplo = helper.readableDatabase.rawQuery(
+                "SELECT valor FROM configuracion WHERE clave = 'datos_ejemplo'", arrayOf()
+            ).use { c -> c.moveToFirst() && c.getString(0) == "1" },
             meta = MetaDelMes(
                 anio = periodo.take(4).toIntOrNull() ?: 0,
                 mes = periodo.takeLast(2).toIntOrNull() ?: 0,

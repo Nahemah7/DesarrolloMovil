@@ -25,8 +25,23 @@ class ColaboradoresViewModel(application: Application) : AndroidViewModel(applic
     private val _aviso = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val aviso: SharedFlow<String> = _aviso.asSharedFlow()
 
+    private val _deEjemplo = MutableStateFlow(false)
+    val deEjemplo: StateFlow<Boolean> = _deEjemplo.asStateFlow()
+
     fun cargar() {
         _colaboradores.value = repositorio.colaboradores()
+        _deEjemplo.value = repositorio.datosDeEjemplo()
+    }
+
+    // Deja la aplicación con las personas y los catálogos, sin las mediciones del caso.
+    fun empezarDeCero(): Boolean {
+        val borrado = repositorio.borrarDatosDeEjemplo()
+        cargar()
+        _aviso.tryEmit(
+            if (borrado) "Listo: desde ahora solo quedan los datos que cargues tú."
+            else "No se pudieron borrar los datos de ejemplo."
+        )
+        return borrado
     }
 
     // Sirve cuando el código temporal venció o la persona lo perdió sin haber entrado nunca.

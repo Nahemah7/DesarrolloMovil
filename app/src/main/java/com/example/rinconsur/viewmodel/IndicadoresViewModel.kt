@@ -54,7 +54,8 @@ class IndicadoresViewModel(application: Application) : AndroidViewModel(applicat
                 fecha = hoy,
                 sesionesHoy = repositorio.sesionesDeFecha(hoy),
                 hayDatosEnHabiles = repositorio.indicadoresDeTipoDia(TipoPeriodo.HABILES.tipoDiaBd!!) != null,
-                semanas = semanas
+                semanas = semanas,
+                deEjemplo = repositorio.datosDeEjemplo()
             )
         }
         val donde = posicion.coerceIn(0, semanas.size)
@@ -67,7 +68,8 @@ class IndicadoresViewModel(application: Application) : AndroidViewModel(applicat
             fecha = hoy,
             sesionesHoy = repositorio.sesionesDeFecha(hoy),
             semanas = semanas,
-            posicionSemana = donde
+            posicionSemana = donde,
+            deEjemplo = repositorio.datosDeEjemplo()
         )
     }
 

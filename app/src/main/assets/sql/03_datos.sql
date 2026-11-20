@@ -614,3 +614,6 @@ INSERT INTO pregunta_seguridad (id_pregunta, texto) VALUES
   (4, '¿Cuál fue tu primer trabajo?'),
   (5, '¿Cuál es tu comida favorita?'),
   (6, '¿Cómo se llamaba tu mejor amigo de la infancia?');;
+
+-- Mientras esto sea '1', lo que se ve en los informes es de ejemplo.
+INSERT INTO configuracion (clave, valor) VALUES ('datos_ejemplo', '1');;

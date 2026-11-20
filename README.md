@@ -29,7 +29,7 @@ La aplicación entra con RUT y clave, y cada perfil ve solo lo que le correspond
 | **Supervisor de piso** | Opera el día: programa sesiones, entra por la lista «Por validar», valida o rechaza con motivo, registra eventos y consulta los indicadores |
 | **Subgerente comercial** | Carga los ingresos y las boletas del día, bloque por bloque, y responde por el reporte operativo: indicadores, comparación por mes y perfil del tránsito |
 | **Jefa de tienda** | Lee y decide: reporte del mes con la meta de conversión, la comparación por mes, las horas punta y el perfil del tránsito |
-| **Administrador** | Crea las cuentas de la tienda y entrega un código temporal. Cada persona define su propia clave y su pregunta de seguridad al entrar por primera vez |
+| **Administrador** | Crea y edita las cuentas de la tienda, entrega el código temporal y puede borrar los datos de ejemplo para que la aplicación quede solo con lo que carga la tienda. Cada persona define su propia clave y su pregunta de seguridad al entrar por primera vez |
 
 ## Qué hace la aplicación
 
@@ -260,6 +260,10 @@ Quedan anotadas acá porque explican el porqué de lo que se ve en pantalla.
   pregunta de seguridad. En la base queda el hash del código, nunca el código.
 - **El cargo no se escribe: sale del perfil.** Pedir el puesto dos veces permitía escribir «Vendedora»
   para una cuenta de administrador.
+- **Los datos de ejemplo se anuncian y se pueden borrar.** Mientras la base tenga la semilla del caso,
+  los informes muestran la etiqueta «Datos de ejemplo»; el administrador la quita desde
+  «Datos de la aplicación → Empezar de cero», que borra mediciones, ingresos, transacciones y metas
+  pero conserva personas, accesos, bloques horarios y preguntas de seguridad.
 - **No se siembran respuestas de seguridad ni cuentas de relleno.** Los datos de ejemplo son los del
   anexo y las siete personas del caso; lo demás lo crea el administrador y lo configura cada persona.
 - **El esquema y la semilla son archivos `.sql`**, no texto dentro de Kotlin: se editan, se revisan y se

@@ -237,3 +237,10 @@ CREATE UNIQUE INDEX ux_conteo_con_detalle
 
 CREATE UNIQUE INDEX ux_conteo_sin_detalle
     ON conteo_ingreso (fecha, id_bloque) WHERE id_acceso IS NULL;;
+
+-- Una sola fila por clave: guarda si la app todavía trae los datos de ejemplo.
+CREATE TABLE configuracion (
+    clave          VARCHAR(40)  NOT NULL PRIMARY KEY,
+    valor          VARCHAR(120) NOT NULL,
+    actualizado_en DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+);;

@@ -27,7 +27,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,6 +60,8 @@ fun PantallaColaboradores(onNuevaPersona: () -> Unit, onEditar: (Long) -> Unit) 
     val vm: ColaboradoresViewModel = viewModel()
     val lista by vm.colaboradores.collectAsStateWithLifecycle()
     val codigo by vm.codigo.collectAsStateWithLifecycle()
+    val deEjemplo by vm.deEjemplo.collectAsStateWithLifecycle()
+    var confirmandoBorrado by remember { mutableStateOf(false) }
     val host = remember { SnackbarHostState() }
     LaunchedEffect(Unit) { vm.aviso.collect { host.showSnackbar(it) } }
 
@@ -123,8 +127,71 @@ fun PantallaColaboradores(onNuevaPersona: () -> Unit, onEditar: (Long) -> Unit) 
             }
         }
 
+        Spacer(Modifier.height(Dimens.espacioMedio))
+        Text(
+            text = "Datos de la aplicación",
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = Marino,
+            modifier = Modifier.padding(top = Dimens.espacioMedio, bottom = Dimens.espacioMini)
+        )
+        TarjetaSeccion {
+            Text(
+                text = if (deEjemplo)
+                    "La aplicación trae las mediciones de ejemplo del caso: el día 15-09, la semana del 08-10 y el sábado 24-10."
+                else "Las mediciones de ejemplo ya se borraron: lo que se ve es lo que cargó la tienda.",
+                style = MaterialTheme.typography.bodySmall,
+                color = Apagado
+            )
+            if (deEjemplo) {
+                Spacer(Modifier.height(Dimens.espacioMini))
+                TextButton(onClick = { confirmandoBorrado = true }) {
+                    Text(
+                        text = "Empezar de cero",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Aviso
+                    )
+                }
+            }
+        }
+
         Spacer(Modifier.height(Dimens.espacioGrande))
     }
+    }
+
+    if (confirmandoBorrado) {
+        AlertDialog(
+            onDismissRequest = { confirmandoBorrado = false },
+            title = { Text("Empezar de cero") },
+            text = {
+                Column {
+                    Text(
+                        "Se borran las mediciones de ejemplo: sesiones, registros, ingresos, " +
+                            "transacciones, eventos y metas.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(Modifier.height(Dimens.espacioChico))
+                    Text(
+                        "Se conservan las personas, los accesos, los bloques horarios y las preguntas " +
+                            "de seguridad. Esta acción no se puede deshacer.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Apagado
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmandoBorrado = false
+                    vm.empezarDeCero()
+                }) {
+                    Text("Borrar los datos de ejemplo", color = Aviso)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmandoBorrado = false }) { Text("Cancelar") }
+            }
+        )
     }
 
     if (codigo != null) {

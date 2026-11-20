@@ -72,7 +72,8 @@ data class IndicadoresUiState(
     val sesionesHoy: List<SesionResumen> = emptyList(),
     val hayDatosEnHabiles: Boolean = false,
     val semanas: List<SemanaIndicadores> = emptyList(),
-    val posicionSemana: Int = 0
+    val posicionSemana: Int = 0,
+    val deEjemplo: Boolean = false
 ) {
     val semanaElegida: SemanaIndicadores?
         get() = semanas.getOrNull(posicionSemana - 1)

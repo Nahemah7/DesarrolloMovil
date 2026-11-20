@@ -11,7 +11,7 @@ class FlujoDbHelper(private val contexto: Context) :
 
     companion object {
         private const val NOMBRE_BD = "rinconsur.db"
-        private const val VERSION_BD = 11
+        private const val VERSION_BD = 12
 
         private const val CARPETA = "sql"
         private const val SCRIPT_ESQUEMA = "01_esquema.sql"
@@ -51,7 +51,7 @@ internal const val SQL_SESIONES =
             "registro_observacion", "respuesta_seguridad", "sesion_observacion", "evento_dia",
             "conteo_ingreso", "transaccion_bloque", "meta_conversion", "usuario", "rol",
             "pregunta_seguridad", "acceso", "bloque_horario", "estado_sesion", "clasificacion",
-            "rango_etario", "tipo_compania", "tipo_evento"
+            "rango_etario", "tipo_compania", "tipo_evento", "configuracion"
         )
     }
 
