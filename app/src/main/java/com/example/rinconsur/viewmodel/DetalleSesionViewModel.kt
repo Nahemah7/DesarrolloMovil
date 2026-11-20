@@ -2,8 +2,13 @@ package com.example.rinconsur.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.rinconsur.data.FlujoRepository
 import com.example.rinconsur.data.SesionPreferencias
+import com.example.rinconsur.data.remoto.DireccionServidor
+import com.example.rinconsur.data.remoto.RepositorioSesionesRemoto
+import com.example.rinconsur.data.remoto.TokenPreferencias
+import kotlinx.coroutines.launch
 import com.example.rinconsur.model.DetalleSesion
 import com.example.rinconsur.model.EstadoSesion
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,6 +22,8 @@ class DetalleSesionViewModel(application: Application) : AndroidViewModel(applic
 
     private val repositorio = FlujoRepository(application)
     private val sesion = SesionPreferencias(application)
+    private val token = TokenPreferencias(application)
+    private val direccion = DireccionServidor(application)
     private val idRevisor: Long = sesion.leer()
 
     private val _detalle = MutableStateFlow<DetalleSesion?>(null)
@@ -31,11 +38,33 @@ class DetalleSesionViewModel(application: Application) : AndroidViewModel(applic
 
     fun recargar(idSesion: Long) = cargar(idSesion)
 
+    // La validación va primero al servidor: es el estado del que dependen los demás teléfonos.
+    // Si no hay red, se hace en la copia local para que el supervisor no quede bloqueado.
     fun validar(idSesion: Long, codigo: String) {
+        val guardado = token.leer()
+        if (guardado == null) {
+            validarLocal(idSesion, codigo)
+            return
+        }
+        viewModelScope.launch {
+            val remoto = RepositorioSesionesRemoto(direccion.leer(), guardado)
+            if (remoto.validar(idSesion)) {
+                // El servidor ya la validó: se refleja en la copia local para que no queden
+                // dos verdades sobre la misma sesión.
+                repositorio.revisarSesion(idSesion, EstadoSesion.VALIDADA, idRevisor)
+                cargar(idSesion)
+                _aviso.tryEmit("Sesión " + codigo + " validada en el servidor.")
+            } else {
+                validarLocal(idSesion, codigo)
+            }
+        }
+    }
+
+    private fun validarLocal(idSesion: Long, codigo: String) {
         val filas = repositorio.revisarSesion(idSesion, EstadoSesion.VALIDADA, idRevisor)
         cargar(idSesion)
         _aviso.tryEmit(
-            if (filas > 0) "Sesión " + codigo + " validada."
+            if (filas > 0) "Sesión " + codigo + " validada en el teléfono: se sincronizará cuando haya red."
             else "No se pudo validar " + codigo + ": la sesión cambió de estado."
         )
     }

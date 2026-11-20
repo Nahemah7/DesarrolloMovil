@@ -2,8 +2,14 @@ package com.example.rinconsur.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.rinconsur.data.FlujoRepository
 import com.example.rinconsur.data.SesionPreferencias
+import com.example.rinconsur.data.remoto.DireccionServidor
+import com.example.rinconsur.data.remoto.RepositorioSesionesRemoto
+import com.example.rinconsur.data.remoto.TokenPreferencias
+import com.example.rinconsur.model.FuenteDatos
+import kotlinx.coroutines.launch
 import com.example.rinconsur.model.Acceso
 import com.example.rinconsur.model.Colaborador
 import com.example.rinconsur.model.EstadoSesion
@@ -19,6 +25,8 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
 
     private val repositorio = FlujoRepository(application)
     private val sesion = SesionPreferencias(application)
+    private val token = TokenPreferencias(application)
+    private val direccion = DireccionServidor(application)
 
     private var fechaElegida: String = repositorio.fechaHoy()
 
@@ -38,6 +46,7 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
 
     init {
         recargar()
+        sincronizar()
     }
 
     fun recargar() {
@@ -57,6 +66,25 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
             fecha = fechaElegida,
             fechaLarga = fechaLarga(fechaElegida)
         )
+        sincronizar()
+    }
+
+    // La pantalla se pinta con la copia local y, si hay sesión en el servidor, se reemplaza con
+    // lo que responde el gateway. Sin red no se pierde nada: queda lo local y el aviso de fuente.
+    private fun sincronizar() {
+        val guardado = token.leer() ?: return
+        val fecha = fechaElegida
+        viewModelScope.launch {
+            val remoto = RepositorioSesionesRemoto(direccion.leer(), guardado)
+            val delDia = remoto.sesionesDeFecha(fecha)
+            val pendientes = remoto.porValidar()
+            if (delDia == null || pendientes == null || fecha != fechaElegida) return@launch
+            _uiState.value = _uiState.value.copy(
+                sesiones = delDia,
+                porValidar = pendientes,
+                fuente = FuenteDatos.EN_LINEA
+            )
+        }
     }
 
     fun diaAnterior() = moverDia(-1)
@@ -108,10 +136,29 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun validar(idSesion: Long, codigo: String) {
+        val guardado = token.leer()
+        if (guardado == null) {
+            validarLocal(idSesion, codigo)
+            return
+        }
+        viewModelScope.launch {
+            val remoto = RepositorioSesionesRemoto(direccion.leer(), guardado)
+            if (remoto.validar(idSesion)) {
+                repositorio.revisarSesion(idSesion, EstadoSesion.VALIDADA, idRevisor)
+                _aviso.tryEmit("Sesión " + codigo + " validada en el servidor.")
+                recargar()
+            } else {
+                // Sin red o rechazada por el servicio: se intenta en la copia local y se avisa.
+                validarLocal(idSesion, codigo)
+            }
+        }
+    }
+
+    private fun validarLocal(idSesion: Long, codigo: String) {
         val filas = repositorio.revisarSesion(idSesion, EstadoSesion.VALIDADA, idRevisor)
         recargar()
         _aviso.tryEmit(
-            if (filas > 0) "Sesión " + codigo + " validada."
+            if (filas > 0) "Sesión " + codigo + " validada en el teléfono: se enviará al servidor cuando haya red."
             else "No se pudo validar " + codigo + ": la sesión cambió de estado."
         )
     }

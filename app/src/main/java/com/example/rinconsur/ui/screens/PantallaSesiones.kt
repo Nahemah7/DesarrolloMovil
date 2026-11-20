@@ -1,7 +1,9 @@
 package com.example.rinconsur.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -40,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rinconsur.model.EstadoSesion
+import androidx.compose.ui.draw.clip
 import com.example.rinconsur.model.SesionResumen
 import com.example.rinconsur.ui.components.BotonPrincipal
 import com.example.rinconsur.ui.components.BotonSecundario
@@ -50,6 +54,10 @@ import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaSeccion
 import com.example.rinconsur.ui.theme.Apagado
+import com.example.rinconsur.ui.theme.AquaSuave
+import com.example.rinconsur.ui.theme.Dimens
+import com.example.rinconsur.ui.theme.Linea
+import com.example.rinconsur.ui.theme.Marino
 import com.example.rinconsur.ui.theme.Fondo
 import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.SesionesViewModel
@@ -170,7 +178,12 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit, onAbri
                 "Semana" -> "Últimos 7 días · " + estado.visibles.size
                 else -> "Sesiones del día · " + estado.visibles.size
             }
-            Seccion(titulo)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Seccion(titulo)
+                Spacer(Modifier.weight(1f))
+                // De dónde salieron las sesiones: del servidor o de la copia del teléfono.
+                EtiquetaFuente(estado.fuente)
+            }
 
             if (estado.visibles.isEmpty()) {
                 TarjetaSeccion { Nota("No hay sesiones con estos filtros.") }
@@ -313,5 +326,24 @@ private fun TarjetaSesion(
                 }
             }
         }
+    }
+}
+
+// Marca discreta de origen: cuando la lista viene del servidor se dice, y cuando es la copia
+// local también, para que nadie confunda datos sin sincronizar con datos reales.
+@Composable
+private fun EtiquetaFuente(fuente: com.example.rinconsur.model.FuenteDatos) {
+    val enLinea = fuente == com.example.rinconsur.model.FuenteDatos.EN_LINEA
+    Box(
+        Modifier
+            .clip(RoundedCornerShape(Dimens.radioEtiqueta))
+            .background(if (enLinea) AquaSuave else Linea)
+            .padding(horizontal = 8.dp, vertical = 2.dp)
+    ) {
+        Text(
+            text = if (enLinea) "En línea" else "Local",
+            style = MaterialTheme.typography.labelSmall,
+            color = if (enLinea) Marino else Apagado
+        )
     }
 }

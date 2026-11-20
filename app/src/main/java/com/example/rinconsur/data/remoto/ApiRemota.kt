@@ -31,6 +31,21 @@ interface ApiMedicion {
         @retrofit2.http.Query("fecha") fecha: String
     ): Response<List<SesionRemota>>
 
+    @GET("api/sesiones/por-validar")
+    suspend fun porValidar(
+        @retrofit2.http.Header("Authorization") autorizacion: String
+    ): Response<List<SesionRemota>>
+
+    // Retrofit exige un cuerpo en PATCH: esta llamada manda un objeto vacío que el servicio
+    // ignora, porque el revisor sale del token. Sin el cuerpo, la petición falla en el cliente
+    // y la app se cae al respaldo local sin que se note.
+    @retrofit2.http.PATCH("api/sesiones/{id}/validar")
+    suspend fun validar(
+        @retrofit2.http.Header("Authorization") autorizacion: String,
+        @Path("id") idSesion: Int,
+        @Body cuerpo: Map<String, String> = emptyMap()
+    ): Response<SesionRemota>
+
     @GET("api/indicadores/{fecha}")
     suspend fun indicadorDelDia(
         @retrofit2.http.Header("Authorization") autorizacion: String,

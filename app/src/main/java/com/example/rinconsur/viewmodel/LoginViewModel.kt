@@ -6,6 +6,12 @@ import com.example.rinconsur.data.Clave
 import com.example.rinconsur.data.FlujoRepository
 import com.example.rinconsur.data.Rut
 import com.example.rinconsur.data.SesionPreferencias
+import com.example.rinconsur.data.remoto.ClienteRemoto
+import com.example.rinconsur.data.remoto.DireccionServidor
+import com.example.rinconsur.data.remoto.PeticionLogin
+import com.example.rinconsur.data.remoto.TokenPreferencias
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import com.example.rinconsur.model.LoginUiState
 import com.example.rinconsur.model.PerfilUsuario
 import com.example.rinconsur.model.Colaborador
@@ -18,6 +24,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = FlujoRepository(application)
     private val sesion = SesionPreferencias(application)
+    private val token = TokenPreferencias(application)
+    private val direccion = DireccionServidor(application)
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -90,11 +98,29 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
         sesion.guardar(encontrado.id)
         _usuario.value = encontrado
+        pedirToken(Rut.formatear(rutEscrito), clave, encontrado.id)
         return encontrado.perfil
+    }
+
+    // El login se valida en el teléfono, que es lo que permite trabajar sin red. En paralelo se
+    // pide el token al gateway: si el servidor no está, la app sigue funcionando con lo local.
+    private fun pedirToken(rut: String, clave: String, idUsuario: Long) {
+        viewModelScope.launch {
+            runCatching {
+                val cliente = ClienteRemoto(direccion.leer())
+                val respuesta = cliente.autenticacion.entrar(PeticionLogin(rut, clave))
+                val cuerpo = respuesta.body()
+                val t = cuerpo?.token
+                if (respuesta.isSuccessful && !t.isNullOrBlank()) {
+                    token.guardar(t, idUsuario, cuerpo?.usuario?.rol.orEmpty())
+                }
+            }.onFailure { token.borrar() }
+        }
     }
 
     fun cerrarSesion() {
         sesion.borrar()
+        token.borrar()
         _usuario.value = null
         _uiState.value = LoginUiState()
     }

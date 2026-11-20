@@ -29,6 +29,9 @@ data class RegistroUiState(
             (clasificacion != Clasificacion.TRANSITO || destino != null)
 }
 
+// De dónde salieron las sesiones que se están mostrando: del servidor o de la copia local.
+enum class FuenteDatos { LOCAL, EN_LINEA }
+
 data class SesionesUiState(
     val sesiones: List<SesionResumen> = emptyList(),
     val porValidar: List<SesionResumen> = emptyList(),
@@ -41,7 +44,8 @@ data class SesionesUiState(
     val soloMias: Boolean = false,
     val miId: Long = 0,
     val fecha: String = "",
-    val fechaLarga: String = ""
+    val fechaLarga: String = "",
+    val fuente: FuenteDatos = FuenteDatos.LOCAL
 ) {
     private val base: List<SesionResumen>
         get() = when (filtro) {
