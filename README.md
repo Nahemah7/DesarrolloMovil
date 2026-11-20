@@ -292,3 +292,25 @@ contrato:
 - Issues del proyecto: https://github.com/Nahemah7/DesarrolloMovil/issues
 - Ramas por bloque de trabajo y merge a `master` cuando compila y las pruebas pasan.
 - El docente está agregado como colaborador del repositorio y del tablero.
+
+## Conexión con el backend
+
+La app ya tiene el cliente HTTP (Retrofit + OkHttp) contra el gateway de los microservicios, y una
+pantalla para probarlo sin recompilar: **Perfil → Probar la conexión**.
+
+Cada paso muestra su tiempo y su resultado, así se distingue "no hay red" de "un servicio está
+caído":
+
+```
+Inicio de sesión     Carolina Fuentes · P-01 · token de 237 caracteres      2282 ms
+Catálogos            4 accesos · A1, A2, A3, A4                             494 ms
+Sesiones del 15-09   2 sesiones · S-0001 Validada · S-0002 Validada         360 ms
+Indicadores 15-09    5735 ingresos · 497 transacciones · 8.7 % conversión   315 ms
+```
+
+La dirección por defecto es `http://localhost:8090` y va por el túnel de `adb reverse tcp:8090
+tcp:8090`, que funciona igual en el emulador y en un teléfono por USB sin pelear con el firewall.
+Por la red local se escribe la IP del PC en la misma pantalla y queda guardada.
+
+Las pantallas de la app todavía leen de SQLite: la conexión está probada y lista para irla
+llevando pantalla por pantalla.

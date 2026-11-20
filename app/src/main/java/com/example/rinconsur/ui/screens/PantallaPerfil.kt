@@ -82,7 +82,11 @@ import com.example.rinconsur.viewmodel.PerfilViewModel
 import java.io.File
 
 @Composable
-fun PantallaPerfil(onSalir: () -> Unit, onDatosCambiados: () -> Unit = {}) {
+fun PantallaPerfil(
+    onSalir: () -> Unit,
+    onDatosCambiados: () -> Unit = {},
+    onConexion: () -> Unit = {}
+) {
     val vm: PerfilViewModel = viewModel()
     val estado by vm.uiState.collectAsStateWithLifecycle()
     val contexto = LocalContext.current
@@ -235,8 +239,45 @@ fun PantallaPerfil(onSalir: () -> Unit, onDatosCambiados: () -> Unit = {}) {
                 BotonPrincipal("Guardar la pregunta", onClick = { vm.guardarPreguntas() })
             }
 
+            // Prueba de la conexión con los microservicios del equipo.
+
+            Seccion("Servidor")
+
+            TarjetaSeccion {
+
+                Text(
+
+                    text = "La app puede trabajar contra el backend del PC: catálogos, cuentas y medición.",
+
+                    style = MaterialTheme.typography.bodySmall,
+
+                    color = Apagado
+
+                )
+
+                Spacer(Modifier.height(Dimens.espacioMini))
+
+                TextButton(onClick = onConexion) {
+
+                    Text(
+
+                        text = "Probar la conexión",
+
+                        style = MaterialTheme.typography.labelMedium,
+
+                        fontWeight = FontWeight.SemiBold,
+
+                        color = Marino
+
+                    )
+
+                }
+
+            }
+
+
             Spacer(Modifier.height(Dimens.espacioGrande))
-        }
+}
     }
 
     if (cambiandoNombre) {

@@ -33,6 +33,7 @@ import com.example.rinconsur.ui.screens.PantallaDetalleSesion
 import com.example.rinconsur.ui.screens.PantallaEvento
 import com.example.rinconsur.ui.screens.PantallaLogin
 import com.example.rinconsur.ui.screens.PantallaMiSesion
+import com.example.rinconsur.ui.screens.PantallaConexion
 import com.example.rinconsur.ui.screens.PantallaPerfil
 import com.example.rinconsur.ui.screens.PantallaProgramar
 import com.example.rinconsur.ui.screens.PantallaPlantilla
@@ -234,13 +235,17 @@ fun AppNavegacion() {
                 )
             }
 
+            composable(Ruta.Conexion.ruta) {
+                PantallaConexion(onVolver = { navController.navigateUp() })
+            }
             composable(Ruta.Perfil.ruta) {
                 PantallaPerfil(
                     onSalir = {
                         loginViewModel.cerrarSesion()
                         navController.navigate(Ruta.Login.ruta) { popUpTo(0) }
                     },
-                    onDatosCambiados = { encabezado.actualizar(rutaActual) }
+                    onDatosCambiados = { encabezado.actualizar(rutaActual) },
+                    onConexion = { navController.navigate(Ruta.Conexion.ruta) }
                 )
             }
         }

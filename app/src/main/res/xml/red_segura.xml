@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- El backend es local y no tiene certificado. Se permite HTTP solo para las direcciones del
+     equipo: el PC visto desde el emulador (10.0.2.2), el propio teléfono (localhost) y la red
+     privada, que es donde vive el PC cuando se prueba desde un móvil de verdad. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+        <domain includeSubdomains="true">100.88.40.46</domain>
+    </domain-config>
+</network-security-config>

@@ -17,6 +17,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Dirección del gateway. Por defecto va por el túnel de adb (adb reverse tcp:8090 tcp:8090),
+        // que sirve igual en el emulador y en un teléfono por USB. Se cambia desde la pantalla de
+        // conexión, sin recompilar, cuando se prueba por la red local.
+        buildConfigField("String", "API_BASE", "\"http://localhost:8090/\"")
     }
 
     buildTypes {
@@ -32,6 +37,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -57,4 +63,10 @@ dependencies {
     implementation(libs.androidx.compose.icons.extended)
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
+
+    // Cliente HTTP contra los microservicios: Retrofit con Gson y OkHttp con tiempos de espera cortos.
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 }
