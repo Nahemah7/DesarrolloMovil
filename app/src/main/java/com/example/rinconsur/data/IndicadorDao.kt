@@ -5,6 +5,7 @@ import com.example.rinconsur.model.ConversionMes
 import com.example.rinconsur.model.GrupoConteo
 import com.example.rinconsur.model.HoraPunta
 import com.example.rinconsur.model.IndicadoresDia
+import com.example.rinconsur.model.MedicionPeriodo
 import com.example.rinconsur.model.MetaDelMes
 import com.example.rinconsur.model.ReporteJefatura
 import com.example.rinconsur.model.TransitoPorAcceso
@@ -66,6 +67,40 @@ internal class IndicadorDao(private val helper: FlujoDbHelper) {
                 hasta = c.texto("hasta")
             )
         }
+
+    // Personas medidas en un día: registros válidos de las sesiones finalizadas o validadas.
+    fun medicionDeFecha(fecha: String): MedicionPeriodo =
+        helper.readableDatabase.rawQuery(
+            "SELECT COUNT(*) AS personas, COUNT(DISTINCT s.id_acceso || '#' || s.hora_inicio_prog) AS bloques, " +
+                "1 AS dias, COUNT(DISTINCT CASE WHEN s.id_estado = 4 THEN s.id_sesion END) AS validadas " +
+                "FROM registro_observacion r JOIN sesion_observacion s ON s.id_sesion = r.id_sesion " +
+                "WHERE s.fecha = ? AND r.anulado = 0 AND s.id_estado IN (3, 4)",
+            arrayOf(fecha)
+        ).use { c -> leerMedicion(c) }
+
+    // Lo mismo para un tipo de día (hábiles o fin de semana), opcionalmente dentro de una semana.
+    fun medicionDeTipo(tipo: String, desde: String? = null, hasta: String? = null): MedicionPeriodo =
+        helper.readableDatabase.rawQuery(
+            "SELECT COUNT(*) AS personas, COUNT(DISTINCT s.id_acceso || '#' || s.hora_inicio_prog) AS bloques, " +
+                "COUNT(DISTINCT s.fecha) AS dias, COUNT(DISTINCT CASE WHEN s.id_estado = 4 THEN s.id_sesion END) AS validadas " +
+                "FROM registro_observacion r JOIN sesion_observacion s ON s.id_sesion = r.id_sesion " +
+                "JOIN v_tipo_dia td ON td.fecha = s.fecha " +
+                "WHERE td.tipo_dia = ? AND r.anulado = 0 AND s.id_estado IN (3, 4)" +
+                (if (desde != null && hasta != null) " AND s.fecha BETWEEN ? AND ?" else ""),
+            (if (desde != null && hasta != null) arrayOf(tipo, desde, hasta) else arrayOf(tipo))
+        ).use { c -> leerMedicion(c) }
+
+    private fun leerMedicion(c: android.database.Cursor): MedicionPeriodo {
+        // El agregado siempre devuelve una fila, aunque no haya registros.
+        return if (c.moveToNext()) {
+            MedicionPeriodo(
+                personas = c.entero("personas"),
+                bloques = c.entero("bloques"),
+                dias = c.entero("dias"),
+                sesionesValidadas = c.entero("validadas")
+            )
+        } else MedicionPeriodo()
+    }
 
     fun semanasConDatos(): List<Pair<String, String>> {
         val lista = mutableListOf<Pair<String, String>>()

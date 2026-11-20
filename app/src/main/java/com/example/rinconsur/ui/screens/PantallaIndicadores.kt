@@ -11,23 +11,29 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,18 +42,23 @@ import com.example.rinconsur.model.EstadoSesion
 import com.example.rinconsur.model.IndicadoresDia
 import com.example.rinconsur.model.TipoPeriodo
 import com.example.rinconsur.ui.components.BarraPorcentaje
-import com.example.rinconsur.ui.components.FilaFiltros
 import com.example.rinconsur.ui.components.EtiquetaEjemplo
+import com.example.rinconsur.ui.components.FilaFiltros
+import com.example.rinconsur.ui.components.FilaKpis
+import com.example.rinconsur.ui.components.KpiMediano
+import com.example.rinconsur.ui.components.KpiPrincipal
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
-import com.example.rinconsur.ui.components.TarjetaEstadistica
 import com.example.rinconsur.ui.components.TarjetaSeccion
-import com.example.rinconsur.viewmodel.IndicadoresViewModel
 import com.example.rinconsur.ui.theme.Apagado
 import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.Fondo
+import com.example.rinconsur.ui.theme.Marino
 import com.example.rinconsur.ui.theme.Tinta
+import com.example.rinconsur.viewmodel.IndicadoresViewModel
 
+// La pantalla cuenta una sola cosa arriba —lo que se midió— y deja el resto detrás de
+// "Ver el detalle": quien entra a mirar no tiene que leer seis bloques para saber cómo va el día.
 @Composable
 fun PantallaIndicadores(onIrA: (String) -> Unit) {
     val vm: IndicadoresViewModel = viewModel()
@@ -63,16 +74,19 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
     }
 
     val ind = state.indicadores
+    val medicion = state.medicion
     val porAcceso = state.porAcceso
     val esHoy = state.periodo == TipoPeriodo.HOY
+    val bloques = state.bloquesDelDia
+    var detalleAbierto by remember { mutableStateOf(false) }
+
     val cabecera = if (esHoy) fechaCorta(state.fecha) + " · hoy"
         else {
-            val dias = ind?.dias ?: 0
+            val dias = ind?.dias ?: medicion.dias
             state.periodo.etiqueta + " · " + dias + (if (dias == 1) " día" else " días") +
                 (ind?.let { " (" + fechaCorta(it.desde) + " a " + fechaCorta(it.hasta) + ")" } ?: "")
         }
     val alcance = if (esHoy) "del día" else "del período"
-
     val maxIngresosAcceso = porAcceso.maxOfOrNull { it.ingresos }?.takeIf { it > 0 } ?: 1
 
     Scaffold(containerColor = Fondo) { pad ->
@@ -80,7 +94,7 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
             modifier = Modifier
                 .padding(pad)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = Dimens.espacioPantalla)
         ) {
             if (!esHoy && state.semanas.isNotEmpty()) {
                 Row(
@@ -118,126 +132,110 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
             ) { etiqueta ->
                 TipoPeriodo.entries.firstOrNull { it.etiqueta == etiqueta }?.let { vm.onPeriodo(it) }
             }
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(Dimens.espacioChico))
 
             if (state.deEjemplo) {
                 EtiquetaEjemplo()
-                Spacer(Modifier.height(Dimens.espacioMini))
+                Spacer(Modifier.height(Dimens.espacioChico))
             }
 
-            if (ind == null) {
-                Nota(cabecera)
+            Text(
+                text = cabecera,
+                style = MaterialTheme.typography.labelSmall,
+                color = Apagado
+            )
 
-                val sesiones = state.sesionesHoy
-                val validadas = sesiones.count { it.estado == EstadoSesion.VALIDADA }
-                val programadas = sesiones.count { it.estado == EstadoSesion.PROGRAMADA }
-                val enCurso = sesiones.count { it.estado == EstadoSesion.EN_CURSO }
-                val rechazadas = sesiones.count { it.estado == EstadoSesion.RECHAZADA }
-
-                if (esHoy) {
-                Seccion("Tu medición de hoy")
-                TarjetaSeccion {
-                    if (sesiones.isEmpty()) {
-                        Nota("Todavía no hay sesiones programadas para hoy.")
-                    } else {
-                        TarjetaEstadistica(valor = numeroAnimado(validadas), etiqueta = "Sesiones validadas")
-                        Spacer(Modifier.height(8.dp))
-                        TarjetaEstadistica(valor = numeroAnimado(programadas), etiqueta = "Programadas, por medir")
-                        Spacer(Modifier.height(8.dp))
-                        TarjetaEstadistica(valor = numeroAnimado(enCurso), etiqueta = "En curso")
-                        if (rechazadas > 0) {
-                            Spacer(Modifier.height(8.dp))
-                            TarjetaEstadistica(valor = numeroAnimado(rechazadas), etiqueta = "Rechazadas")
-                        }
-                    }
+            // ---- Primer nivel: lo que midió el observador. No depende de la carga de la tienda.
+            Spacer(Modifier.height(Dimens.espacioChico))
+            KpiPrincipal(
+                valor = numeroAnimado(medicion.personas),
+                etiqueta = "Personas medidas",
+                contexto = if (esHoy) {
+                    "en ${medicion.bloques} de $bloques bloques"
+                } else {
+                    // Sin el conteo de días: los días medidos y los días con carga de la tienda
+                    // no siempre coinciden, y dos números distintos arriba confunden.
+                    "en ${medicion.bloques} " + (if (medicion.bloques == 1) "bloque con medición" else "bloques con medición")
+                },
+                avance = if (esHoy) medicion.bloques.toFloat() / bloques else null,
+                nota = when {
+                    esHoy && medicion.personas == 0 -> "Todavía no hay sesiones medidas en este día."
+                    esHoy && medicion.bloques >= bloques -> "Día completo: están medidos los $bloques bloques."
+                    esHoy -> "Faltan ${bloques - medicion.bloques} bloques para completar el día."
+                    else -> null
                 }
-                }
+            )
 
-                Seccion(if (esHoy) "Indicadores del día" else "Indicadores del período")
+            // ---- Segundo nivel: el negocio, solo cuando la tienda cargó sus números.
+            Spacer(Modifier.height(Dimens.espacioChico))
+            if (ind != null) {
+                val conv = ind.conversionBruta
+                FilaKpis {
+                    KpiMediano(
+                        etiqueta = "Conversión",
+                        valor = conv?.let { "${IndicadoresDia.formato(it)} %" } ?: "—",
+                        detalle = if (ind.ingresos > 0) "${IndicadoresDia.formatoMiles(ind.transacciones)} de ${IndicadoresDia.formatoMiles(ind.ingresos)}" else null,
+                        modifier = Modifier.weight(1f)
+                    )
+                    KpiMediano(
+                        etiqueta = "Transacciones",
+                        valor = IndicadoresDia.formatoMiles(ind.transacciones),
+                        detalle = "ventas " + alcance,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            } else {
                 TarjetaSeccion {
                     Text(
-                        "Sin información",
-                        style = MaterialTheme.typography.titleSmall,
+                        text = "La tienda todavía no cargó " + (if (esHoy) "los ingresos ni las transacciones de hoy" else "los ingresos ni las transacciones de este período"),
+                        style = MaterialTheme.typography.bodySmall,
                         color = Tinta
                     )
-                    Spacer(Modifier.height(4.dp))
-                    Nota(
-                        if (esHoy)
-                            "La tienda todavía no cargó los ingresos y las transacciones de hoy, y sin esos dos " +
-                                "datos no hay conversión ni tránsito que calcular: no se estiman."
-                        else
-                            "Ningún día de este período tiene ingresos y transacciones cargados, y sin esos dos " +
-                                "datos no hay conversión ni tránsito que calcular: no se estiman."
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        text = "Sin esos dos datos no hay conversión que calcular, y no se estima.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Apagado
                     )
                 }
+            }
 
-                Nota(
-                    if (esHoy && state.hayDatosEnHabiles)
-                        "Los días hábiles tienen cifras cargadas: están en el filtro «Hábiles»."
-                    else
-                        "Cuando el conteo de la tienda esté cargado, esta pantalla muestra la conversión, " +
-                            "el tránsito por acceso y el avance de la medición."
+            // ---- El resto, a un toque.
+            Spacer(Modifier.height(Dimens.espacioMini))
+            TextButton(onClick = { detalleAbierto = !detalleAbierto }) {
+                Text(
+                    text = if (detalleAbierto) "Ocultar el detalle" else "Ver el detalle",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Marino
                 )
-            } else {
-                Nota(cabecera + " · datos de la tienda")
+                Icon(
+                    imageVector = if (detalleAbierto) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    contentDescription = null,
+                    tint = Marino
+                )
+            }
 
-                val totalBloques = ind.bloquesMedidos + ind.bloquesEstimados + ind.bloquesSinInformacion
-                val pctMedido = if (totalBloques > 0) 100f * ind.bloquesMedidos / totalBloques else 0f
-
-                Seccion("Avance de la medición")
-                TarjetaSeccion {
-                    BarraPorcentaje(
-                        etiqueta = "Medidos",
-                        valor = pctMedido,
-                        textoValor = "${ind.bloquesMedidos} de $totalBloques"
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Nota(
-                        if (ind.bloquesSinInformacion > 0)
-                            (if (ind.bloquesSinInformacion == 1) "Queda 1 bloque sin información. Mientras falte, "
-                            else "Quedan ${ind.bloquesSinInformacion} bloques sin información. Mientras falten, ") +
-                                "el tránsito es parcial y la conversión sin tránsito no se calcula."
-                        else
-                            "Los $totalBloques bloques $alcance están medidos: los indicadores están completos."
-                    )
-                }
-
-                Seccion("Lo que la tienda registró")
-                TarjetaSeccion {
-                    TarjetaEstadistica(
-                        valor = numeroAnimado(ind.ingresos),
-                        etiqueta = "Ingresos totales (personas registradas)"
-                    )
-                    Spacer(Modifier.height(8.dp))
-
-                    TarjetaEstadistica(
-                        valor = numeroAnimado(ind.transacciones),
-                        etiqueta = "Transacciones (ventas realizadas)"
-                    )
-
-                    ind.conversionBruta?.let { conv ->
-                        Spacer(Modifier.height(8.dp))
-                        TarjetaEstadistica(
-                            valor = "${IndicadoresDia.formato(conv)} %",
-                            etiqueta = "Tasa de conversión bruta (Transacciones / Ingresos)"
+            if (detalleAbierto) {
+                if (ind != null) {
+                    Seccion("Cobertura de la medición")
+                    TarjetaSeccion {
+                        val total = ind.bloquesMedidos + ind.bloquesEstimados + ind.bloquesSinInformacion
+                        val pct = if (total > 0) 100f * ind.bloquesMedidos / total else 0f
+                        BarraPorcentaje(
+                            etiqueta = "Bloques medidos",
+                            valor = pct,
+                            textoValor = "${ind.bloquesMedidos} de $total"
                         )
-                    }
-
-                    Spacer(Modifier.height(8.dp))
-                    Nota("Estos datos vienen del conteo de la tienda: están completos y no dependen de lo que medimos.")
-                }
-
-                Seccion("Tránsito medido")
-                TarjetaSeccion {
-                    if (ind.bloquesMedidos == 0) {
-                        Nota("Sin bloques medidos en este " + (if (esHoy) "día" else "período") + ": no hay tránsito que mostrar todavía.")
-                    } else {
-                        TarjetaEstadistica(
-                            valor = IndicadoresDia.formatoMiles((ind.transito ?: 0.0).toInt()),
-                            etiqueta = "Personas en tránsito, en ${ind.bloquesMedidos} de $totalBloques bloques"
+                        Spacer(Modifier.height(Dimens.espacioMini))
+                        Nota(
+                            if (ind.bloquesEstimados > 0)
+                                "Hay ${ind.bloquesEstimados} bloques con estimación; los estimados no cuentan como medidos."
+                            else if (ind.bloquesSinInformacion > 0)
+                                "Quedan ${ind.bloquesSinInformacion} bloques sin información: el tránsito es parcial."
+                            else
+                                "Los $total bloques $alcance están medidos."
                         )
-                        Spacer(Modifier.height(8.dp))
-                        Nota("Es lo medido, no una proyección: falta cubrir los otros bloques para tener el día completo.")
                     }
                 }
 
@@ -245,10 +243,9 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                     Seccion("Ingresos por acceso")
                     TarjetaSeccion {
                         porAcceso.forEach { acc ->
-                            val pct = (acc.ingresos.toFloat() / maxIngresosAcceso) * 100f
                             BarraPorcentaje(
                                 etiqueta = acc.acceso,
-                                valor = pct,
+                                valor = (acc.ingresos.toFloat() / maxIngresosAcceso) * 100f,
                                 textoValor = IndicadoresDia.formatoMiles(acc.ingresos)
                             )
                             Spacer(Modifier.height(6.dp))
@@ -256,34 +253,74 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                     }
                 }
 
-                Seccion("Conversión sin tránsito")
-                TarjetaSeccion {
-                    val convST = ind.conversionSinTransito
-                    if (convST != null) {
-                        TarjetaEstadistica(
-                            valor = "${IndicadoresDia.formato(convST)} %",
-                            etiqueta = "Conversión sin tránsito (descontando el flujo continuo)"
-                        )
-                    } else {
-                        Text(
-                            "Sin información",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = Tinta
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Nota(
-                            "Para calcularla hay que descontar el tránsito de los $totalBloques bloques $alcance " +
-                                "y faltan ${ind.bloquesSinInformacion} por medir. Estimarla con datos parciales " +
-                                "daría un número que no es el del día."
-                        )
+                if (ind != null) {
+                    Seccion("Conversión sin tránsito")
+                    TarjetaSeccion {
+                        val convST = ind.conversionSinTransito
+                        if (convST != null) {
+                            Text(
+                                text = "${IndicadoresDia.formato(convST)} %",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Tinta
+                            )
+                            Spacer(Modifier.height(2.dp))
+                            Nota("Descontando el flujo continuo de personas que solo cruzan la tienda.")
+                        } else {
+                            Text(
+                                text = "Sin información",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Tinta
+                            )
+                            Spacer(Modifier.height(2.dp))
+                            Nota(
+                                "Para calcularla hay que medir los $bloques bloques $alcance y faltan " +
+                                    "${ind.bloquesSinInformacion}. Estimarla con datos parciales daría un número " +
+                                    "que no es el $alcance."
+                            )
+                        }
                     }
                 }
 
-                Spacer(Modifier.height(8.dp))
-                Nota("Las cifras se calculan con los ingresos y las transacciones que carga la tienda.")
+                val sesiones = state.sesionesHoy
+                if (esHoy) {
+                    Seccion("Tus sesiones de hoy")
+                    TarjetaSeccion {
+                        if (sesiones.isEmpty()) {
+                            Nota("No hay sesiones programadas para hoy.")
+                        } else {
+                            val filas = listOf(
+                                EstadoSesion.VALIDADA to "Validadas",
+                                EstadoSesion.FINALIZADA to "Esperando validación",
+                                EstadoSesion.EN_CURSO to "En curso",
+                                EstadoSesion.PROGRAMADA to "Programadas",
+                                EstadoSesion.RECHAZADA to "Rechazadas"
+                            )
+                            filas.forEachIndexed { i, (estado, etiqueta) ->
+                                val cuantas = sesiones.count { it.estado == estado }
+                                if (cuantas > 0 || estado == EstadoSesion.VALIDADA) {
+                                    if (i > 0) Spacer(Modifier.height(6.dp))
+                                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                        Text(
+                                            text = etiqueta,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Apagado
+                                        )
+                                        Text(
+                                            text = cuantas.toString(),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = Tinta
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(Dimens.espacioGrande))
         }
     }
 }

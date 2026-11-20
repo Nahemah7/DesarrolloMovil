@@ -45,6 +45,7 @@ class IndicadoresViewModel(application: Application) : AndroidViewModel(applicat
 
     private fun estadoDe(periodo: TipoPeriodo, posicion: Int): IndicadoresUiState {
         val semanas = repositorio.semanasConDatos().map { SemanaIndicadores(it.first, it.second) }
+        val bloquesDelDia = repositorio.bloques().size
         val tipo = periodo.tipoDiaBd
         if (tipo == null) {
             return IndicadoresUiState(
@@ -55,7 +56,9 @@ class IndicadoresViewModel(application: Application) : AndroidViewModel(applicat
                 sesionesHoy = repositorio.sesionesDeFecha(hoy),
                 hayDatosEnHabiles = repositorio.indicadoresDeTipoDia(TipoPeriodo.HABILES.tipoDiaBd!!) != null,
                 semanas = semanas,
-                deEjemplo = repositorio.datosDeEjemplo()
+                deEjemplo = repositorio.datosDeEjemplo(),
+                medicion = repositorio.medicionDeFecha(hoy),
+                bloquesDelDia = bloquesDelDia
             )
         }
         val donde = posicion.coerceIn(0, semanas.size)
@@ -69,7 +72,9 @@ class IndicadoresViewModel(application: Application) : AndroidViewModel(applicat
             sesionesHoy = repositorio.sesionesDeFecha(hoy),
             semanas = semanas,
             posicionSemana = donde,
-            deEjemplo = repositorio.datosDeEjemplo()
+            deEjemplo = repositorio.datosDeEjemplo(),
+            medicion = repositorio.medicionDeTipo(tipo, semana?.desde, semana?.hasta),
+            bloquesDelDia = bloquesDelDia
         )
     }
 

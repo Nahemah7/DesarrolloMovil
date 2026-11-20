@@ -1,6 +1,7 @@
 package com.example.rinconsur.data
 
 import android.content.Context
+import com.example.rinconsur.model.MedicionPeriodo
 import com.example.rinconsur.model.NuevaPersona
 import com.example.rinconsur.model.PerfilUsuario
 import com.example.rinconsur.model.PreguntaSeguridad
@@ -125,6 +126,12 @@ class FlujoRepository(context: Context) {
         indicadorDao.transitoPorAccesoDeTipo(tipo, desde, hasta)
 
     fun semanasConDatos(): List<Pair<String, String>> = indicadorDao.semanasConDatos()
+
+    // La medición del observador no depende de la carga de la tienda: se puede mostrar sola.
+    fun medicionDeFecha(fecha: String): MedicionPeriodo = indicadorDao.medicionDeFecha(fecha)
+
+    fun medicionDeTipo(tipo: String, desde: String? = null, hasta: String? = null): MedicionPeriodo =
+        indicadorDao.medicionDeTipo(tipo, desde, hasta)
 
 
     fun transitoPorAcceso(fecha: String): List<TransitoPorAcceso> = indicadorDao.transitoPorAcceso(fecha)

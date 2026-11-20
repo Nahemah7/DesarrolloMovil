@@ -63,9 +63,11 @@ La aplicación entra con RUT y clave, y cada perfil ve solo lo que le correspond
   misma persona en el mismo tramo) y de la duración del bloque (entre 30 y 60 minutos).
 - **Eventos del día**: clima, feriado, evento del mall o cierre de acceso, con descripción y foto de
   evidencia desde la cámara o la galería.
-- **Indicadores**: hoy, días hábiles o fines de semana, con la semana navegable. Muestra el avance de la
-  medición, lo que la tienda registró (ingresos, transacciones y conversión bruta), el tránsito medido,
-  los ingresos por acceso y la conversión sin tránsito cuando el día está completo.
+- **Indicadores**: hoy, días hábiles o fines de semana, con la semana navegable. Arriba va una sola cifra
+  —las personas medidas, con los bloques que cubre y su barra de avance—, porque es lo único que depende
+  del observador y se ve el mismo día, sin esperar la carga de la tienda. Debajo, en fila, la conversión y
+  las transacciones cuando la tienda cargó sus números. El resto —cobertura de la medición, ingresos por
+  acceso, conversión sin tránsito y el estado de las sesiones del día— vive detrás de «Ver el detalle».
 
 ### Administrar personas
 
