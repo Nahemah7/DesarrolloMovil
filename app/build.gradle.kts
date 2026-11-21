@@ -35,6 +35,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    testOptions {
+        // Las pruebas de ViewModel corren en la JVM con Robolectric: necesitan los recursos y los
+        // assets .sql para abrir la base igual que en el teléfono.
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
     buildFeatures {
         compose = true
         buildConfig = true
@@ -51,6 +58,13 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     testImplementation(libs.junit)
+    // ViewModels en la JVM: Application real y SQLite de verdad, sin emulador.
+    testImplementation("org.robolectric:robolectric:4.16")
+    testImplementation("androidx.test:core-ktx:1.6.1")
+    // Robolectric instrumenta clases con ASM: sin una versión reciente no entiende el bytecode
+    // de las dependencias nuevas y todas las pruebas fallan con "major version".
+    testImplementation("org.ow2.asm:asm:9.9.1")
+    testImplementation("org.ow2.asm:asm-commons:9.9.1")
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
