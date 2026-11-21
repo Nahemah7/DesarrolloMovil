@@ -45,6 +45,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rinconsur.model.EstadoSesion
 import androidx.compose.ui.draw.clip
 import com.example.rinconsur.model.SesionResumen
+import com.example.rinconsur.ui.components.EtiquetaFuente
 import com.example.rinconsur.ui.components.BotonPrincipal
 import com.example.rinconsur.ui.components.BotonSecundario
 import com.example.rinconsur.ui.components.EtiquetaEstado
@@ -326,24 +327,5 @@ private fun TarjetaSesion(
                 }
             }
         }
-    }
-}
-
-// Marca discreta de origen: cuando la lista viene del servidor se dice, y cuando es la copia
-// local también, para que nadie confunda datos sin sincronizar con datos reales.
-@Composable
-private fun EtiquetaFuente(fuente: com.example.rinconsur.model.FuenteDatos) {
-    val enLinea = fuente == com.example.rinconsur.model.FuenteDatos.EN_LINEA
-    Box(
-        Modifier
-            .clip(RoundedCornerShape(Dimens.radioEtiqueta))
-            .background(if (enLinea) AquaSuave else Linea)
-            .padding(horizontal = 8.dp, vertical = 2.dp)
-    ) {
-        Text(
-            text = if (enLinea) "En línea" else "Local",
-            style = MaterialTheme.typography.labelSmall,
-            color = if (enLinea) Marino else Apagado
-        )
     }
 }

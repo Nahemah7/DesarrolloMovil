@@ -65,6 +65,20 @@ interface ApiMedicion {
         @Body cuerpo: Map<String, String> = emptyMap()
     ): Response<SesionRemota>
 
+    @GET("api/indicadores/reporte/{fecha}")
+    suspend fun reporte(
+        @retrofit2.http.Header("Authorization") autorizacion: String,
+        @Path("fecha") fecha: String
+    ): Response<ReporteRemoto>
+
+    @GET("api/indicadores")
+    suspend fun indicadoresDelTipo(
+        @retrofit2.http.Header("Authorization") autorizacion: String,
+        @retrofit2.http.Query("tipoDia") tipoDia: String,
+        @retrofit2.http.Query("desde") desde: String?,
+        @retrofit2.http.Query("hasta") hasta: String?
+    ): Response<IndicadorRemoto>
+
     @GET("api/indicadores/{fecha}")
     suspend fun indicadorDelDia(
         @retrofit2.http.Header("Authorization") autorizacion: String,

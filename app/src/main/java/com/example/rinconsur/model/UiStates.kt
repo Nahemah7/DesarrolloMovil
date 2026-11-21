@@ -80,7 +80,8 @@ data class IndicadoresUiState(
     val posicionSemana: Int = 0,
     val deEjemplo: Boolean = false,
     val medicion: MedicionPeriodo = MedicionPeriodo(),
-    val bloquesDelDia: Int = 11
+    val bloquesDelDia: Int = 11,
+    val fuente: FuenteDatos = FuenteDatos.LOCAL
 ) {
     val semanaElegida: SemanaIndicadores?
         get() = semanas.getOrNull(posicionSemana - 1)

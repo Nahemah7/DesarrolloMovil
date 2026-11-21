@@ -43,6 +43,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rinconsur.model.formatoPorcentaje
+import com.example.rinconsur.ui.components.EtiquetaFuente
 import com.example.rinconsur.ui.components.AnilloProgreso
 import com.example.rinconsur.ui.components.BarrasVerticales
 import com.example.rinconsur.ui.components.Donut
@@ -66,6 +67,7 @@ import com.example.rinconsur.viewmodel.ReporteViewModel
 fun PantallaReporte() {
     val vm: ReporteViewModel = viewModel()
     val reporte by vm.reporte.collectAsStateWithLifecycle()
+    val fuente by vm.fuente.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) { vm.cargar() }
     val ciclo = LocalLifecycleOwner.current
@@ -101,6 +103,15 @@ fun PantallaReporte() {
                 EtiquetaEjemplo()
                 Spacer(Modifier.height(Dimens.espacioMini))
             }
+
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                EtiquetaFuente(fuente)
+            }
+            Spacer(Modifier.height(Dimens.espacioMini))
 
             Seccion("Meta del mes")
             TarjetaSeccion {

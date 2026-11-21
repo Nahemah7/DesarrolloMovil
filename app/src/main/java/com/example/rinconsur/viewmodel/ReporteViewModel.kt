@@ -5,7 +5,20 @@ import androidx.lifecycle.AndroidViewModel
 import com.example.rinconsur.data.FlujoRepository
 import com.example.rinconsur.data.SesionPreferencias
 import com.example.rinconsur.model.PerfilUsuario
+import com.example.rinconsur.data.remoto.DireccionServidor
+import com.example.rinconsur.data.remoto.RepositorioIndicadoresRemoto
+import com.example.rinconsur.data.remoto.ReporteRemoto
+import com.example.rinconsur.data.remoto.TokenPreferencias
+import com.example.rinconsur.data.remoto.TrabajoDeFondo
+import com.example.rinconsur.model.Compania
+import com.example.rinconsur.model.ConversionMes
+import com.example.rinconsur.model.FuenteDatos
+import com.example.rinconsur.model.GrupoConteo
+import com.example.rinconsur.model.HoraPunta
+import com.example.rinconsur.model.MetaDelMes
+import com.example.rinconsur.model.RangoEtario
 import com.example.rinconsur.model.ReporteJefatura
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,11 +30,16 @@ class ReporteViewModel(application: Application) : AndroidViewModel(application)
 
     private val repositorio = FlujoRepository(application)
     private val sesion = SesionPreferencias(application)
+    private val tokens = TokenPreferencias(application)
+    private val direccion = DireccionServidor(application)
 
     private val idUsuario: Long = sesion.leer()
 
     private val _reporte = MutableStateFlow<ReporteJefatura?>(null)
     val reporte: StateFlow<ReporteJefatura?> = _reporte.asStateFlow()
+
+    private val _fuente = MutableStateFlow(FuenteDatos.LOCAL)
+    val fuente: StateFlow<FuenteDatos> = _fuente.asStateFlow()
 
     private val _aviso = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val aviso: SharedFlow<String> = _aviso.asSharedFlow()
@@ -31,6 +49,59 @@ class ReporteViewModel(application: Application) : AndroidViewModel(application)
 
     fun cargar() {
         _reporte.value = repositorio.reporteJefatura()
+        cargarDelServicio()
+    }
+
+    // El reporte se calcula en el servicio con las vistas de siempre. Se pide en segundo plano y,
+    // si contesta, reemplaza al del teléfono; si no hay red, queda la copia local y se dice que es
+    // local. Los nombres de rangos y compañías se ponen acá: el servicio manda identificadores.
+    private fun cargarDelServicio() {
+        val token = tokens.leer() ?: return
+        TrabajoDeFondo.alcance.launch {
+            val fecha = repositorio.fechaHoy()
+            val remoto = RepositorioIndicadoresRemoto(direccion.leer(), token).reporte(fecha) ?: return@launch
+            _reporte.value = remoto.aReporteJefatura()
+            _fuente.value = FuenteDatos.EN_LINEA
+        }
+    }
+
+    private fun ReporteRemoto.aReporteJefatura(): ReporteJefatura {
+        val bloques = repositorio.bloques().associateBy { it.id.toInt() }
+        return ReporteJefatura(
+            meta = MetaDelMes(
+                anio = meta?.anio ?: 0,
+                mes = meta?.mes ?: 0,
+                objetivo = meta?.objetivo,
+                actual = meta?.actual,
+                dias = meta?.dias ?: 0
+            ),
+            deEjemplo = false,
+            meses = meses.map {
+                ConversionMes(it.mes, it.ingresos, it.boletas, it.conversion, it.dias)
+            },
+            horas = horas.map {
+                HoraPunta(
+                    hora = bloques[it.idBloque]?.horaInicioCorta ?: ("bloque " + it.idBloque),
+                    ingresos = it.ingresos,
+                    transito = it.transito,
+                    medidos = it.medidos,
+                    bloques = it.bloques
+                )
+            },
+            porRango = porRango.map {
+                GrupoConteo(RangoEtario.porId(it.etiqueta.toLongOrNull() ?: 0).etiqueta, it.cantidad, it.porcentaje)
+            },
+            porCompania = porCompania.map {
+                GrupoConteo(Compania.porId(it.etiqueta.toLongOrNull() ?: 0).etiqueta, it.cantidad, it.porcentaje)
+            },
+            compras = compras.map {
+                GrupoConteo(
+                    if (it.etiqueta == "si") "Compró en otra tienda" else "No compró en otra tienda",
+                    it.cantidad,
+                    it.porcentaje
+                )
+            }
+        )
     }
 
     fun registrarMeta(texto: String): Boolean {

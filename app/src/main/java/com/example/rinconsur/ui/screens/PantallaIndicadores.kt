@@ -41,6 +41,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rinconsur.model.EstadoSesion
 import com.example.rinconsur.model.IndicadoresDia
 import com.example.rinconsur.model.TipoPeriodo
+import com.example.rinconsur.ui.components.EtiquetaFuente
 import com.example.rinconsur.ui.components.BarraPorcentaje
 import com.example.rinconsur.ui.components.EtiquetaEjemplo
 import com.example.rinconsur.ui.components.FilaFiltros
@@ -139,11 +140,19 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                 Spacer(Modifier.height(Dimens.espacioChico))
             }
 
-            Text(
-                text = cabecera,
-                style = MaterialTheme.typography.labelSmall,
-                color = Apagado
-            )
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            ) {
+                Text(
+                    text = cabecera,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Apagado,
+                    modifier = Modifier.weight(1f)
+                )
+                EtiquetaFuente(state.fuente)
+            }
 
             // ---- Primer nivel: lo que midió el observador. No depende de la carga de la tienda.
             Spacer(Modifier.height(Dimens.espacioChico))
