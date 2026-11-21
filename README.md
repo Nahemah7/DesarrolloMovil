@@ -211,7 +211,7 @@ que el esquema y la semilla no se mezclan con las consultas.
 ./gradlew testDebugUnitTest
 ```
 
-Hay **123 pruebas unitarias**. Las de reglas no dependen de Android: formato y dígito verificador del
+Hay **110 pruebas unitarias**. Las de reglas no dependen de Android: formato y dígito verificador del
 RUT, reglas de la clave, largo del texto libre, reglas de programación de sesiones (duración y cruces),
 filtros del listado de sesiones, armado del detalle de una sesión, cálculo del avance de la meta frente a
 su objetivo, separación de un script SQL en sentencias, formato del código temporal, validaciones del
@@ -220,20 +220,20 @@ acceso y bloques incompletos).
 
 ### Pruebas sobre los ViewModels
 
-**23 pruebas en 4 archivos** que entran por el ViewModel y no por la pantalla, porque ahí es donde se
+**10 pruebas en 4 archivos** que entran por el ViewModel y no por la pantalla, porque ahí es donde se
 toma la decisión: `app/src/test/java/com/example/rinconsur/viewmodel/`
 
-| Archivo | Qué defiende |
-|---|---|
-| `LoginViewModelTest` | RUT inválido, clave vacía, clave equivocada y entrada de dos perfiles distintos |
-| `SesionesViewModelTest` | Filtro por validar (solo cerradas), filtros de acceso y observador, navegación de días |
-| `RegistroViewModelTest` | Negarse a guardar sin sesión, plantillas de toque rápido y tránsito sin destino |
-| `IndicadoresViewModelTest` | Día, hábiles y fin de semana, semana anterior y siguiente, recargar sin perder el período |
+| Archivo | Pruebas | Qué defiende, en una línea |
+|---|---|---|
+| `LoginViewModelTest` | 3 | RUT inválido, clave equivocada y entrada de la jefa de tienda |
+| `SesionesViewModelTest` | 3 | Filtro por validar, filtro de mis sesiones y día elegido |
+| `RegistroViewModelTest` | 2 | No guardar sin sesión en curso y no aplicar una plantilla que no existe |
+| `IndicadoresViewModelTest` | 2 | Período de hábiles y retroceder una semana |
 
-Se nombran `funcion_en_condicion_esperado` (`entrar_conClaveEquivocada_...`,
-`onSemanaAnterior_desdeHoy_...`) y usan Robolectric: el ViewModel se instancia de verdad, con su
-`Application` y su SQLite cargado desde los `.sql` de `assets`. No hay dobles de prueba que puedan decir
-que sí a algo que la app real diría que no.
+Cada una comprueba una sola cosa, para que se pueda leer y explicar en la defensa: se nombran
+`funcion_en_condicion_esperado` (`entrar_conClaveEquivocada_...`, `onSemanaAnterior_...`) y usan
+Robolectric: el ViewModel se instancia de verdad, con su `Application` y su SQLite cargado desde los
+`.sql` de `assets`. No hay dobles de prueba que puedan decir que sí a algo que la app real diría que no.
 
 El reporte HTML se genera solo y queda versionado para la entrega:
 
