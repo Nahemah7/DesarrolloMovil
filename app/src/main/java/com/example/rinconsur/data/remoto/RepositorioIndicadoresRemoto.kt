@@ -1,6 +1,8 @@
 package com.example.rinconsur.data.remoto
 
 import com.example.rinconsur.model.IndicadoresDia
+import com.example.rinconsur.model.OrigenTransito
+import com.example.rinconsur.model.TransitoPorAcceso
 
 // Los indicadores y el reporte vienen calculados del servicio: las vistas viven allá y son la
 // misma fuente para todos los dispositivos. Devuelve null si no se pudo hablar con el servidor.
@@ -30,12 +32,35 @@ class RepositorioIndicadoresRemoto(
         null
     }
 
+    // El desglose por acceso: la misma vista que el número de la tienda, agrupada por puerta.
+    suspend fun accesosDelDia(fecha: String): List<TransitoPorAcceso>? = try {
+        val respuesta = cliente.medicion.accesosDelDia(autorizacion, fecha)
+        if (respuesta.isSuccessful) respuesta.body()?.map { it.aTransito() } else null
+    } catch (e: Exception) {
+        null
+    }
+
+    suspend fun accesosDelPeriodo(tipoDia: String, desde: String? = null, hasta: String? = null): List<TransitoPorAcceso>? = try {
+        val respuesta = cliente.medicion.accesosDelTipo(autorizacion, tipoDia, desde, hasta)
+        if (respuesta.isSuccessful) respuesta.body()?.map { it.aTransito() } else null
+    } catch (e: Exception) {
+        null
+    }
+
     suspend fun reporte(fecha: String): ReporteRemoto? = try {
         val respuesta = cliente.medicion.reporte(autorizacion, fecha)
         if (respuesta.isSuccessful) respuesta.body() else null
     } catch (e: Exception) {
         null
     }
+
+    private fun AccesoMedidoRemoto.aTransito() = TransitoPorAcceso(
+        acceso = "A" + idAcceso,
+        ingresos = ingresos.toInt(),
+        // Sin medición el servicio manda nulo y así se muestra: un cero se leería como "pasó nadie".
+        transitoEstimado = transito?.toDouble(),
+        origen = OrigenTransito.porNombre(origen)
+    )
 
     private fun IndicadorRemoto.aIndicadores(desdePedido: String, hastaPedido: String) = IndicadoresDia(
         fecha = desde ?: desdePedido,

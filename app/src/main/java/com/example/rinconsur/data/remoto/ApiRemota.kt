@@ -71,6 +71,20 @@ interface ApiMedicion {
         @Path("fecha") fecha: String
     ): Response<ReporteRemoto>
 
+    @GET("api/indicadores/{fecha}/accesos")
+    suspend fun accesosDelDia(
+        @retrofit2.http.Header("Authorization") autorizacion: String,
+        @Path("fecha") fecha: String
+    ): Response<List<AccesoMedidoRemoto>>
+
+    @GET("api/indicadores/accesos")
+    suspend fun accesosDelTipo(
+        @retrofit2.http.Header("Authorization") autorizacion: String,
+        @retrofit2.http.Query("tipoDia") tipoDia: String,
+        @retrofit2.http.Query("desde") desde: String?,
+        @retrofit2.http.Query("hasta") hasta: String?
+    ): Response<List<AccesoMedidoRemoto>>
+
     @GET("api/indicadores")
     suspend fun indicadoresDelTipo(
         @retrofit2.http.Header("Authorization") autorizacion: String,
@@ -143,6 +157,15 @@ data class IndicadorRemoto(
     val transito: Double?,
     val medidos: Int?,
     val sinInformacion: Int?
+)
+
+// Una puerta del desglose. El código y el nombre (A1, "Acceso principal") no viajan: la app los
+// tiene en sus catálogos.
+data class AccesoMedidoRemoto(
+    val idAcceso: Int = 0,
+    val ingresos: Long = 0,
+    val transito: Long? = null,
+    val origen: String = ""
 )
 
 data class PeticionRegistro(

@@ -283,9 +283,12 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                             )
                             Spacer(Modifier.height(2.dp))
                             Nota(
-                                "Para calcularla hay que medir los $bloques bloques $alcance y faltan " +
-                                    "${ind.bloquesSinInformacion}. Estimarla con datos parciales daría un número " +
-                                    "que no es el $alcance."
+                                // El faltante se cuenta en bloques por acceso (44 en un día), no en
+                                // bloques del día (11): mezclar las dos unidades daba "11 bloques y
+                                // faltan 42".
+                                "Para calcularla tienen que estar medidos todos los bloques de los cuatro " +
+                                    "accesos, y faltan ${ind.bloquesSinInformacion}. Estimarla con datos " +
+                                    "parciales daría un número que no es el $alcance."
                             )
                         }
                     }

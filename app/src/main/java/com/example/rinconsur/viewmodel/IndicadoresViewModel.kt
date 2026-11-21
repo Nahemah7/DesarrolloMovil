@@ -46,14 +46,33 @@ class IndicadoresViewModel(application: Application) : AndroidViewModel(applicat
             val s = _uiState.value
             val remoto = RepositorioIndicadoresRemoto(direccion.leer(), token)
             val tipo = s.periodo.tipoDiaBd
+            val semana = s.semanaElegida
             val cifras = if (tipo == null) {
                 remoto.delDia(s.fecha)
             } else {
-                val semana = s.semanaElegida
                 remoto.delPeriodo(tipo, semana?.desde, semana?.hasta)
             }
+            // El desglose por acceso sale del mismo servicio y del mismo período; si no responde,
+            // se queda el que calculó el teléfono.
+            val accesos = if (tipo == null) {
+                remoto.accesosDelDia(s.fecha)
+            } else {
+                remoto.accesosDelPeriodo(tipo, semana?.desde, semana?.hasta)
+            }
             if (cifras != null) {
-                _uiState.value = _uiState.value.copy(indicadores = cifras, fuente = FuenteDatos.EN_LINEA)
+                // Las personas medidas se recalculan con el MISMO rango que trae el servicio: si no,
+                // arriba decía "258 personas" y al lado "1 día (15-09)", que son dos períodos.
+                val medicion = if (tipo == null) {
+                    repositorio.medicionDeFecha(cifras.desde)
+                } else {
+                    repositorio.medicionDeTipo(tipo, cifras.desde, cifras.hasta)
+                }
+                _uiState.value = _uiState.value.copy(
+                    indicadores = cifras,
+                    medicion = medicion,
+                    porAcceso = accesos?.takeIf { it.isNotEmpty() } ?: _uiState.value.porAcceso,
+                    fuente = FuenteDatos.EN_LINEA
+                )
             }
         }
     }
