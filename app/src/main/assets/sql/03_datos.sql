@@ -617,3 +617,7 @@ INSERT INTO pregunta_seguridad (id_pregunta, texto) VALUES
 
 -- Mientras esto sea '1', lo que se ve en los informes es de ejemplo.
 INSERT INTO configuracion (clave, valor) VALUES ('datos_ejemplo', '1');;
+
+-- Los registros del anexo son historia, no cola de salida: se marcan como ya enviados para que
+-- la sincronización no los vuelva a subir al servidor (que tiene su propia copia).
+UPDATE registro_observacion SET enviado = 1;;

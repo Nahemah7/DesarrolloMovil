@@ -25,6 +25,15 @@ class RepositorioSesionesRemoto(
         null
     }
 
+    // Marca el inicio en el servidor. Devuelve true si quedó en curso o si ya lo estaba: para
+    // la app las dos cosas significan lo mismo y no hay que distinguirlas.
+    suspend fun iniciar(idSesionRemota: Long): Boolean = try {
+        val respuesta = cliente.medicion.iniciar(autorizacion, idSesionRemota.toInt())
+        respuesta.isSuccessful || respuesta.code() == 409
+    } catch (e: Exception) {
+        false
+    }
+
     // Valida una sesión cerrada. El revisor sale del token, así que la app no lo manda.
     suspend fun validar(idSesion: Long): Boolean = try {
         val respuesta = cliente.medicion.validar(autorizacion, idSesion.toInt())

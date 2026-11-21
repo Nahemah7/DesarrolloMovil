@@ -134,6 +134,30 @@ internal class SesionDao(private val helper: FlujoDbHelper) {
         return helper.writableDatabase.insert("registro_observacion", null, valores)
     }
 
+    // La sesión se creó en el teléfono y después se dio de alta en el servidor: se guarda el id
+    // que le asignó el servicio para poder enlazar sus registros.
+    fun marcarRemota(idLocal: Long, idRemoto: Long) {
+        helper.writableDatabase.execSQL(
+            "UPDATE sesion_observacion SET id_remoto = ? WHERE id_sesion = ?",
+            arrayOf(idRemoto, idLocal)
+        )
+    }
+
+    fun idRemotoDe(idLocal: Long): Long? =
+        helper.readableDatabase.rawQuery(
+            "SELECT id_remoto FROM sesion_observacion WHERE id_sesion = ?", arrayOf(idLocal.toString())
+        ).use { c -> if (c.moveToFirst() && !c.isNull(0)) c.getLong(0) else null }
+
+    fun idPorCodigo(codigo: String): Long =
+        helper.readableDatabase.rawQuery(
+            "SELECT id_sesion FROM sesion_observacion WHERE codigo = ?", arrayOf(codigo)
+        ).use { c -> if (c.moveToFirst()) c.getLong(0) else 0L }
+
+    fun idRemotoPorCodigo(codigo: String): Long? =
+        helper.readableDatabase.rawQuery(
+            "SELECT id_remoto FROM sesion_observacion WHERE codigo = ?", arrayOf(codigo)
+        ).use { c -> if (c.moveToFirst() && !c.isNull(0)) c.getLong(0) else null }
+
     fun anularRegistro(idRegistro: Long, motivo: String, idColaborador: Long): Int =
         helper.writableDatabase.update(
             "registro_observacion",

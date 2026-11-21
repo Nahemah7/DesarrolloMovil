@@ -115,6 +115,9 @@ CREATE TABLE sesion_observacion (
     id_revisor      INT          NULL,
     fecha_revision  DATETIME     NULL,
     motivo_rechazo  VARCHAR(200) NULL,
+    -- Identificador de la misma sesión en el servidor. Nulo mientras la sesión exista solo en el
+    -- teléfono: sin este número, los registros no tienen a qué sesión del servidor apuntar.
+    id_remoto       INT          NULL,
     CONSTRAINT uq_sesion_codigo UNIQUE (codigo),
     CONSTRAINT ck_sesion_orden CHECK (hora_fin_prog > hora_inicio_prog),
     CONSTRAINT ck_sesion_revisor CHECK (id_revisor IS NULL OR id_revisor <> id_observador),
@@ -165,6 +168,10 @@ CREATE TABLE registro_observacion (
     id_usuario_anula    INT          NULL,
     fecha_anulacion     DATETIME     NULL,
     motivo_anulacion    VARCHAR(200) NULL,
+    -- Un registro se guarda en el teléfono primero. Mientras 'enviado' esté en 0 espera su turno
+    -- para subir al servidor; cuando llega, se guarda el identificador que le dio el servicio.
+    enviado             BOOLEAN      NOT NULL DEFAULT 0,
+    id_remoto           INT          NULL,
     CONSTRAINT ck_registro_anulacion CHECK (anulado = 0 OR (id_usuario_anula IS NOT NULL AND motivo_anulacion IS NOT NULL)),
     CONSTRAINT fk_registro_sesion FOREIGN KEY (id_sesion) REFERENCES sesion_observacion (id_sesion),
     CONSTRAINT fk_registro_clasificacion FOREIGN KEY (id_clasificacion) REFERENCES clasificacion (id_clasificacion),

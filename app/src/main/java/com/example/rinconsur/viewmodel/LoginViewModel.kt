@@ -10,7 +10,7 @@ import com.example.rinconsur.data.remoto.ClienteRemoto
 import com.example.rinconsur.data.remoto.DireccionServidor
 import com.example.rinconsur.data.remoto.PeticionLogin
 import com.example.rinconsur.data.remoto.TokenPreferencias
-import androidx.lifecycle.viewModelScope
+import com.example.rinconsur.data.remoto.TrabajoDeFondo
 import kotlinx.coroutines.launch
 import com.example.rinconsur.model.LoginUiState
 import com.example.rinconsur.model.PerfilUsuario
@@ -105,7 +105,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     // El login se valida en el teléfono, que es lo que permite trabajar sin red. En paralelo se
     // pide el token al gateway: si el servidor no está, la app sigue funcionando con lo local.
     private fun pedirToken(rut: String, clave: String, idUsuario: Long) {
-        viewModelScope.launch {
+        // Va en el alcance de la aplicación y no en el del ViewModel: al entrar, esta pantalla se
+        // cierra y su alcance se cancela antes de que la petición salga.
+        TrabajoDeFondo.alcance.launch {
             runCatching {
                 val cliente = ClienteRemoto(direccion.leer())
                 val respuesta = cliente.autenticacion.entrar(PeticionLogin(rut, clave))

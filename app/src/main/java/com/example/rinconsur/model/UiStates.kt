@@ -13,6 +13,7 @@ data class LoginUiState(
 
 data class RegistroUiState(
     val codigoSesion: String = "",
+    val porEnviar: Int = 0,
     val clasificacion: Clasificacion = Clasificacion.TRANSITO,
     val rangoEtario: RangoEtario? = null,
     val compania: Compania = Compania.SOLO,

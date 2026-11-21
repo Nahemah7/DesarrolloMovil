@@ -11,7 +11,7 @@ class FlujoDbHelper(private val contexto: Context) :
 
     companion object {
         private const val NOMBRE_BD = "rinconsur.db"
-        private const val VERSION_BD = 12
+        private const val VERSION_BD = 14
 
         private const val CARPETA = "sql"
         private const val SCRIPT_ESQUEMA = "01_esquema.sql"

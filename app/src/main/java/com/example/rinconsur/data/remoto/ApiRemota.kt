@@ -31,6 +31,25 @@ interface ApiMedicion {
         @retrofit2.http.Query("fecha") fecha: String
     ): Response<List<SesionRemota>>
 
+    @POST("api/sesiones")
+    suspend fun programar(
+        @retrofit2.http.Header("Authorization") autorizacion: String,
+        @Body peticion: PeticionSesionNueva
+    ): Response<SesionRemota>
+
+    @retrofit2.http.PATCH("api/sesiones/{id}/iniciar")
+    suspend fun iniciar(
+        @retrofit2.http.Header("Authorization") autorizacion: String,
+        @Path("id") idSesion: Int,
+        @Body cuerpo: Map<String, String> = emptyMap()
+    ): Response<SesionRemota>
+
+    @POST("api/registros")
+    suspend fun registrar(
+        @retrofit2.http.Header("Authorization") autorizacion: String,
+        @Body peticion: PeticionRegistro
+    ): Response<RegistroRemoto>
+
     @GET("api/sesiones/por-validar")
     suspend fun porValidar(
         @retrofit2.http.Header("Authorization") autorizacion: String
@@ -110,4 +129,30 @@ data class IndicadorRemoto(
     val transito: Double?,
     val medidos: Int?,
     val sinInformacion: Int?
+)
+
+data class PeticionRegistro(
+    val idSesion: Int,
+    val idClasificacion: Int,
+    val idRango: Int,
+    val idTipoCompania: Int,
+    val comprasOtraTienda: Boolean,
+    val idAccesoDestino: Int?,
+    val fechaHora: String?
+)
+
+data class RegistroRemoto(
+    val id: Int?,
+    val idSesion: Int?,
+    val fechaHora: String?,
+    val anulado: Boolean?
+)
+
+data class PeticionSesionNueva(
+    val idAcceso: Int,
+    val fecha: String,
+    val horaInicio: String,
+    val horaFin: String,
+    val idObservador: Int,
+    val observadorNombre: String?
 )

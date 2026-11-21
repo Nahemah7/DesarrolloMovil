@@ -6,6 +6,11 @@ import com.example.rinconsur.data.FlujoRepository
 import com.example.rinconsur.data.Plantilla
 import com.example.rinconsur.data.Plantillas
 import com.example.rinconsur.data.SesionPreferencias
+import com.example.rinconsur.data.Sincronizador
+import com.example.rinconsur.data.remoto.DireccionServidor
+import com.example.rinconsur.data.remoto.TokenPreferencias
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import com.example.rinconsur.model.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +21,9 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
 
     private val repositorio = FlujoRepository(application)
     private val sesion = SesionPreferencias(application)
+    private val tokens = TokenPreferencias(application)
+    private val direccion = DireccionServidor(application)
+    private val sincronizador = Sincronizador(repositorio, tokens, direccion)
 
     private val idObservador: Long = sesion.leer()
 
@@ -33,6 +41,28 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
     )
     val uiState: StateFlow<RegistroUiState> = _uiState.asStateFlow()
 
+    init {
+        // Al entrar a medir se intenta vaciar lo que quedó pendiente de ayer o de un corte de red.
+        sincronizar()
+    }
+
+    // Vacía la cola contra el servidor. Si no hay red, no pasa nada: los registros siguen
+    // guardados en el teléfono y se reintenta en la próxima entrada o al guardar otro.
+    fun sincronizar() {
+        viewModelScope.launch {
+            val resultado = sincronizador.enviarPendientes()
+            _uiState.update { it.copy(porEnviar = resultado.quedan) }
+            if (resultado.enviados > 0) {
+                refrescar(mensaje = if (resultado.quedan == 0)
+                    "Se enviaron " + resultado.enviados + " registros al servidor."
+                else
+                    "Se enviaron " + resultado.enviados + " y quedan " + resultado.quedan + " por enviar.")
+            } else if (resultado.quedan > 0 && resultado.motivo != null) {
+                _uiState.update { it.copy(mensaje = resultado.motivo) }
+            }
+        }
+    }
+
 
     fun releer() {
         idSesion = repositorio.sesionEnCursoDe(idObservador)?.id ?: 0L
@@ -42,7 +72,8 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
                 resumen = repositorio.resumenDeSesion(idSesion),
                 ultimosRegistros = repositorio.ultimosRegistros(idSesion),
                 sinSesionEnCurso = idSesion == 0L,
-                sesionEnCurso = idSesion != 0L
+                sesionEnCurso = idSesion != 0L,
+                porEnviar = repositorio.contarRegistrosPendientes()
             )
         }
     }
@@ -100,6 +131,8 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
             return false
         }
         refrescar(mensaje = null)
+        // El registro ya quedó guardado: si hay red, sale ahora mismo; si no, espera en la cola.
+        sincronizar()
         return true
     }
 
@@ -145,6 +178,7 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
                 ultimosRegistros = repositorio.ultimosRegistros(idSesion),
                 sinSesionEnCurso = idSesion == 0L,
                 sesionEnCurso = idSesion != 0L,
+                porEnviar = repositorio.contarRegistrosPendientes(),
                 mensaje = mensaje
             )
         }

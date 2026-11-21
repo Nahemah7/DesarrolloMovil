@@ -3,6 +3,11 @@ package com.example.rinconsur.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.example.rinconsur.data.FlujoRepository
+import com.example.rinconsur.data.remoto.DireccionServidor
+import com.example.rinconsur.data.remoto.RepositorioSesionesRemoto
+import com.example.rinconsur.data.remoto.TokenPreferencias
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import com.example.rinconsur.data.SesionPreferencias
 import com.example.rinconsur.model.Acceso
 import com.example.rinconsur.model.EstadoSesion
@@ -16,6 +21,8 @@ class MiSesionViewModel(application: Application) : AndroidViewModel(application
 
     private val repositorio = FlujoRepository(application)
     private val sesion = SesionPreferencias(application)
+    private val tokens = TokenPreferencias(application)
+    private val direccion = DireccionServidor(application)
 
     private val _usuario = MutableStateFlow<Colaborador?>(null)
     val usuario: StateFlow<Colaborador?> = _usuario.asStateFlow()
@@ -55,7 +62,18 @@ class MiSesionViewModel(application: Application) : AndroidViewModel(application
     fun iniciar(idSesion: Long): Boolean {
         val elegida = _sesionesDeHoy.value.firstOrNull { it.id == idSesion } ?: return false
         val hora = ahora()
-        if (elegida.estado == EstadoSesion.PROGRAMADA) repositorio.iniciarSesion(elegida.id, hora)
+        if (elegida.estado == EstadoSesion.PROGRAMADA) {
+            repositorio.iniciarSesion(elegida.id, hora)
+            // Si la sesión ya existe en el servidor, se marca allá también: mientras siga
+            // "Programada" del otro lado, el servicio rechaza los registros.
+            val token = tokens.leer()
+            val idRemoto = repositorio.idRemotoDeSesion(elegida.id)
+            if (token != null && idRemoto != null) {
+                viewModelScope.launch {
+                    RepositorioSesionesRemoto(direccion.leer(), token).iniciar(idRemoto)
+                }
+            }
+        }
         _sesionesDeHoy.value = _sesionesDeHoy.value.map {
             if (it.id == elegida.id) it.copy(estado = EstadoSesion.EN_CURSO, inicioReal = hora) else it
         }

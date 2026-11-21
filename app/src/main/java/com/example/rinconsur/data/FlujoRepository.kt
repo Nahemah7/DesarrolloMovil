@@ -2,6 +2,7 @@ package com.example.rinconsur.data
 
 import android.content.Context
 import com.example.rinconsur.model.MedicionPeriodo
+import com.example.rinconsur.model.RegistroPendiente
 import com.example.rinconsur.model.NuevaPersona
 import com.example.rinconsur.model.PerfilUsuario
 import com.example.rinconsur.model.PreguntaSeguridad
@@ -34,6 +35,7 @@ class FlujoRepository(context: Context) {
     private val eventoDao = EventoDao(db)
     private val cargaDao = CargaDao(db)
     private val mantenimientoDao = MantenimientoDao(db)
+    private val colaDao = ColaDao(db)
 
     companion object {
         const val MINIMO_REGISTROS = FlujoDbHelper.MINIMO_REGISTROS
@@ -141,6 +143,19 @@ class FlujoRepository(context: Context) {
     fun reporteJefatura(): ReporteJefatura = indicadorDao.reporteJefatura(fechaHoy())
 
     // Mientras haya datos de ejemplo, los informes lo dicen y el administrador puede borrarlos.
+    // Cola de salida de los registros anotados sin red.
+    fun registrosPendientes(limite: Int = 200): List<RegistroPendiente> = colaDao.pendientes(limite)
+
+    fun marcarSesionRemota(idLocal: Long, idRemoto: Long) = sesionDao.marcarRemota(idLocal, idRemoto)
+
+    fun idRemotoDeSesion(idLocal: Long): Long? = sesionDao.idRemotoDe(idLocal)
+
+    fun idDeSesionPorCodigo(codigo: String): Long = sesionDao.idPorCodigo(codigo)
+
+    fun contarRegistrosPendientes(): Int = colaDao.contarPendientes()
+
+    fun marcarRegistroEnviado(idLocal: Long, idRemoto: Long) = colaDao.marcarEnviado(idLocal, idRemoto)
+
     fun datosDeEjemplo(): Boolean = mantenimientoDao.datosDeEjemplo()
 
     fun borrarDatosDeEjemplo(): Boolean = mantenimientoDao.borrarDatosDeEjemplo()

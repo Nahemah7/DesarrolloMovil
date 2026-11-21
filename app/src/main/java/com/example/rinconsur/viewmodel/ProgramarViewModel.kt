@@ -2,8 +2,14 @@ package com.example.rinconsur.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import com.example.rinconsur.data.FlujoRepository
 import com.example.rinconsur.data.SesionPreferencias
+import com.example.rinconsur.data.remoto.ClienteRemoto
+import com.example.rinconsur.data.remoto.DireccionServidor
+import com.example.rinconsur.data.remoto.PeticionSesionNueva
+import com.example.rinconsur.data.remoto.TokenPreferencias
 import com.example.rinconsur.model.ProgramarUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,6 +20,8 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
 
     private val repositorio = FlujoRepository(application)
     private val sesion = SesionPreferencias(application)
+    private val tokens = TokenPreferencias(application)
+    private val direccion = DireccionServidor(application)
     private val idProgramador: Long = sesion.leer()
 
     private val _uiState = MutableStateFlow(ProgramarUiState())
@@ -50,6 +58,42 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
         _uiState.update { it.copy(error = null) }
     }
 
+    // La sesión nace en el teléfono, que es lo que permite programar sin red. Si hay servidor, se
+    // da de alta allá y se guarda el identificador que devuelve: los registros de esa sesión se
+    // enlazan con ese número.
+    private fun publicarEnServidor(
+        codigo: String,
+        idAcceso: Long,
+        fecha: String,
+        horaInicio: String,
+        horaFin: String,
+        idObservador: Long
+    ) {
+        val token = tokens.leer() ?: return
+        val observador = repositorio.colaboradorPorId(idObservador)
+        val nombre = observador?.let { (it.nombre + " " + it.apellido).trim() }
+        viewModelScope.launch {
+            runCatching {
+                val cliente = ClienteRemoto(direccion.leer())
+                val respuesta = cliente.medicion.programar(
+                    "Bearer " + token,
+                    PeticionSesionNueva(
+                        idAcceso = idAcceso.toInt(),
+                        fecha = fecha,
+                        horaInicio = horaInicio,
+                        horaFin = horaFin,
+                        idObservador = idObservador.toInt(),
+                        observadorNombre = nombre
+                    )
+                )
+                val idRemoto = respuesta.body()?.id
+                if (respuesta.isSuccessful && idRemoto != null) {
+                    repositorio.marcarSesionRemota(repositorio.idDeSesionPorCodigo(codigo), idRemoto.toLong())
+                }
+            }
+        }
+    }
+
     fun programar(): Boolean {
         val e = _uiState.value
         val problema = when {
@@ -66,6 +110,7 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
         val idAcceso = e.idAcceso!!
         val idObservador = e.idObservador!!
         val codigo = repositorio.programarSesion(idAcceso, e.fecha, e.horaInicio, e.horaFin, idObservador, idProgramador)
+        publicarEnServidor(codigo, idAcceso, e.fecha, e.horaInicio, e.horaFin, idObservador)
         _uiState.update {
             it.copy(
                 error = null,

@@ -22,6 +22,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import com.example.rinconsur.ui.theme.Aviso
+import com.example.rinconsur.ui.theme.AvisoSuave
+import com.example.rinconsur.ui.theme.Dimens
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -258,6 +261,27 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
                         }
                     }
                 }
+            }
+
+            // Cola de salida: lo que está guardado en el teléfono y todavía no llegó al servidor.
+            if (estado.porEnviar > 0) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(Dimens.radioEtiqueta))
+                        .background(AvisoSuave)
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = if (estado.porEnviar == 1)
+                            "1 registro esperando para enviarse al servidor"
+                        else
+                            estado.porEnviar.toString() + " registros esperando para enviarse al servidor",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Aviso
+                    )
+                }
+                Spacer(Modifier.height(Dimens.espacioChico))
             }
 
             Seccion("Plantillas de registro rápido")
