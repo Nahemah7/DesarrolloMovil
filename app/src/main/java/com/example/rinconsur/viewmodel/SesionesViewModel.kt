@@ -7,6 +7,7 @@ import com.example.rinconsur.data.FlujoRepository
 import com.example.rinconsur.data.SesionPreferencias
 import com.example.rinconsur.data.remoto.DireccionServidor
 import com.example.rinconsur.data.remoto.RepositorioSesionesRemoto
+import com.example.rinconsur.data.remoto.SincronizadorSesiones
 import com.example.rinconsur.data.remoto.TokenPreferencias
 import com.example.rinconsur.model.FuenteDatos
 import kotlinx.coroutines.launch
@@ -73,6 +74,13 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
         val guardado = token.leer() ?: return
         val fecha = fechaElegida
         viewModelScope.launch {
+            val publicadas = SincronizadorSesiones(repositorio, token, direccion).publicarPendientes()
+            if (publicadas > 0) {
+                _uiState.value = _uiState.value.copy(
+                    sesiones = repositorio.sesionesDeFecha(fechaElegida),
+                    porValidar = repositorio.sesionesPorValidar()
+                )
+            }
             val remoto = RepositorioSesionesRemoto(direccion.leer(), guardado)
             val delDia = remoto.sesionesDeFecha(fecha)
             val pendientes = remoto.porValidar()
@@ -140,6 +148,13 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
             return
         }
         viewModelScope.launch {
+            val publicadas = SincronizadorSesiones(repositorio, token, direccion).publicarPendientes()
+            if (publicadas > 0) {
+                _uiState.value = _uiState.value.copy(
+                    sesiones = repositorio.sesionesDeFecha(fechaElegida),
+                    porValidar = repositorio.sesionesPorValidar()
+                )
+            }
             val remoto = RepositorioSesionesRemoto(direccion.leer(), guardado)
             if (remoto.validar(idSesion)) {
                 repositorio.revisarSesion(idSesion, EstadoSesion.VALIDADA, idRevisor)

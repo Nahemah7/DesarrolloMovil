@@ -34,7 +34,7 @@ internal class SesionDao(private val helper: FlujoDbHelper) {
         val siguiente = helper.readableDatabase
             .rawQuery("SELECT COALESCE(MAX(id_sesion), 0) + 1 AS siguiente FROM sesion_observacion", null)
             .use { c -> if (c.moveToNext()) c.long("siguiente") else 1L }
-        val codigo = "S-" + siguiente.toString().padStart(4, '0')
+        val codigo = "L-" + siguiente.toString()
         val valores = ContentValues().apply {
             put("id_sesion", siguiente)
             put("codigo", codigo)
@@ -140,6 +140,19 @@ internal class SesionDao(private val helper: FlujoDbHelper) {
             arrayOf(idRemoto, idLocal)
         )
     }
+
+    fun adoptarDelServicio(idLocal: Long, idRemoto: Long, codigoServicio: String) {
+        helper.writableDatabase.execSQL(
+            "UPDATE sesion_observacion SET id_remoto = ?, codigo = ? WHERE id_sesion = ?",
+            arrayOf(idRemoto, codigoServicio, idLocal)
+        )
+    }
+
+    fun sinPublicar(desde: String): List<Pair<Long, SesionResumen>> =
+        consultarSesiones(
+            FlujoDbHelper.SQL_SESIONES + "WHERE s.id_remoto IS NULL AND s.fecha >= ? ORDER BY s.fecha, s.hora_inicio_prog",
+            arrayOf(desde)
+        ).map { it.id to it }
 
     fun idRemotoDe(idLocal: Long): Long? =
         helper.readableDatabase.rawQuery(

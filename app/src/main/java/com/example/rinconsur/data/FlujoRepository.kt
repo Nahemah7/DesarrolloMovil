@@ -136,6 +136,11 @@ class FlujoRepository(context: Context) {
 
     fun marcarSesionRemota(idLocal: Long, idRemoto: Long) = sesionDao.marcarRemota(idLocal, idRemoto)
 
+    fun adoptarSesionDelServicio(idLocal: Long, idRemoto: Long, codigo: String) =
+        sesionDao.adoptarDelServicio(idLocal, idRemoto, codigo)
+
+    fun sesionesSinPublicar(desde: String): List<Pair<Long, SesionResumen>> = sesionDao.sinPublicar(desde)
+
     fun idRemotoDeSesion(idLocal: Long): Long? = sesionDao.idRemotoDe(idLocal)
 
     fun idDeSesionPorCodigo(codigo: String): Long = sesionDao.idPorCodigo(codigo)

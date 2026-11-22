@@ -83,9 +83,14 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
                         observadorNombre = nombre
                     )
                 )
-                val idRemoto = respuesta.body()?.id
+                val cuerpo = respuesta.body()
+                val idRemoto = cuerpo?.id
                 if (respuesta.isSuccessful && idRemoto != null) {
-                    repositorio.marcarSesionRemota(repositorio.idDeSesionPorCodigo(codigo), idRemoto.toLong())
+                    repositorio.adoptarSesionDelServicio(
+                        repositorio.idDeSesionPorCodigo(codigo),
+                        idRemoto.toLong(),
+                        cuerpo.codigo ?: codigo
+                    )
                 }
             }
         }
