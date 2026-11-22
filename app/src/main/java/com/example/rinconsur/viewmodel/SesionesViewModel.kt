@@ -71,7 +71,11 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
     }
 
     private fun sincronizar() {
-        val guardado = token.leer() ?: return
+        val guardado = token.leer()
+        if (guardado == null) {
+            _uiState.value = _uiState.value.copy(fuente = FuenteDatos.SIN_SESION)
+            return
+        }
         val fecha = fechaElegida
         viewModelScope.launch {
             val publicadas = SincronizadorSesiones(repositorio, token, direccion).publicarPendientes()

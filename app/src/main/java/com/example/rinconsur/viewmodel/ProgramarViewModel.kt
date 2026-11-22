@@ -65,8 +65,10 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
         horaInicio: String,
         horaFin: String,
         idObservador: Long
-    ) {
-        val token = tokens.leer() ?: return
+    ): String {
+        val token = tokens.leer()
+            ?: return "Quedó guardada en este teléfono: no hay sesión iniciada en el servidor. " +
+                "Cierra sesión y vuelve a entrar para enviarla."
         val observador = repositorio.colaboradorPorId(idObservador)
         val nombre = observador?.let { (it.nombre + " " + it.apellido).trim() }
         viewModelScope.launch {
@@ -91,9 +93,18 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
                         idRemoto.toLong(),
                         cuerpo.codigo ?: codigo
                     )
+                } else {
+                    _uiState.update {
+                        it.copy(error = "Quedó guardada en este teléfono: el servidor respondió " + respuesta.code() + ".")
+                    }
+                }
+            }.onFailure { falla ->
+                _uiState.update {
+                    it.copy(error = "Quedó guardada en este teléfono: " + (falla.message ?: "sin conexión") + ".")
                 }
             }
         }
+        return ""
     }
 
     fun programar(): Boolean {
@@ -112,10 +123,10 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
         val idAcceso = e.idAcceso!!
         val idObservador = e.idObservador!!
         val codigo = repositorio.programarSesion(idAcceso, e.fecha, e.horaInicio, e.horaFin, idObservador, idProgramador)
-        publicarEnServidor(codigo, idAcceso, e.fecha, e.horaInicio, e.horaFin, idObservador)
+        val aviso = publicarEnServidor(codigo, idAcceso, e.fecha, e.horaInicio, e.horaFin, idObservador)
         _uiState.update {
             it.copy(
-                error = null,
+                error = aviso,
                 codigo = codigo,
                 programada = nombreDe(e, idObservador),
                 sesionesDeLaFecha = repositorio.sesionesDeFecha(e.fecha),

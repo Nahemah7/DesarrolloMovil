@@ -30,7 +30,7 @@ data class RegistroUiState(
             (clasificacion != Clasificacion.TRANSITO || destino != null)
 }
 
-enum class FuenteDatos { LOCAL, EN_LINEA }
+enum class FuenteDatos { LOCAL, EN_LINEA, SIN_SESION }
 
 data class SesionesUiState(
     val sesiones: List<SesionResumen> = emptyList(),

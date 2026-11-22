@@ -20,6 +20,12 @@ import com.example.rinconsur.ui.theme.Marino
 @Composable
 fun EtiquetaFuente(fuente: FuenteDatos) {
     val enLinea = fuente == FuenteDatos.EN_LINEA
+    val sinSesion = fuente == FuenteDatos.SIN_SESION
+    val texto = when (fuente) {
+        FuenteDatos.EN_LINEA -> "En línea"
+        FuenteDatos.SIN_SESION -> "Sin sesión en el servidor"
+        FuenteDatos.LOCAL -> "Local"
+    }
     Box(
         Modifier
             .clip(RoundedCornerShape(Dimens.radioEtiqueta))
@@ -27,9 +33,9 @@ fun EtiquetaFuente(fuente: FuenteDatos) {
             .padding(horizontal = 8.dp, vertical = 2.dp)
     ) {
         Text(
-            text = if (enLinea) "En línea" else "Local",
+            text = texto,
             style = MaterialTheme.typography.labelSmall,
-            color = if (enLinea) Marino else Apagado
+            color = if (enLinea || sinSesion) Marino else Apagado
         )
     }
 }

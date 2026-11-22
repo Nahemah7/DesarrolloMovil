@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rinconsur.model.EstadoSesion
+import com.example.rinconsur.model.FuenteDatos
 import androidx.compose.ui.draw.clip
 import com.example.rinconsur.model.SesionResumen
 import com.example.rinconsur.ui.components.EtiquetaFuente
@@ -105,6 +106,10 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit, onAbri
                 IconButton(onClick = vm::diaSiguiente) {
                     Icon(Icons.Filled.KeyboardArrowRight, contentDescription = "Día siguiente", tint = Tinta)
                 }
+            }
+
+            if (estado.fuente != FuenteDatos.EN_LINEA) {
+                EtiquetaFuente(estado.fuente)
             }
 
             Row(
