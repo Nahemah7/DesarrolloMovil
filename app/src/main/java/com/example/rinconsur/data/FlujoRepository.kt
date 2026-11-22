@@ -143,6 +143,9 @@ class FlujoRepository(context: Context) {
 
     fun sesionesSinPublicar(desde: String): List<Pair<Long, SesionResumen>> = sesionDao.sinPublicar(desde)
 
+    fun actualizarSesionProgramada(idLocal: Long, idAcceso: Long, inicio: String, fin: String, idObservador: Long): Int =
+        sesionDao.actualizarProgramada(idLocal, idAcceso, inicio, fin, idObservador)
+
     fun idRemotoDeSesion(idLocal: Long): Long? = sesionDao.idRemotoDe(idLocal)
 
     fun idDeSesionPorCodigo(codigo: String): Long = sesionDao.idPorCodigo(codigo)

@@ -23,6 +23,30 @@ class RepositorioSesionesRemoto(
         null
     }
 
+    suspend fun editar(
+        idSesionRemota: Long,
+        idAcceso: Long,
+        horaInicio: String,
+        horaFin: String,
+        idObservador: Long,
+        nombreObservador: String?
+    ): Boolean = try {
+        val respuesta = cliente.medicion.editar(
+            autorizacion,
+            idSesionRemota.toInt(),
+            PeticionEditarSesion(
+                idAcceso = idAcceso.toInt(),
+                horaInicio = horaInicio,
+                horaFin = horaFin,
+                idObservador = idObservador.toInt(),
+                observadorNombre = nombreObservador
+            )
+        )
+        respuesta.isSuccessful
+    } catch (e: Exception) {
+        false
+    }
+
     suspend fun iniciar(idSesionRemota: Long): Boolean = try {
         val respuesta = cliente.medicion.iniciar(autorizacion, idSesionRemota.toInt())
         respuesta.isSuccessful || respuesta.code() == 409

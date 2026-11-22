@@ -18,6 +18,11 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.layout.width
+import com.example.rinconsur.ui.theme.Aqua
+import com.example.rinconsur.ui.theme.AquaSuave
+import com.example.rinconsur.ui.theme.Dimens
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -46,6 +51,7 @@ import com.example.rinconsur.ui.components.MensajeFlotante
 import com.example.rinconsur.ui.components.NavInferior
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
+import com.example.rinconsur.ui.components.SelectorHora
 import com.example.rinconsur.ui.components.TarjetaSeccion
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.rinconsur.viewmodel.ProgramarViewModel
@@ -99,8 +105,8 @@ fun PantallaProgramar(onIrA: (String) -> Unit) {
                 Modifier.fillMaxWidth().padding(top = 2.dp, bottom = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                BloqueHora("Desde", estado.horaInicio, vm.horas, Modifier.weight(1f)) { vm.onHoraInicio(it) }
-                BloqueHora("Hasta", estado.horaFin, vm.horas, Modifier.weight(1f)) { vm.onHoraFin(it) }
+                ColumnaHora("Desde", estado.horaInicio, Modifier.weight(1f)) { vm.onHoraInicio(it) }
+                ColumnaHora("Hasta", estado.horaFin, Modifier.weight(1f)) { vm.onHoraFin(it) }
             }
             Spacer(Modifier.height(10.dp))
             TarjetaSeccion {
@@ -117,10 +123,28 @@ fun PantallaProgramar(onIrA: (String) -> Unit) {
             }
 
             Seccion("Observador")
-            estado.observadores.forEach { o ->
-                Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Filtro(o.nombre, estado.idObservador == o.id) { vm.onObservador(o.id) }
-                    Text("  " + o.cargo, style = MaterialTheme.typography.bodySmall, color = Apagado)
+            var busqueda by remember { mutableStateOf("") }
+            val visibles = estado.observadores.filter {
+                busqueda.isBlank() || it.nombre.contains(busqueda, ignoreCase = true)
+            }
+            TarjetaSeccion {
+                if (estado.observadores.size > 5) {
+                    OutlinedTextField(
+                        value = busqueda,
+                        onValueChange = { busqueda = it },
+                        singleLine = true,
+                        label = { Text("Buscar colaborador") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(Modifier.height(8.dp))
+                }
+                Column(Modifier.heightIn(max = 280.dp).verticalScroll(rememberScrollState())) {
+                    visibles.forEach { o ->
+                        FilaObservador(o.nombre, o.cargo, estado.idObservador == o.id) { vm.onObservador(o.id) }
+                    }
+                    if (visibles.isEmpty()) {
+                        Nota("No hay colaboradores que coincidan con la búsqueda.")
+                    }
                 }
             }
 
@@ -219,5 +243,49 @@ private fun BloqueHora(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun FilaObservador(
+    nombre: String,
+    cargo: String,
+    elegido: Boolean,
+    onElegir: () -> Unit
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(Dimens.radioEtiqueta))
+            .clickable(onClick = onElegir)
+            .background(if (elegido) AquaSuave else Color.Transparent)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                nombre,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = if (elegido) FontWeight.Bold else FontWeight.Normal,
+                color = Tinta
+            )
+            Text(cargo, style = MaterialTheme.typography.bodySmall, color = Apagado)
+        }
+        Box(
+            Modifier
+                .height(18.dp)
+                .width(18.dp)
+                .clip(RoundedCornerShape(9.dp))
+                .background(if (elegido) Aqua else Linea)
+        )
+    }
+}
+
+@Composable
+private fun ColumnaHora(etiqueta: String, hora: String, modifier: Modifier = Modifier, onCambiar: (String) -> Unit) {
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(etiqueta, style = MaterialTheme.typography.labelMedium, color = Apagado)
+        Spacer(Modifier.height(4.dp))
+        SelectorHora(etiqueta, hora, onCambiar, Modifier.fillMaxWidth())
     }
 }

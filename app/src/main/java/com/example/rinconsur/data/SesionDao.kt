@@ -196,6 +196,27 @@ internal class SesionDao(private val helper: FlujoDbHelper) {
             arrayOf(desde)
         ).map { it.id to it }
 
+    fun actualizarProgramada(
+        idLocal: Long,
+        idAcceso: Long,
+        horaInicio: String,
+        horaFin: String,
+        idObservador: Long
+    ): Int {
+        val valores = arrayOf<Any>(idAcceso, horaInicio, horaFin, idObservador, idLocal)
+        return helper.writableDatabase.compileStatement(
+            "UPDATE sesion_observacion SET id_acceso = ?, hora_inicio_prog = ?, hora_fin_prog = ?, " +
+                "id_observador = ? WHERE id_sesion = ? AND id_estado = 1"
+        ).use { st ->
+            st.bindLong(1, idAcceso)
+            st.bindString(2, horaInicio)
+            st.bindString(3, horaFin)
+            st.bindLong(4, idObservador)
+            st.bindLong(5, idLocal)
+            st.executeUpdateDelete()
+        }
+    }
+
     fun idRemotoDe(idLocal: Long): Long? =
         helper.readableDatabase.rawQuery(
             "SELECT id_remoto FROM sesion_observacion WHERE id_sesion = ?", arrayOf(idLocal.toString())

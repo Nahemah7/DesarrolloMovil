@@ -35,6 +35,13 @@ interface ApiMedicion {
         @Body peticion: PeticionSesionNueva
     ): Response<SesionRemota>
 
+    @retrofit2.http.PATCH("api/sesiones/{id}")
+    suspend fun editar(
+        @retrofit2.http.Header("Authorization") autorizacion: String,
+        @Path("id") idSesion: Int,
+        @Body peticion: PeticionEditarSesion
+    ): Response<SesionRemota>
+
     @retrofit2.http.PATCH("api/sesiones/{id}/iniciar")
     suspend fun iniciar(
         @retrofit2.http.Header("Authorization") autorizacion: String,
@@ -124,6 +131,14 @@ data class BloqueRemoto(
     val id: Int?,
     val horaInicio: String?,
     val horaFin: String?
+)
+
+data class PeticionEditarSesion(
+    val idAcceso: Int,
+    val horaInicio: String,
+    val horaFin: String,
+    val idObservador: Int,
+    val observadorNombre: String?
 )
 
 data class SesionRemota(

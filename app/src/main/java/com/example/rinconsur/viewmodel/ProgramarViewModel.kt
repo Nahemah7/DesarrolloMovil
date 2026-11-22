@@ -88,11 +88,15 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
                 val cuerpo = respuesta.body()
                 val idRemoto = cuerpo?.id
                 if (respuesta.isSuccessful && idRemoto != null) {
+                    val codigoServicio = cuerpo.codigo ?: codigo
                     repositorio.adoptarSesionDelServicio(
                         repositorio.idDeSesionPorCodigo(codigo),
                         idRemoto.toLong(),
-                        cuerpo.codigo ?: codigo
+                        codigoServicio
                     )
+                    _uiState.update {
+                        it.copy(codigo = codigoServicio, sesionesDeLaFecha = repositorio.sesionesDeFecha(fecha))
+                    }
                 } else {
                     _uiState.update {
                         it.copy(error = "Quedó guardada en este teléfono: el servidor respondió " + respuesta.code() + ".")
