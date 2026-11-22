@@ -211,29 +211,20 @@ que el esquema y la semilla no se mezclan con las consultas.
 ./gradlew testDebugUnitTest
 ```
 
-Hay **110 pruebas unitarias**. Las de reglas no dependen de Android: formato y dígito verificador del
-RUT, reglas de la clave, largo del texto libre, reglas de programación de sesiones (duración y cruces),
-filtros del listado de sesiones, armado del detalle de una sesión, cálculo del avance de la meta frente a
-su objetivo, separación de un script SQL en sentencias, formato del código temporal, validaciones del
-primer acceso y del alta de una persona, y las reglas de la carga diaria (totales, conversión, reparto por
-acceso y bloques incompletos).
+**Diez pruebas, en cuatro archivos, sobre los ViewModels.** Es lo que pide la pauta y lo que se puede
+explicar una por una: cada una comprueba una sola cosa.
 
-### Pruebas sobre los ViewModels
-
-**10 pruebas en 4 archivos** que entran por el ViewModel y no por la pantalla, porque ahí es donde se
-toma la decisión: `app/src/test/java/com/example/rinconsur/viewmodel/`
-
-| Archivo | Pruebas | Qué defiende, en una línea |
+| Archivo | Pruebas | Qué defiende |
 |---|---|---|
 | `LoginViewModelTest` | 3 | RUT inválido, clave equivocada y entrada de la jefa de tienda |
 | `SesionesViewModelTest` | 3 | Filtro por validar, filtro de mis sesiones y día elegido |
 | `RegistroViewModelTest` | 2 | No guardar sin sesión en curso y no aplicar una plantilla que no existe |
 | `IndicadoresViewModelTest` | 2 | Período de hábiles y retroceder una semana |
 
-Cada una comprueba una sola cosa, para que se pueda leer y explicar en la defensa: se nombran
-`funcion_en_condicion_esperado` (`entrar_conClaveEquivocada_...`, `onSemanaAnterior_...`) y usan
-Robolectric: el ViewModel se instancia de verdad, con su `Application` y su SQLite cargado desde los
-`.sql` de `assets`. No hay dobles de prueba que puedan decir que sí a algo que la app real diría que no.
+Se nombran `funcion_en_condicion_esperado` (`entrar_conClaveEquivocada_...`,
+`onSemanaAnterior_...`) y corren con Robolectric, así que el ViewModel se instancia de verdad, con su
+`Application` y su SQLite cargado desde los `.sql` de `assets`: no hay dobles de prueba que puedan
+decir que sí a algo que la app real diría que no.
 
 El reporte HTML se genera solo y queda versionado para la entrega:
 
@@ -241,15 +232,10 @@ El reporte HTML se genera solo y queda versionado para la entrega:
 app/build/reports/tests/testDebugUnitTest/index.html   ->   reportes/pruebas-unitarias/
 ```
 
-```bash
-./gradlew connectedDebugAndroidTest
-```
-
-Once pruebas instrumentadas corren sobre la base del propio teléfono: las tres del anexo (proporción de
-tránsito de S-0001 y S-0002, conversión del 15-09 y tránsito estimado del A4 a las 13:00) cuatro de la
-carga del día, que guardan, releen, comprueban que las métricas del día reflejan lo cargado y que volver a
-guardar no duplica filas, y tres del alta y la edición de una persona (el cargo según el perfil y el género,
-el cambio de perfil y la desactivación de una cuenta).
+Las reglas que antes se probaban en el teléfono (proporción de tránsito, mínimos de la sesión, carga
+del día, cargo según el perfil) se comprueban hoy en el **servicio**: `mvn verify` en el repo del
+backend corre 153 pruebas con la compuerta de 80 % de cobertura. La app se queda con lo que solo la
+app puede decidir.
 
 ## Decisiones del grupo
 
