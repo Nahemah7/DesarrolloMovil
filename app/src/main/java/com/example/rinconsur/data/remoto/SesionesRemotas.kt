@@ -11,7 +11,8 @@ fun SesionRemota.aResumen(): SesionResumen = SesionResumen(
     horaInicioProg = horaInicio.orEmpty(),
     horaFinProg = horaFin.orEmpty(),
     estado = EstadoSesion.porNombre(estado.orEmpty()),
-    idObservador = 0L,
+    idObservador = idObservador?.toLong() ?: 0L,
     nombreObservador = observador.orEmpty(),
-    registrosValidos = (registros ?: 0L).toInt()
+    registrosValidos = (registros ?: 0L).toInt(),
+    idRemoto = id?.toLong()
 )

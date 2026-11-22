@@ -136,6 +136,7 @@ data class SesionRemota(
     val horaFin: String?,
     val estado: String?,
     val observador: String?,
+    val idObservador: Int?,
     val registros: Long?
 )
 

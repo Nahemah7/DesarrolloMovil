@@ -280,6 +280,9 @@ private fun TarjetaSesion(
                     color = Apagado
                 )
             }
+            if (sesion.sinPublicar) {
+                EtiquetaEstado("Sin publicar", "aviso")
+            }
             EtiquetaEstado(
                 sesion.estado.etiqueta,
                 when (sesion.estado) {
@@ -289,6 +292,15 @@ private fun TarjetaSesion(
                     EstadoSesion.EN_CURSO -> "info"
                     else -> "neutro"
                 }
+            )
+        }
+
+        if (sesion.sinPublicar) {
+            Text(
+                text = "Esta sesión existe solo en este teléfono: se enviará al servidor en cuanto haya " +
+                    "conexión y sesión iniciada.",
+                style = MaterialTheme.typography.labelSmall,
+                color = Apagado
             )
         }
 

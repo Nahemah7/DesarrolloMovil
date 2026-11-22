@@ -139,6 +139,8 @@ class FlujoRepository(context: Context) {
     fun adoptarSesionDelServicio(idLocal: Long, idRemoto: Long, codigo: String) =
         sesionDao.adoptarDelServicio(idLocal, idRemoto, codigo)
 
+    fun espejarSesiones(sesiones: List<SesionResumen>) = sesionDao.espejarDelServicio(sesiones)
+
     fun sesionesSinPublicar(desde: String): List<Pair<Long, SesionResumen>> = sesionDao.sinPublicar(desde)
 
     fun idRemotoDeSesion(idLocal: Long): Long? = sesionDao.idRemotoDe(idLocal)

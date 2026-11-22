@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import com.example.rinconsur.data.FlujoRepository
 import com.example.rinconsur.data.remoto.DireccionServidor
 import com.example.rinconsur.data.remoto.RepositorioSesionesRemoto
+import com.example.rinconsur.data.remoto.SincronizadorSesiones
 import com.example.rinconsur.data.remoto.TokenPreferencias
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
@@ -56,6 +57,7 @@ class MiSesionViewModel(application: Application) : AndroidViewModel(application
             _accesos.value = repositorio.accesos()
             _acceso.value = repositorio.accesos()
                 .firstOrNull { it.id == (elegida?.idAcceso ?: 0L) }?.etiquetaCorta ?: ""
+            sincronizar(id, fecha)
         }
     }
 
@@ -86,5 +88,26 @@ class MiSesionViewModel(application: Application) : AndroidViewModel(application
     override fun onCleared() {
         repositorio.cerrar()
         super.onCleared()
+    }
+
+    private fun sincronizar(id: Long, fecha: String) {
+        val guardado = tokens.leer() ?: return
+        viewModelScope.launch {
+            runCatching {
+                SincronizadorSesiones(repositorio, tokens, direccion).publicarPendientes()
+                val remotas = RepositorioSesionesRemoto(direccion.leer(), guardado).sesionesDeFecha(fecha)
+                    ?: return@launch
+                repositorio.espejarSesiones(remotas)
+                val propias = remotas.filter { it.idObservador == id }
+                val elegida = propias.firstOrNull { it.estado == EstadoSesion.EN_CURSO }
+                    ?: propias.firstOrNull { it.estado == EstadoSesion.PROGRAMADA }
+                    ?: propias.firstOrNull { it.estado == EstadoSesion.FINALIZADA }
+                _sesionesDeHoy.value = propias
+                _sesionAsignada.value = elegida
+                _sinSesionProgramada.value = elegida == null
+                _acceso.value = repositorio.accesos()
+                    .firstOrNull { it.id == (elegida?.idAcceso ?: 0L) }?.etiquetaCorta ?: ""
+            }
+        }
     }
 }

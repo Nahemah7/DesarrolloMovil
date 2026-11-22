@@ -44,9 +44,14 @@ class DetalleSesionViewModel(application: Application) : AndroidViewModel(applic
             validarLocal(idSesion, codigo)
             return
         }
+        val idRemoto = repositorio.idRemotoDeSesion(idSesion)
+        if (idRemoto == null) {
+            validarLocal(idSesion, codigo)
+            return
+        }
         viewModelScope.launch {
             val remoto = RepositorioSesionesRemoto(direccion.leer(), guardado)
-            if (remoto.validar(idSesion)) {
+            if (remoto.validar(idRemoto)) {
 
                 repositorio.revisarSesion(idSesion, EstadoSesion.VALIDADA, idRevisor)
                 cargar(idSesion)

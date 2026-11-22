@@ -34,7 +34,7 @@ internal class SesionDao(private val helper: FlujoDbHelper) {
         val siguiente = helper.readableDatabase
             .rawQuery("SELECT COALESCE(MAX(id_sesion), 0) + 1 AS siguiente FROM sesion_observacion", null)
             .use { c -> if (c.moveToNext()) c.long("siguiente") else 1L }
-        val codigo = "L-" + siguiente.toString()
+        val codigo = "S-" + siguiente.toString().padStart(4, '0')
         val valores = ContentValues().apply {
             put("id_sesion", siguiente)
             put("codigo", codigo)
@@ -146,6 +146,48 @@ internal class SesionDao(private val helper: FlujoDbHelper) {
             "UPDATE sesion_observacion SET id_remoto = ?, codigo = ? WHERE id_sesion = ?",
             arrayOf(idRemoto, codigoServicio, idLocal)
         )
+    }
+
+    fun espejarDelServicio(sesiones: List<SesionResumen>) {
+        val db = helper.writableDatabase
+        db.beginTransaction()
+        try {
+            for (s in sesiones) {
+                val idRemoto = s.idRemoto ?: continue
+                if (s.codigo.isEmpty() || s.fecha.isEmpty()) continue
+                val existente = db.rawQuery(
+                    "SELECT id_sesion FROM sesion_observacion WHERE id_remoto = ? OR codigo = ? LIMIT 1",
+                    arrayOf(idRemoto.toString(), s.codigo)
+                ).use { if (it.moveToFirst()) it.getLong(0) else null }
+                val fila = arrayOf<Any>(
+                    s.codigo, s.idAcceso, s.fecha, s.horaInicioProg, s.horaFinProg,
+                    s.estado.idEstado, s.idObservador, idRemoto
+                )
+                runCatching {
+                    if (existente == null) {
+                        db.execSQL(
+                            "INSERT INTO sesion_observacion (codigo, id_acceso, fecha, hora_inicio_prog, " +
+                                "hora_fin_prog, id_estado, id_observador, id_programador, id_remoto) " +
+                                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            arrayOf<Any>(
+                                s.codigo, s.idAcceso, s.fecha, s.horaInicioProg, s.horaFinProg,
+                                s.estado.idEstado, s.idObservador, s.idObservador, idRemoto
+                            )
+                        )
+                    } else {
+                        db.execSQL(
+                            "UPDATE sesion_observacion SET codigo = ?, id_acceso = ?, fecha = ?, " +
+                                "hora_inicio_prog = ?, hora_fin_prog = ?, id_estado = ?, id_observador = ?, " +
+                                "id_remoto = ? WHERE id_sesion = ?",
+                            arrayOf<Any>(*fila, existente)
+                        )
+                    }
+                }
+            }
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
     }
 
     fun sinPublicar(desde: String): List<Pair<Long, SesionResumen>> =
@@ -293,6 +335,7 @@ internal class SesionDao(private val helper: FlujoDbHelper) {
                         fechaRevision = c.textoOpcional("fecha_revision"),
                         motivoRechazo = c.textoOpcional("motivo_rechazo"),
                         nombreObservador = c.texto("nombre_observador"),
+                        idRemoto = c.longOpcional("id_remoto"),
                         registrosValidos = c.entero("registros_validos"),
                         transito = c.entero("transito"),
                         visita = c.entero("visita"),

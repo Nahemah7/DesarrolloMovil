@@ -7,7 +7,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -48,6 +51,11 @@ import com.example.rinconsur.ui.theme.Fondo
 
 @Composable
 fun AppNavegacion() {
+    val contexto = LocalContext.current
+    LaunchedEffect(Unit) {
+        publicarPendientesAlAbrir(contexto)
+    }
+
     val navController = rememberNavController()
     val loginViewModel: LoginViewModel = viewModel()
     val encabezado: EncabezadoViewModel = viewModel()
@@ -269,4 +277,15 @@ internal fun inicioDe(perfil: PerfilUsuario): String = when (perfil) {
     PerfilUsuario.SUPERVISOR -> Ruta.Sesiones.ruta
     PerfilUsuario.JEFE_TIENDA -> Ruta.Reporte.ruta
     PerfilUsuario.SUBGERENTE -> Ruta.Carga.ruta
+}
+
+private fun publicarPendientesAlAbrir(contexto: android.content.Context) {
+    val repositorio = com.example.rinconsur.data.FlujoRepository(contexto)
+    val tokens = com.example.rinconsur.data.remoto.TokenPreferencias(contexto)
+    val direccion = com.example.rinconsur.data.remoto.DireccionServidor(contexto)
+    com.example.rinconsur.data.remoto.TrabajoDeFondo.alcance.launch {
+        runCatching {
+            com.example.rinconsur.data.remoto.SincronizadorSesiones(repositorio, tokens, direccion).publicarPendientes()
+        }
+    }
 }

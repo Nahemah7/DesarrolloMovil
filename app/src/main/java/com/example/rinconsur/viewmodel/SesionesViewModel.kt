@@ -85,6 +85,7 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
             val delDia = remoto.sesionesDeFecha(fecha)
             val pendientes = remoto.porValidar()
             if (delDia == null || pendientes == null || fecha != fechaElegida) return@launch
+            repositorio.espejarSesiones(delDia + pendientes)
             _uiState.value = _uiState.value.copy(
                 sesiones = delDia,
                 porValidar = pendientes,

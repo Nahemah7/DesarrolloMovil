@@ -17,6 +17,7 @@ data class SesionResumen(
     val motivoRechazo: String? = null,
     val nombreObservador: String = "",
     val registrosValidos: Int = 0,
+    val idRemoto: Long? = null,
     val transito: Int = 0,
     val visita: Int = 0,
     val noDeterminado: Int = 0,
@@ -32,4 +33,6 @@ data class SesionResumen(
     }
 
     val sePuedeValidar: Boolean get() = registrosValidos >= 30
+
+    val sinPublicar: Boolean get() = idRemoto == null && estado == EstadoSesion.PROGRAMADA
 }
