@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.example.rinconsur.data.Clave
 import com.example.rinconsur.data.FlujoRepository
+import com.example.rinconsur.model.PerfilUsuario
 import com.example.rinconsur.data.SesionPreferencias
 import com.example.rinconsur.data.mensajeDeClave
 import com.example.rinconsur.model.Colaborador
@@ -21,6 +22,9 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
 
     private var nombreOriginal: String = persona?.nombre ?: ""
     private var apellidoOriginal: String = persona?.apellido ?: ""
+
+    val puedeExportarMetricas: Boolean = persona?.perfil == PerfilUsuario.JEFE_TIENDA ||
+        persona?.perfil == PerfilUsuario.SUBGERENTE
 
     private val _uiState = MutableStateFlow(PerfilUiState())
     val uiState: StateFlow<PerfilUiState> = _uiState.asStateFlow()

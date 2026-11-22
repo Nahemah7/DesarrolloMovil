@@ -8,6 +8,7 @@ import com.example.rinconsur.model.PerfilUsuario
 import com.example.rinconsur.data.remoto.DireccionServidor
 import com.example.rinconsur.data.remoto.RepositorioIndicadoresRemoto
 import com.example.rinconsur.data.remoto.ReporteRemoto
+import com.example.rinconsur.data.remoto.aReporteJefatura
 import com.example.rinconsur.data.remoto.TokenPreferencias
 import com.example.rinconsur.data.remoto.TrabajoDeFondo
 import com.example.rinconsur.model.Compania
@@ -57,48 +58,9 @@ class ReporteViewModel(application: Application) : AndroidViewModel(application)
         TrabajoDeFondo.alcance.launch {
             val fecha = repositorio.fechaHoy()
             val remoto = RepositorioIndicadoresRemoto(direccion.leer(), token).reporte(fecha) ?: return@launch
-            _reporte.value = remoto.aReporteJefatura()
+            _reporte.value = remoto.aReporteJefatura(repositorio.bloques())
             _fuente.value = FuenteDatos.EN_LINEA
         }
-    }
-
-    private fun ReporteRemoto.aReporteJefatura(): ReporteJefatura {
-        val bloques = repositorio.bloques().associateBy { it.id.toInt() }
-        return ReporteJefatura(
-            meta = MetaDelMes(
-                anio = meta?.anio ?: 0,
-                mes = meta?.mes ?: 0,
-                objetivo = meta?.objetivo,
-                actual = meta?.actual,
-                dias = meta?.dias ?: 0
-            ),
-            deEjemplo = false,
-            meses = meses.map {
-                ConversionMes(it.mes, it.ingresos, it.boletas, it.conversion, it.dias)
-            },
-            horas = horas.map {
-                HoraPunta(
-                    hora = bloques[it.idBloque]?.horaInicioCorta ?: ("bloque " + it.idBloque),
-                    ingresos = it.ingresos,
-                    transito = it.transito,
-                    medidos = it.medidos,
-                    bloques = it.bloques
-                )
-            },
-            porRango = porRango.map {
-                GrupoConteo(RangoEtario.porId(it.etiqueta.toLongOrNull() ?: 0).etiqueta, it.cantidad, it.porcentaje)
-            },
-            porCompania = porCompania.map {
-                GrupoConteo(Compania.porId(it.etiqueta.toLongOrNull() ?: 0).etiqueta, it.cantidad, it.porcentaje)
-            },
-            compras = compras.map {
-                GrupoConteo(
-                    if (it.etiqueta == "si") "Compró en otra tienda" else "No compró en otra tienda",
-                    it.cantidad,
-                    it.porcentaje
-                )
-            }
-        )
     }
 
     fun registrarMeta(texto: String): Boolean {

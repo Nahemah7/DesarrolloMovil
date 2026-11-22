@@ -60,6 +60,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rinconsur.data.ConvertidorImagen
 import com.example.rinconsur.ui.components.BotonPrincipal
+import android.content.Intent
+import androidx.compose.runtime.rememberCoroutineScope
+import com.example.rinconsur.data.exportacion.ExportadorMetricas
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.example.rinconsur.ui.components.BotonSecundario
 import com.example.rinconsur.ui.components.CampoContrasena
 import com.example.rinconsur.ui.components.CampoLista
@@ -92,6 +98,28 @@ fun PantallaPerfil(
     val contexto = LocalContext.current
     var cambiandoNombre by remember { mutableStateOf(false) }
     var cambiandoClave by remember { mutableStateOf(false) }
+    var exportando by remember { mutableStateOf(false) }
+    val alcanceExportacion = rememberCoroutineScope()
+
+    fun exportarMetricas() {
+        if (exportando) return
+        exportando = true
+        alcanceExportacion.launch {
+            val archivo = withContext(Dispatchers.IO) {
+                runCatching { ExportadorMetricas(contexto).exportar() }.getOrNull()
+            }
+            exportando = false
+            if (archivo != null) {
+                val uri = FileProvider.getUriForFile(contexto, contexto.packageName + ".archivos", archivo)
+                val compartir = Intent(Intent.ACTION_SEND).apply {
+                    type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                contexto.startActivity(Intent.createChooser(compartir, "Enviar las métricas"))
+            }
+        }
+    }
 
     val tomarFoto = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
@@ -186,6 +214,25 @@ fun PantallaPerfil(
                 }
                 if (estado.avisoFoto != null) AvisoBueno(estado.avisoFoto!!)
                 if (estado.avisoNombre != null) AvisoBueno(estado.avisoNombre!!)
+            }
+
+            if (vm.puedeExportarMetricas) {
+                Seccion("Métricas")
+                TarjetaSeccion {
+                    Text(
+                        text = "Descarga las métricas del período en una planilla Excel: resumen, meses, " +
+                            "horas punta, perfil del tránsito e ingresos por acceso.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Apagado
+                    )
+                    Spacer(Modifier.height(Dimens.espacioChico))
+                    BotonSecundario(
+                        texto = if (exportando) "Preparando la planilla..." else "Exportar métricas a Excel",
+                        onClick = { exportarMetricas() },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                Spacer(Modifier.height(Dimens.espacioChico))
             }
 
             Seccion("Seguridad")
