@@ -10,7 +10,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-// La supervisora elige qué sesiones mira: las que esperan revisión, o solo las suyas.
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class SesionesViewModelTest {

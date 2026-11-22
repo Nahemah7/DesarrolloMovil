@@ -4,8 +4,6 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
-// La base local: el esquema, las vistas y la semilla viven en app/src/main/assets/sql y se ejecutan
-// al crear la base. Este archivo solo sabe de versiones, del orden de borrado y de leer los scripts.
 class FlujoDbHelper(private val contexto: Context) :
     SQLiteOpenHelper(contexto, NOMBRE_BD, null, VERSION_BD) {
 
@@ -45,8 +43,6 @@ internal const val SQL_SESIONES =
             "v_perfil_transito", "v_tipo_dia", "v_sesion_proporcion"
         )
 
-        // Orden de borrado: primero las tablas que apuntan a otras y al final las que son
-        // referenciadas. Al revés, con las claves foráneas activas, el DROP TABLE falla.
         private val TABLAS = listOf(
             "registro_observacion", "respuesta_seguridad", "sesion_observacion", "evento_dia",
             "conteo_ingreso", "transaccion_bloque", "meta_conversion", "usuario", "rol",
@@ -68,8 +64,7 @@ internal const val SQL_SESIONES =
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // Base limpia: no hay datos de cliente real, así que en vez de encadenar migraciones se
-        // borran las vistas y las tablas y se reconstruye todo desde los scripts.
+
         if (oldVersion < VERSION_BD) {
             VISTAS.forEach { db.execSQL("DROP VIEW IF EXISTS " + it) }
             TABLAS.forEach { db.execSQL("DROP TABLE IF EXISTS " + it) }

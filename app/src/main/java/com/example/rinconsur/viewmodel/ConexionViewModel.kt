@@ -13,8 +13,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-// Una prueba por paso, con su tiempo: sirve para ver de un vistazo si el problema es la red, el
-// gateway o un servicio, en vez de "no carga".
 data class PasoDeConexion(
     val nombre: String,
     val detalle: String = "",
@@ -59,7 +57,6 @@ class ConexionViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             val cliente = ClienteRemoto(direccion)
 
-            // 1) login con una cuenta sembrada
             val llamadaLogin = medir { cliente.autenticacion.entrar(PeticionLogin(RUT, CLAVE)) }
             val login = llamadaLogin.valor
             val msLogin = llamadaLogin.milisegundos
@@ -76,7 +73,6 @@ class ConexionViewModel(application: Application) : AndroidViewModel(application
 
             val autorizacion = "Bearer " + token
 
-            // 2) catálogos
             val llamadaCat = medir { cliente.catalogos.accesos(autorizacion) }
             val catalogos = llamadaCat.valor
             val msCat = llamadaCat.milisegundos
@@ -89,7 +85,6 @@ class ConexionViewModel(application: Application) : AndroidViewModel(application
                     detalle = listaAccesos.size.toString() + " accesos · " + listaAccesos.joinToString(", ") { a -> a.codigo ?: "" }) })
             }
 
-            // 3) sesiones de un día con datos del anexo
             val llamadaSes = medir { cliente.medicion.sesionesDelDia(autorizacion, FECHA) }
             val sesiones = llamadaSes.valor
             val msSes = llamadaSes.milisegundos
@@ -103,7 +98,6 @@ class ConexionViewModel(application: Application) : AndroidViewModel(application
                         listaSesiones.joinToString(" · ") { s -> (s.codigo ?: "") + " " + (s.estado ?: "") }) })
             }
 
-            // 4) indicadores del mismo día
             val llamadaInd = medir { cliente.medicion.indicadorDelDia(autorizacion, FECHA) }
             val indicador = llamadaInd.valor
             val msInd = llamadaInd.milisegundos
@@ -123,8 +117,6 @@ class ConexionViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    // Cronometra la llamada y conserva el motivo del fallo: sin el mensaje de la excepción,
-    // "no hubo respuesta" no dice nada (¿red, permiso, servidor apagado?).
     private suspend fun <T> medir(bloque: suspend () -> T): ResultadoLlamada<T> =
         withContext(Dispatchers.IO) {
             val inicio = System.currentTimeMillis()
@@ -158,7 +150,7 @@ class ConexionViewModel(application: Application) : AndroidViewModel(application
     }
 
     private companion object {
-        // Una cuenta sembrada del caso, solo para la prueba de conexión.
+
         const val RUT = "15.234.871-1"
         const val CLAVE = "rincon2026"
         const val FECHA = "2026-09-15"

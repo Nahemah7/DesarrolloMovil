@@ -69,8 +69,6 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
         sincronizar()
     }
 
-    // La pantalla se pinta con la copia local y, si hay sesión en el servidor, se reemplaza con
-    // lo que responde el gateway. Sin red no se pierde nada: queda lo local y el aviso de fuente.
     private fun sincronizar() {
         val guardado = token.leer() ?: return
         val fecha = fechaElegida
@@ -148,7 +146,7 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
                 _aviso.tryEmit("Sesión " + codigo + " validada en el servidor.")
                 recargar()
             } else {
-                // Sin red o rechazada por el servicio: se intenta en la copia local y se avisa.
+
                 validarLocal(idSesion, codigo)
             }
         }

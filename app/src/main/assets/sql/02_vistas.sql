@@ -1,6 +1,3 @@
--- Rincón Sur · script de la base local
--- Se ejecuta al crear la base (FlujoDbHelper.onCreate). Es SQL estándar de SQLite,
--- así que también se puede correr con cualquier cliente para revisarlo.
 
 CREATE VIEW v_tipo_dia AS
 SELECT d.fecha,

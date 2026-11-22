@@ -19,3 +19,9 @@ local.properties
 
 # Documentacion interna de trabajo: para nosotros, no va al repositorio
 DOCUMENTACION_INTERNA.md
+
+# Firma: el almacén de claves se entrega en el ZIP, no va al repo público
+keystore/
+keystore.properties
+*.jks
+*.aab

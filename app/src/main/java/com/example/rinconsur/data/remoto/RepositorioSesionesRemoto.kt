@@ -2,8 +2,6 @@ package com.example.rinconsur.data.remoto
 
 import com.example.rinconsur.model.SesionResumen
 
-// Envuelve las llamadas de sesiones contra el gateway. Devuelve null cuando no se pudo hablar
-// con el servidor, y quien lo usa decide qué hacer: en esta app, caer al SQLite local.
 class RepositorioSesionesRemoto(
     direccion: String,
     private val token: String
@@ -25,8 +23,6 @@ class RepositorioSesionesRemoto(
         null
     }
 
-    // Marca el inicio en el servidor. Devuelve true si quedó en curso o si ya lo estaba: para
-    // la app las dos cosas significan lo mismo y no hay que distinguirlas.
     suspend fun iniciar(idSesionRemota: Long): Boolean = try {
         val respuesta = cliente.medicion.iniciar(autorizacion, idSesionRemota.toInt())
         respuesta.isSuccessful || respuesta.code() == 409
@@ -34,7 +30,6 @@ class RepositorioSesionesRemoto(
         false
     }
 
-    // Valida una sesión cerrada. El revisor sale del token, así que la app no lo manda.
     suspend fun validar(idSesion: Long): Boolean = try {
         val respuesta = cliente.medicion.validar(autorizacion, idSesion.toInt())
         respuesta.isSuccessful

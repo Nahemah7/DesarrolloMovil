@@ -141,8 +141,6 @@ internal class UsuarioDao(private val helper: FlujoDbHelper) {
         return lista
     }
 
-    // ==================== alta y primer acceso ====================
-
     fun crearColaborador(datos: NuevaPersona, codigoHash: String, vence: String): Long? {
         val perfil = datos.rol ?: return null
         val idRol = idRolDe(perfil) ?: return null
@@ -174,7 +172,6 @@ internal class UsuarioDao(private val helper: FlujoDbHelper) {
         return helper.writableDatabase.update("usuario", valores, "id_usuario = ?", arrayOf(idUsuario.toString())) > 0
     }
 
-    // Cierra el primer acceso: clave propia, sin código que venza y con la pregunta ya guardada.
     fun definirClaveDefinitiva(idUsuario: Long, claveHash: String): Boolean {
         val valores = ContentValues().apply {
             put("password_hash", claveHash)
@@ -189,8 +186,6 @@ internal class UsuarioDao(private val helper: FlujoDbHelper) {
             "SELECT id_rol FROM rol WHERE codigo = ?", arrayOf(perfil.codigo)
         ).use { c -> if (c.moveToFirst()) c.getLong(0) else null }
 
-    // Edición de una cuenta: datos, perfil, género y estado. El cargo se recalcula con el perfil
-    // y el género, para que no quede "Jefa" en una cuenta que ahora es de un jefe.
     fun actualizarColaborador(
         idUsuario: Long,
         datos: NuevaPersona,

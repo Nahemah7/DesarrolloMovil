@@ -126,8 +126,7 @@ fun AppNavegacion() {
             composable(Ruta.Login.ruta) {
                 PantallaLogin(
                     onEntrar = { perfil, pendiente ->
-                        // Si la cuenta se creó con un código temporal, primero define su clave
-                        // y su pregunta: nadie trabaja con la clave que dejó el administrador.
+
                         val destino = if (pendiente) Ruta.PrimerAcceso.ruta else inicioDe(perfil)
                         navController.navigate(destino) { popUpTo(Ruta.Login.ruta) { inclusive = true } }
                     }
@@ -144,7 +143,6 @@ fun AppNavegacion() {
                 )
             }
 
-            // ---- Colaborador observador ----
             composable(Ruta.MiSesion.ruta) {
                 PantallaMiSesion(
                     onIniciar = { navController.navigate(Ruta.Registro.ruta) },
@@ -182,8 +180,6 @@ fun AppNavegacion() {
                 )
             }
 
-            // ---- Comunes ----
-            // ---- Supervisor de piso ----
             composable(Ruta.Sesiones.ruta) {
                 PantallaSesiones(
                     onRechazar = { idSesion -> navController.navigate(rutaDeRechazar(idSesion)) },
@@ -267,7 +263,6 @@ private fun NavHostController.navegar(pestana: String) {
     navigate(destino) { launchSingleTop = true }
 }
 
-// Pantalla de entrada según el perfil, compartida por el login y el primer acceso.
 internal fun inicioDe(perfil: PerfilUsuario): String = when (perfil) {
     PerfilUsuario.OBSERVADOR -> Ruta.MiSesion.ruta
     PerfilUsuario.ADMINISTRADOR -> Ruta.Colaboradores.ruta

@@ -64,8 +64,7 @@ class MiSesionViewModel(application: Application) : AndroidViewModel(application
         val hora = ahora()
         if (elegida.estado == EstadoSesion.PROGRAMADA) {
             repositorio.iniciarSesion(elegida.id, hora)
-            // Si la sesión ya existe en el servidor, se marca allá también: mientras siga
-            // "Programada" del otro lado, el servicio rechaza los registros.
+
             val token = tokens.leer()
             val idRemoto = repositorio.idRemotoDeSesion(elegida.id)
             if (token != null && idRemoto != null) {

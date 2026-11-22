@@ -30,7 +30,6 @@ data class RegistroUiState(
             (clasificacion != Clasificacion.TRANSITO || destino != null)
 }
 
-// De dónde salieron las sesiones que se están mostrando: del servidor o de la copia local.
 enum class FuenteDatos { LOCAL, EN_LINEA }
 
 data class SesionesUiState(
@@ -59,8 +58,7 @@ data class SesionesUiState(
         get() = base.filter { s ->
             (idAcceso == null || s.idAcceso == idAcceso) &&
                     (idObservador == null || s.idObservador == idObservador) &&
-                    // "Solo las mías" son las que medí yo: el supervisor programa casi todas,
-                    // así que filtrar por programador no acotaría nada.
+
                     (!soloMias || s.idObservador == miId)
         }
 

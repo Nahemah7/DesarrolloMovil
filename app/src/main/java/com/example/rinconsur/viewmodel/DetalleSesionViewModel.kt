@@ -38,8 +38,6 @@ class DetalleSesionViewModel(application: Application) : AndroidViewModel(applic
 
     fun recargar(idSesion: Long) = cargar(idSesion)
 
-    // La validación va primero al servidor: es el estado del que dependen los demás teléfonos.
-    // Si no hay red, se hace en la copia local para que el supervisor no quede bloqueado.
     fun validar(idSesion: Long, codigo: String) {
         val guardado = token.leer()
         if (guardado == null) {
@@ -49,8 +47,7 @@ class DetalleSesionViewModel(application: Application) : AndroidViewModel(applic
         viewModelScope.launch {
             val remoto = RepositorioSesionesRemoto(direccion.leer(), guardado)
             if (remoto.validar(idSesion)) {
-                // El servidor ya la validó: se refleja en la copia local para que no queden
-                // dos verdades sobre la misma sesión.
+
                 repositorio.revisarSesion(idSesion, EstadoSesion.VALIDADA, idRevisor)
                 cargar(idSesion)
                 _aviso.tryEmit("Sesión " + codigo + " validada en el servidor.")

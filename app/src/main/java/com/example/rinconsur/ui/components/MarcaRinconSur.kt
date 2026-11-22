@@ -16,8 +16,6 @@ import com.example.rinconsur.ui.theme.Aqua
 import com.example.rinconsur.ui.theme.Marino
 import com.example.rinconsur.ui.theme.RinconSurTheme
 
-// La marca es un vano de acceso: dos jambas, un arco y el umbral.
-// Monocroma en marino; el punto de acento es la persona que cruza.
 @Composable
 fun MarcaRinconSur(
     modifier: Modifier = Modifier,

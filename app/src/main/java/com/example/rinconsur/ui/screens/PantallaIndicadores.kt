@@ -58,8 +58,6 @@ import com.example.rinconsur.ui.theme.Marino
 import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.IndicadoresViewModel
 
-// La pantalla cuenta una sola cosa arriba —lo que se midió— y deja el resto detrás de
-// "Ver el detalle": quien entra a mirar no tiene que leer seis bloques para saber cómo va el día.
 @Composable
 fun PantallaIndicadores(onIrA: (String) -> Unit) {
     val vm: IndicadoresViewModel = viewModel()
@@ -154,7 +152,6 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                 EtiquetaFuente(state.fuente)
             }
 
-            // ---- Primer nivel: lo que midió el observador. No depende de la carga de la tienda.
             Spacer(Modifier.height(Dimens.espacioChico))
             KpiPrincipal(
                 valor = numeroAnimado(medicion.personas),
@@ -162,8 +159,7 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                 contexto = if (esHoy) {
                     "en ${medicion.bloques} de $bloques bloques"
                 } else {
-                    // Sin el conteo de días: los días medidos y los días con carga de la tienda
-                    // no siempre coinciden, y dos números distintos arriba confunden.
+
                     "en ${medicion.bloques} " + (if (medicion.bloques == 1) "bloque con medición" else "bloques con medición")
                 },
                 avance = if (esHoy) medicion.bloques.toFloat() / bloques else null,
@@ -175,7 +171,6 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                 }
             )
 
-            // ---- Segundo nivel: el negocio, solo cuando la tienda cargó sus números.
             Spacer(Modifier.height(Dimens.espacioChico))
             if (ind != null) {
                 val conv = ind.conversionBruta
@@ -209,7 +204,6 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                 }
             }
 
-            // ---- El resto, a un toque.
             Spacer(Modifier.height(Dimens.espacioMini))
             TextButton(onClick = { detalleAbierto = !detalleAbierto }) {
                 Text(
@@ -283,9 +277,7 @@ fun PantallaIndicadores(onIrA: (String) -> Unit) {
                             )
                             Spacer(Modifier.height(2.dp))
                             Nota(
-                                // El faltante se cuenta en bloques por acceso (44 en un día), no en
-                                // bloques del día (11): mezclar las dos unidades daba "11 bloques y
-                                // faltan 42".
+
                                 "Para calcularla tienen que estar medidos todos los bloques de los cuatro " +
                                     "accesos, y faltan ${ind.bloquesSinInformacion}. Estimarla con datos " +
                                     "parciales daría un número que no es el $alcance."

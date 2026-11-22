@@ -31,8 +31,6 @@ import com.example.rinconsur.ui.theme.Marino
 import com.example.rinconsur.ui.theme.Superficie
 import com.example.rinconsur.ui.theme.Tinta
 
-// El número que manda en la pantalla. Va solo, grande, y con el avance debajo como
-// contexto: quién lo lee no tiene que interpretar nada.
 @Composable
 fun KpiPrincipal(
     valor: String,
@@ -97,8 +95,6 @@ fun KpiPrincipal(
     }
 }
 
-// Los KPIs de segundo orden van en fila, más chicos: se comparan entre ellos, no compiten
-// con el número principal.
 @Composable
 fun FilaKpis(contenido: @Composable () -> Unit) {
     Row(

@@ -37,9 +37,6 @@ class IndicadoresViewModel(application: Application) : AndroidViewModel(applicat
         sincronizar()
     }
 
-    // Las cifras se piden al servicio y, si contesta, reemplazan a las del teléfono. El desglose
-    // por acceso se queda local: el servicio todavía no lo publica, y los dos salen de las mismas
-    // vistas, así que no pueden discrepar.
     private fun sincronizar() {
         val token = tokens.leer() ?: return
         TrabajoDeFondo.alcance.launch {
@@ -52,16 +49,14 @@ class IndicadoresViewModel(application: Application) : AndroidViewModel(applicat
             } else {
                 remoto.delPeriodo(tipo, semana?.desde, semana?.hasta)
             }
-            // El desglose por acceso sale del mismo servicio y del mismo período; si no responde,
-            // se queda el que calculó el teléfono.
+
             val accesos = if (tipo == null) {
                 remoto.accesosDelDia(s.fecha)
             } else {
                 remoto.accesosDelPeriodo(tipo, semana?.desde, semana?.hasta)
             }
             if (cifras != null) {
-                // Las personas medidas se recalculan con el MISMO rango que trae el servicio: si no,
-                // arriba decía "258 personas" y al lado "1 día (15-09)", que son dos períodos.
+
                 val medicion = if (tipo == null) {
                     repositorio.medicionDeFecha(cifras.desde)
                 } else {

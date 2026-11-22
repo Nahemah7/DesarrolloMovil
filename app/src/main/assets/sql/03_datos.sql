@@ -1,6 +1,3 @@
--- Rincón Sur · script de la base local
--- Se ejecuta al crear la base (FlujoDbHelper.onCreate). Es SQL estándar de SQLite,
--- así que también se puede correr con cualquier cliente para revisarlo.
 
 INSERT INTO rol (id_rol, codigo, nombre, descripcion) VALUES
   (1, 'P-01', 'Jefa de tienda', 'Consulta indicadores, historial y perfil; registra la meta'),
@@ -615,9 +612,6 @@ INSERT INTO pregunta_seguridad (id_pregunta, texto) VALUES
   (5, '¿Cuál es tu comida favorita?'),
   (6, '¿Cómo se llamaba tu mejor amigo de la infancia?');;
 
--- Mientras esto sea '1', lo que se ve en los informes es de ejemplo.
 INSERT INTO configuracion (clave, valor) VALUES ('datos_ejemplo', '1');;
 
--- Los registros del anexo son historia, no cola de salida: se marcan como ya enviados para que
--- la sincronización no los vuelva a subir al servidor (que tiene su propia copia).
 UPDATE registro_observacion SET enviado = 1;;

@@ -1,7 +1,5 @@
 package com.example.rinconsur.data.remoto
 
-// El reporte llega con números e identificadores: los nombres de rangos y compañías se resuelven
-// en el teléfono con los catálogos, que la app ya tiene.
 data class ReporteRemoto(
     val meta: MetaRemota? = null,
     val meses: List<MesRemoto> = emptyList(),

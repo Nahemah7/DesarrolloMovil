@@ -5,8 +5,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-// Utilidades compartidas por los DAO: lectura de columnas y marca de tiempo actual.
-
 internal fun ahora(): String =
 java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(java.util.Date())
 

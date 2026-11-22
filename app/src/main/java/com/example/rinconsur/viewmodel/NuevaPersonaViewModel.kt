@@ -12,8 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-// El administrador crea la persona; el código temporal se genera al guardar y se muestra
-// una sola vez, porque en la base queda solo su hash.
 class NuevaPersonaViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = FlujoRepository(application)

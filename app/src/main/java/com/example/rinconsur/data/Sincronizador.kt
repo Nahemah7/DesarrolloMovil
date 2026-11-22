@@ -6,10 +6,6 @@ import com.example.rinconsur.data.remoto.PeticionRegistro
 import com.example.rinconsur.data.remoto.TokenPreferencias
 import com.example.rinconsur.model.RegistroPendiente
 
-// Sube los registros anotados sin red. La regla es simple y en este orden:
-// 1. un registro que ya subió se marca y no se vuelve a mandar (la marca es el estado, no la memoria);
-// 2. si una llamada falla, se corta el envío: no tiene sentido seguir empujando contra una red caída;
-// 3. un rechazo del servidor (400/404/409) no se reintenta para siempre: se deja en la cola y se informa.
 class Sincronizador(
     private val repositorio: FlujoRepository,
     private val tokens: TokenPreferencias,
@@ -31,8 +27,7 @@ class Sincronizador(
         for (registro in pendientes) {
             val idSesionServidor = registro.idSesionRemota
             if (idSesionServidor == null) {
-                // La sesión todavía existe solo en el teléfono: sin su id en el servidor no hay
-                // dónde colgar el registro, así que espera sin gastar intentos.
+
                 problema = "La sesión de esta medición todavía no está en el servidor."
                 continue
             }
@@ -43,12 +38,12 @@ class Sincronizador(
                     enviados++
                 }
                 resultado.definitivo -> {
-                    // El servicio lo rechazó por una razón de negocio: reintentarlo no lo arregla.
+
                     problema = resultado.motivo
                     continue
                 }
                 else -> {
-                    // Sin red o servicio caído: se corta acá y se reintenta en la próxima pasada.
+
                     problema = resultado.motivo
                     break
                 }
@@ -82,7 +77,7 @@ class Sincronizador(
             when {
                 respuesta.isSuccessful && cuerpo?.id != null ->
                     Envio(cuerpo.id.toLong(), definitivo = true, motivo = null)
-                // Un 4xx es una respuesta del negocio: reintentar no lo va a cambiar.
+
                 respuesta.code() in 400..499 ->
                     Envio(null, definitivo = true, motivo = "El servidor rechazó un registro (" + respuesta.code() + ").")
                 else ->

@@ -119,12 +119,12 @@ fun PantallaPerfil(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = Dimens.espacioPantalla)
         ) {
-            // Salir es una acción secundaria: va arriba, lejos del pulgar y con borde.
+
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 Button(
                     onClick = onSalir,
                     shape = RoundedCornerShape(Dimens.radioEtiqueta),
-                    // Mismo azul marino del botón principal que tenía antes.
+
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Marino,
                         contentColor = Superficie
@@ -141,8 +141,6 @@ fun PantallaPerfil(
             }
             Spacer(Modifier.height(Dimens.espacioChico))
 
-            // Los datos de la persona viven en su tarjeta: foto, nombre y cargo a la izquierda,
-            // y la acción de cambiar el nombre al costado, no debajo.
             TarjetaSeccion {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     AvatarConCamara(
@@ -239,8 +237,6 @@ fun PantallaPerfil(
                 BotonPrincipal("Guardar la pregunta", onClick = { vm.guardarPreguntas() })
             }
 
-            // Prueba de la conexión con los microservicios del equipo.
-
             Seccion("Servidor")
 
             TarjetaSeccion {
@@ -274,7 +270,6 @@ fun PantallaPerfil(
                 }
 
             }
-
 
             Spacer(Modifier.height(Dimens.espacioGrande))
 }
@@ -369,7 +364,6 @@ fun PantallaPerfil(
     }
 }
 
-// Una fila de la ficha: qué es, su valor y, si se puede tocar, la acción a la derecha.
 @Composable
 private fun FilaDato(
     titulo: String,

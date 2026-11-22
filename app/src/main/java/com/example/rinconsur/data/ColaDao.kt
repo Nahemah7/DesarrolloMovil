@@ -3,9 +3,6 @@ package com.example.rinconsur.data
 import android.database.Cursor
 import com.example.rinconsur.model.RegistroPendiente
 
-// La cola de salida: lo que está guardado en el teléfono y todavía no llegó al servidor.
-// Es una tabla de la misma base local, así que un registro y su marca de "pendiente" se
-// escriben en la misma transacción: no existe el caso de un registro que se pierda en el medio.
 internal class ColaDao(private val helper: FlujoDbHelper) {
 
     fun pendientes(limite: Int = 200): List<RegistroPendiente> {

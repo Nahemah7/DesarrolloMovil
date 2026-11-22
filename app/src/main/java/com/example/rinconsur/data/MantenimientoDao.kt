@@ -1,7 +1,5 @@
 package com.example.rinconsur.data
 
-// Lo que no es medición: la marca de datos de ejemplo y el borrado de esos datos.
-// Las personas, los catálogos y las preguntas de seguridad no se tocan.
 internal class MantenimientoDao(private val helper: FlujoDbHelper) {
 
     fun datosDeEjemplo(): Boolean =
@@ -13,7 +11,7 @@ internal class MantenimientoDao(private val helper: FlujoDbHelper) {
         val db = helper.writableDatabase
         db.beginTransaction()
         try {
-            // Primero los hijos, después los padres: las claves foráneas están activas.
+
             listOf(
                 "registro_observacion",
                 "evento_dia",

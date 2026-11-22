@@ -13,8 +13,6 @@ import com.example.rinconsur.ui.theme.Fondo
 import com.example.rinconsur.ui.theme.Marino
 import com.example.rinconsur.ui.theme.MarinoClaro
 
-// Fondo del acceso: marino, una banda diagonal mas clara con su filo de aqua
-// y rayas del mismo tono. El contenido va encima, centrado.
 @Composable
 fun FondoAcceso(modifier: Modifier = Modifier, contenido: @Composable BoxScope.() -> Unit) {
     Box(modifier) {

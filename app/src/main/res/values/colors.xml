@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Neutros del sistema. La paleta del proyecto vive en el tema de Compose
-         (ui/theme/Color.kt): burdeo, terracota y los colores de cada tramo etario. -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="marino">#FF0B2545</color>
 </resources>

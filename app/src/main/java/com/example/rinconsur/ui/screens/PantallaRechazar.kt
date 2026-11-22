@@ -106,7 +106,6 @@ fun PantallaRechazar(idSesion: Long, onVolver: () -> Unit) {
 
             Nota("El rechazo no borra nada: los registros se conservan para volver a contar ese bloque.")
 
-            // ---- Botones ----
             Spacer(Modifier.height(14.dp))
             BotonPrincipal(
                 texto = "Rechazar sesión",

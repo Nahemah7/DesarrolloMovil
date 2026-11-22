@@ -2,8 +2,6 @@ package com.example.rinconsur.data.remoto
 
 import android.content.Context
 
-// El token que devuelve el gateway al iniciar sesión. Se guarda para que las pantallas que ya
-// hablan con la API no tengan que volver a pedirlo, y se borra al cerrar sesión.
 class TokenPreferencias(contexto: Context) {
 
     private val preferencias = contexto.getSharedPreferences("rinconsur_token", Context.MODE_PRIVATE)

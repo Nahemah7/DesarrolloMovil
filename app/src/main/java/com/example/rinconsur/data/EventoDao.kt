@@ -18,7 +18,7 @@ internal class EventoDao(private val helper: FlujoDbHelper) {
                 put("id_acceso", evento.idAcceso)
                 put("descripcion", evento.descripcion)
                 put("id_usuario_registra", evento.idUsuarioRegistra)
-                // La foto va como bytes (BLOB). Si el evento no lleva foto, queda NULL.
+
                 put("foto", evento.foto)
             }
         )

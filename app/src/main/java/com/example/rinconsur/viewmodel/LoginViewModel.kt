@@ -102,11 +102,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         return encontrado.perfil
     }
 
-    // El login se valida en el teléfono, que es lo que permite trabajar sin red. En paralelo se
-    // pide el token al gateway: si el servidor no está, la app sigue funcionando con lo local.
     private fun pedirToken(rut: String, clave: String, idUsuario: Long) {
-        // Va en el alcance de la aplicación y no en el del ViewModel: al entrar, esta pantalla se
-        // cierra y su alcance se cancela antes de que la petición salga.
+
         TrabajoDeFondo.alcance.launch {
             runCatching {
                 val cliente = ClienteRemoto(direccion.leer())

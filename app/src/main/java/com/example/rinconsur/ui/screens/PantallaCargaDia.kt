@@ -51,7 +51,6 @@ import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.ui.theme.Aviso
 import com.example.rinconsur.viewmodel.CargaDiaViewModel
 
-// Carga del día: once bloques con ingresos y boletas, y el reparto por acceso como detalle.
 @Composable
 fun PantallaCargaDia() {
     val vm: CargaDiaViewModel = viewModel()

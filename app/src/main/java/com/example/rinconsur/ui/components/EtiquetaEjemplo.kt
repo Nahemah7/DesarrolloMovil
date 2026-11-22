@@ -15,7 +15,6 @@ import com.example.rinconsur.ui.theme.Aviso
 import com.example.rinconsur.ui.theme.AvisoSuave
 import com.example.rinconsur.ui.theme.Dimens
 
-// Se muestra mientras la aplicación tenga los datos de ejemplo del caso.
 @Composable
 fun EtiquetaEjemplo(modifier: Modifier = Modifier) {
     Box(

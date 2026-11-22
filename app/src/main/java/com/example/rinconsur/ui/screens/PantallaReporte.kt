@@ -169,7 +169,7 @@ fun PantallaReporte() {
                     Nota("Sin datos de conversión cargados.")
                 } else {
                     val meses = r.meses.reversed()
-                    // Las barras se escalan con el entero, pero la etiqueta lleva el decimal real.
+
                     BarrasVerticales(
                         datos = meses.map { mes ->
                             nombreCorto(mes.mes) to (mes.conversion?.let { Math.round(it * 10).toInt() } ?: 0)
@@ -216,7 +216,7 @@ fun PantallaReporte() {
                     datos = r.porRango.map { it.etiqueta to it.cantidad },
                     centro = total.toString(),
                     centroAbajo = "personas",
-                    // Mismos colores que la plantilla del observador: el tramo se reconoce de un vistazo.
+
                     colores = r.porRango.map { colorDeRango(it.etiqueta) ?: Apagado }
                 )
                 Spacer(Modifier.height(4.dp))
@@ -282,7 +282,6 @@ fun PantallaReporte() {
     }
 }
 
-// "2026-10" -> "oct" para que quepa debajo de la barra.
 private fun nombreCorto(mes: String): String {
     val nombres = listOf(
         "ene", "feb", "mar", "abr", "may", "jun",

@@ -205,7 +205,6 @@ fun PantallaEvento(onVolver: () -> Unit) {
                 }
             }
 
-            // ---- Botones ----
             Spacer(Modifier.height(14.dp))
             BotonPrincipal(
                 texto = "Guardar evento",

@@ -28,7 +28,7 @@ fun BotonSecundario(
     fondo: Color? = null,
     colorTexto: Color? = null
 ) {
-    // Con fondo se dibuja relleno (acción secundaria con color); sin fondo, con borde.
+
     if (fondo != null) {
         Button(
             onClick = onClick,

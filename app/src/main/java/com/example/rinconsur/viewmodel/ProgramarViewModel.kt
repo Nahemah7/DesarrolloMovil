@@ -28,7 +28,7 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
     val uiState: StateFlow<ProgramarUiState> = _uiState.asStateFlow()
 
     init {
-        // La sesion se programa para hoy: el conteo se hace el dia que se hace.
+
         val fecha = repositorio.fechaHoy()
         _uiState.update {
             it.copy(
@@ -58,9 +58,6 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
         _uiState.update { it.copy(error = null) }
     }
 
-    // La sesión nace en el teléfono, que es lo que permite programar sin red. Si hay servidor, se
-    // da de alta allá y se guarda el identificador que devuelve: los registros de esa sesión se
-    // enlazan con ese número.
     private fun publicarEnServidor(
         codigo: String,
         idAcceso: Long,

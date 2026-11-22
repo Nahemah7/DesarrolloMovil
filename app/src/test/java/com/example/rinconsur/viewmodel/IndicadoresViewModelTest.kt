@@ -10,8 +10,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-// Los indicadores se miran por día, por hábiles o por fin de semana, y se puede retroceder una
-// semana. Elegir mal el período muestra las cifras de otros días sin avisar.
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class IndicadoresViewModelTest {

@@ -134,8 +134,6 @@ internal class SesionDao(private val helper: FlujoDbHelper) {
         return helper.writableDatabase.insert("registro_observacion", null, valores)
     }
 
-    // La sesión se creó en el teléfono y después se dio de alta en el servidor: se guarda el id
-    // que le asignó el servicio para poder enlazar sus registros.
     fun marcarRemota(idLocal: Long, idRemoto: Long) {
         helper.writableDatabase.execSQL(
             "UPDATE sesion_observacion SET id_remoto = ? WHERE id_sesion = ?",
@@ -212,7 +210,6 @@ internal class SesionDao(private val helper: FlujoDbHelper) {
             return DetalleSesion(resumen, validos, anulados, primera, ultima)
         }
 
-        // Las claves van en este orden: primero el total para el porcentaje, después la sesión.
         fun grupos(select: String, join: String, extra: String, grupo: String, orden: String): List<GrupoConteo> {
             val sql = "SELECT " + select + ", COUNT(*) AS cantidad, " +
                 "ROUND(100.0 * COUNT(*) / NULLIF(?, 0), 1) AS porcentaje " +

@@ -10,8 +10,6 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- Los microservicios del proyecto corren en el PC del equipo, sin certificado:
-         por eso el tráfico sin TLS queda permitido solo para las direcciones locales. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -28,7 +26,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.RinconSur"
+            android:theme="@style/Theme.RinconSur.Splash"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

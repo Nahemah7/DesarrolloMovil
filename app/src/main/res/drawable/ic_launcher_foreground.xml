@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Marca del icono: una puerta y una flecha que entra, que es lo que hace la app: contar accesos.
-     Dibujada dentro de la zona segura (el icono adaptativo recorta los bordes). -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"

@@ -2,7 +2,6 @@ package com.example.rinconsur.model
 
 import com.example.rinconsur.data.problemasDeClave
 
-// Configuración obligatoria del primer acceso: clave propia y una pregunta de seguridad.
 data class PrimerAccesoUiState(
     val clave: String = "",
     val repetir: String = "",

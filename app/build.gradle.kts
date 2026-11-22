@@ -1,6 +1,16 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+}
+
+// La firma se lee de keystore.properties, que no va al repo: el almacén de claves se entrega junto
+// al APK, no en el historial de Git. Si el archivo no está (una compañera clona el repo), el build
+// de release falla con un mensaje claro en vez de producir un APK sin firmar.
+val archivoFirma = rootProject.file("keystore.properties")
+val datosFirma = Properties().apply {
+    if (archivoFirma.exists()) archivoFirma.inputStream().use { load(it) }
 }
 
 android {
@@ -11,7 +21,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.rinconsur"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"
@@ -24,10 +34,26 @@ android {
         buildConfigField("String", "API_BASE", "\"http://localhost:8090/\"")
     }
 
+    signingConfigs {
+        if (datosFirma.isNotEmpty()) {
+            create("release") {
+                storeFile = rootProject.file(datosFirma.getProperty("storeFile"))
+                storePassword = datosFirma.getProperty("storePassword")
+                keyAlias = datosFirma.getProperty("keyAlias")
+                keyPassword = datosFirma.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
             optimization {
                 enable = false
+            }
+            // Sin minificar: el APK de la entrega tiene que poder leerse en la defensa.
+            isMinifyEnabled = false
+            if (datosFirma.isNotEmpty()) {
+                signingConfig = signingConfigs.getByName("release")
             }
         }
     }
@@ -56,6 +82,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
+    // Pantalla de arranque con el tema del sistema (API 31) y su equivalente en versiones anteriores.
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     testImplementation(libs.junit)
     // ViewModels en la JVM: Application real y SQLite de verdad, sin emulador.

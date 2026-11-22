@@ -164,7 +164,6 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
 
     var aAnular by remember { mutableStateOf<Long?>(null) }
 
-
     aAnular?.let { id ->
         AlertDialog(
             onDismissRequest = { aAnular = null },
@@ -263,7 +262,6 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
                 }
             }
 
-            // Cola de salida: lo que está guardado en el teléfono y todavía no llegó al servidor.
             if (estado.porEnviar > 0) {
                 Box(
                     Modifier
@@ -344,7 +342,6 @@ fun PantallaRegistro(onPlantilla: (Int) -> Unit, onCerrar: () -> Unit, onIrA: (S
                     Nota("Va a " + a.codigo + " · " + a.nombre)
                 }
             }
-
 
             if (estado.ultimosRegistros.isNotEmpty()) {
                 Seccion("Últimos registros")

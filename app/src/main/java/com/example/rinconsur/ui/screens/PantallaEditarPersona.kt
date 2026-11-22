@@ -42,7 +42,6 @@ import com.example.rinconsur.ui.theme.Fondo
 import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.EditarPersonaViewModel
 
-// Editar una cuenta: la persona cambió de puesto, de correo o dejó de trabajar en la tienda.
 @Composable
 fun PantallaEditarPersona(idUsuario: Long, onVolver: () -> Unit) {
     val vm: EditarPersonaViewModel = viewModel()

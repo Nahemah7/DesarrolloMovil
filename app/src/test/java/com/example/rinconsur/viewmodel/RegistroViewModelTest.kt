@@ -11,8 +11,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-// Registrar es un toque por persona: no hay tiempo de corregir, así que el ViewModel tiene que
-// negarse a guardar cuando falta algo.
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class RegistroViewModelTest {
@@ -22,7 +20,7 @@ class RegistroViewModelTest {
     @Before
     fun preparar() {
         application = ApplicationProvider.getApplicationContext()
-        // Sin sesión abierta: es el estado en que el observador no puede anotar.
+
         SesionPreferencias(application).borrar()
     }
 

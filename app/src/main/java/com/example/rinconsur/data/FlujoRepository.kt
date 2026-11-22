@@ -41,8 +41,6 @@ class FlujoRepository(context: Context) {
         const val MINIMO_REGISTROS = FlujoDbHelper.MINIMO_REGISTROS
     }
 
-    // ---- catalogos y datos de referencia ----
-
     fun accesos(): List<Acceso> = catalogoDao.listarAccesos()
 
     fun bloques(): List<BloqueHorario> = catalogoDao.listarBloques()
@@ -55,16 +53,12 @@ class FlujoRepository(context: Context) {
 
     fun fechaDeTrabajo(): String = catalogoDao.fechaDeTrabajo()
 
-    // ---- personas ----
-
     fun colaboradorPorRut(rut: String): Colaborador? = usuarioDao.buscarColaboradorPorRut(rut)
 
     fun colaboradorPorId(id: Long): Colaborador? = usuarioDao.buscarColaboradorPorId(id)
 
     fun cambiarNombre(idUsuario: Long, nombres: String, apellidoPaterno: String): Boolean =
         usuarioDao.cambiarNombre(idUsuario, nombres, apellidoPaterno) > 0
-
-    // ---- sesiones de conteo ----
 
     fun sesionEnCursoDe(idObservador: Long): SesionResumen? = sesionDao.sesionEnCursoDe(idObservador)
 
@@ -102,8 +96,6 @@ class FlujoRepository(context: Context) {
     fun revisarSesion(idSesion: Long, estado: EstadoSesion, idRevisor: Long, motivo: String? = null): Int =
         sesionDao.revisarSesion(idSesion, estado, idRevisor, motivo)
 
-    // ---- registros ----
-
     fun registrar(
         idSesion: Long,
         clasificacion: Clasificacion,
@@ -129,12 +121,10 @@ class FlujoRepository(context: Context) {
 
     fun semanasConDatos(): List<Pair<String, String>> = indicadorDao.semanasConDatos()
 
-    // La medición del observador no depende de la carga de la tienda: se puede mostrar sola.
     fun medicionDeFecha(fecha: String): MedicionPeriodo = indicadorDao.medicionDeFecha(fecha)
 
     fun medicionDeTipo(tipo: String, desde: String? = null, hasta: String? = null): MedicionPeriodo =
         indicadorDao.medicionDeTipo(tipo, desde, hasta)
-
 
     fun transitoPorAcceso(fecha: String): List<TransitoPorAcceso> = indicadorDao.transitoPorAcceso(fecha)
 
@@ -142,8 +132,6 @@ class FlujoRepository(context: Context) {
 
     fun reporteJefatura(): ReporteJefatura = indicadorDao.reporteJefatura(fechaHoy())
 
-    // Mientras haya datos de ejemplo, los informes lo dicen y el administrador puede borrarlos.
-    // Cola de salida de los registros anotados sin red.
     fun registrosPendientes(limite: Int = 200): List<RegistroPendiente> = colaDao.pendientes(limite)
 
     fun marcarSesionRemota(idLocal: Long, idRemoto: Long) = sesionDao.marcarRemota(idLocal, idRemoto)
@@ -168,8 +156,6 @@ class FlujoRepository(context: Context) {
     fun guardarMeta(anio: Int, mes: Int, porcentaje: Double, idUsuario: Long): Boolean =
         indicadorDao.guardarMeta(anio, mes, porcentaje, idUsuario)
 
-    // ---- eventos del dia ----
-
     fun registrarEvento(evento: EventoDia): Long = eventoDao.registrarEvento(evento)
 
     fun eventosRegistrados(): List<EventoDia> = eventoDao.eventosRegistrados()
@@ -183,7 +169,6 @@ class FlujoRepository(context: Context) {
 
     fun preguntas(): List<PreguntaSeguridad> = usuarioDao.listarPreguntas()
 
-    // El administrador crea la cuenta con un código temporal que vence en una semana.
     fun crearColaborador(datos: NuevaPersona, codigo: String): Long? =
         usuarioDao.crearColaborador(
             datos,

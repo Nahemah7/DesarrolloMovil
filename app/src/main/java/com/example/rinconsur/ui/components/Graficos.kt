@@ -41,7 +41,6 @@ import com.example.rinconsur.ui.theme.Marino
 import com.example.rinconsur.ui.theme.SerieGraficos
 import com.example.rinconsur.ui.theme.Tinta
 
-// Donut con leyenda: sirve para repartos de tres a seis categorías.
 @Composable
 fun Donut(
     datos: List<Pair<String, Int>>,
@@ -128,7 +127,6 @@ fun Donut(
 private fun Porcion.cantidadTexto(): String =
     valor.toString() + " · " + String.format(java.util.Locale("es", "CL"), "%.1f", porcentaje).replace(".", ",") + " %"
 
-// Barras verticales: horas del día, meses, cualquier serie corta con etiqueta debajo.
 @Composable
 fun BarrasVerticales(
     datos: List<Pair<String, Int>>,
@@ -190,7 +188,6 @@ fun BarrasVerticales(
     }
 }
 
-// Anillo de avance: la meta del mes en una sola lectura.
 @Composable
 fun AnilloProgreso(
     avance: Float,
@@ -237,7 +234,6 @@ fun AnilloProgreso(
     }
 }
 
-// Fila de leyenda simple para acompañar un gráfico con su cifra.
 @Composable
 fun LeyendaGrafico(datos: List<Pair<String, String>>) {
     Column(Modifier.fillMaxWidth().padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {

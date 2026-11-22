@@ -1,6 +1,5 @@
 package com.example.rinconsur.model
 
-// Un bloque de la carga diaria: el total del local y, si se conoce, el reparto por acceso.
 data class BloqueCarga(
     val idBloque: Long,
     val hora: String,
@@ -15,7 +14,6 @@ data class BloqueCarga(
     val sumaDetalle: Int
         get() = detalle.values.sumOf { it.trim().toIntOrNull() ?: 0 }
 
-    // Si se abrió el reparto por acceso, la suma tiene que dar el total del bloque.
     val detalleCuadra: Boolean
         get() = !detallado || sumaDetalle == (ingresosNumero ?: 0)
 
@@ -37,7 +35,6 @@ data class CargaDia(
     val totalIngresos: Int get() = bloques.sumOf { it.ingresosNumero ?: 0 }
     val totalBoletas: Int get() = bloques.sumOf { it.boletasNumero ?: 0 }
 
-    // La conversión se calcula sobre los totales del día, nunca promediando bloques.
     val conversion: Double?
         get() = if (totalIngresos <= 0) null
         else Math.round(1000.0 * totalBoletas / totalIngresos) / 10.0
@@ -50,7 +47,6 @@ data class CargaDia(
     val bloquesConDetalle: Int get() = bloques.count { it.detallado }
     val bloquesConDatos: Int get() = bloques.count { it.conDatos }
 
-    // Un bloque con ingresos y sin boletas (o al revés) no entra en la conversión del día.
     val bloquesAPartar: Int get() = bloques.count { it.conIngresos != it.conBoletas }
 
     val errores: List<String>

@@ -2,8 +2,6 @@ package com.example.rinconsur.data.remoto
 
 import android.content.Context
 
-// Guarda la última dirección con la que se conectó: quien prueba desde el teléfono no tiene que
-// escribir la IP del PC cada vez que abre la app.
 class DireccionServidor(contexto: Context) {
 
     private val preferencias =
@@ -20,7 +18,6 @@ class DireccionServidor(contexto: Context) {
     }
 }
 
-// BuildConfig del módulo: se aísla acá para que el resto del código no dependa del paquete generado.
 internal object BuildConfigApi {
     val base: String = com.example.rinconsur.BuildConfig.API_BASE
 }

@@ -4,8 +4,6 @@ import com.example.rinconsur.model.IndicadoresDia
 import com.example.rinconsur.model.OrigenTransito
 import com.example.rinconsur.model.TransitoPorAcceso
 
-// Los indicadores y el reporte vienen calculados del servicio: las vistas viven allá y son la
-// misma fuente para todos los dispositivos. Devuelve null si no se pudo hablar con el servidor.
 class RepositorioIndicadoresRemoto(
     direccion: String,
     private val token: String
@@ -13,7 +11,6 @@ class RepositorioIndicadoresRemoto(
     private val cliente = ClienteRemoto(direccion)
     private val autorizacion = "Bearer " + token
 
-    // Un día concreto: fecha y fecha.
     suspend fun delDia(fecha: String): IndicadoresDia? = try {
         val respuesta = cliente.medicion.indicadorDelDia(autorizacion, fecha)
         if (respuesta.isSuccessful) respuesta.body()?.let { it.aIndicadores(fecha, fecha) } else null
@@ -21,8 +18,6 @@ class RepositorioIndicadoresRemoto(
         null
     }
 
-    // Un rango de días del mismo tipo (hábiles o fin de semana). Sin desde ni hasta, el servicio
-    // agrega todos los días de ese tipo, que es lo que muestra "todas las semanas".
     suspend fun delPeriodo(tipoDia: String, desde: String? = null, hasta: String? = null): IndicadoresDia? = try {
         val respuesta = cliente.medicion.indicadoresDelTipo(autorizacion, tipoDia, desde, hasta)
         if (respuesta.isSuccessful) {
@@ -32,7 +27,6 @@ class RepositorioIndicadoresRemoto(
         null
     }
 
-    // El desglose por acceso: la misma vista que el número de la tienda, agrupada por puerta.
     suspend fun accesosDelDia(fecha: String): List<TransitoPorAcceso>? = try {
         val respuesta = cliente.medicion.accesosDelDia(autorizacion, fecha)
         if (respuesta.isSuccessful) respuesta.body()?.map { it.aTransito() } else null
@@ -57,7 +51,7 @@ class RepositorioIndicadoresRemoto(
     private fun AccesoMedidoRemoto.aTransito() = TransitoPorAcceso(
         acceso = "A" + idAcceso,
         ingresos = ingresos.toInt(),
-        // Sin medición el servicio manda nulo y así se muestra: un cero se leería como "pasó nadie".
+
         transitoEstimado = transito?.toDouble(),
         origen = OrigenTransito.porNombre(origen)
     )
@@ -70,7 +64,7 @@ class RepositorioIndicadoresRemoto(
         conversionBruta = conversionBruta,
         estadoDia = dia ?: "Sin información",
         transito = transito,
-        // El servicio entrega el tránsito; la conversión sin tránsito se deriva de él.
+
         flujoSinTransito = transito?.let { (ingresos ?: 0L) - it }?.takeIf { transito != null && transito!! > 0 },
         conversionSinTransito = null,
         bloquesMedidos = medidos ?: 0,

@@ -42,12 +42,10 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
     val uiState: StateFlow<RegistroUiState> = _uiState.asStateFlow()
 
     init {
-        // Al entrar a medir se intenta vaciar lo que quedó pendiente de ayer o de un corte de red.
+
         sincronizar()
     }
 
-    // Vacía la cola contra el servidor. Si no hay red, no pasa nada: los registros siguen
-    // guardados en el teléfono y se reintenta en la próxima entrada o al guardar otro.
     fun sincronizar() {
         viewModelScope.launch {
             val resultado = sincronizador.enviarPendientes()
@@ -62,7 +60,6 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
             }
         }
     }
-
 
     fun releer() {
         idSesion = repositorio.sesionEnCursoDe(idObservador)?.id ?: 0L
@@ -131,7 +128,7 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
             return false
         }
         refrescar(mensaje = null)
-        // El registro ya quedó guardado: si hay red, sale ahora mismo; si no, espera en la cola.
+
         sincronizar()
         return true
     }

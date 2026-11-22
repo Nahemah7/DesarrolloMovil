@@ -2,8 +2,6 @@ package com.example.rinconsur.model
 
 import com.example.rinconsur.data.Rut
 
-// Lo que el administrador completa para crear una cuenta. El cargo sale del perfil elegido
-// y el código temporal lo genera la app al guardar: no se piden dos veces.
 data class NuevaPersona(
     val rut: String = "",
     val nombres: String = "",

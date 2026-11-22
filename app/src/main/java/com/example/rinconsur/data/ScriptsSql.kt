@@ -1,7 +1,5 @@
 package com.example.rinconsur.data
 
-// Separa un script SQL por punto y coma sin romper los que están dentro de un texto
-// ni los que aparecen en un comentario. Los scripts viven en assets/sql.
 internal fun dividirSentencias(script: String): List<String> {
     val salida = mutableListOf<String>()
     val actual = StringBuilder()

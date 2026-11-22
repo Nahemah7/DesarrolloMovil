@@ -22,7 +22,6 @@ import com.example.rinconsur.ui.theme.Aqua
 import com.example.rinconsur.ui.theme.Linea
 import com.example.rinconsur.ui.theme.Tinta
 
-// Distribución de un grupo: etiqueta, cantidad, porcentaje y barra proporcional.
 @Composable
 fun BloquesConteo(grupos: List<GrupoConteo>) {
     if (grupos.isEmpty()) {

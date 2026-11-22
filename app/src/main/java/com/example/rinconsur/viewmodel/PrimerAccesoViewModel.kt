@@ -14,8 +14,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-// Primer acceso: la cuenta se creó con un código temporal y hay que dejar la clave propia
-// y la pregunta de seguridad antes de usar la aplicación.
 class PrimerAccesoViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = FlujoRepository(application)

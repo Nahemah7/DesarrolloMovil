@@ -41,8 +41,6 @@ import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.ConexionViewModel
 import com.example.rinconsur.viewmodel.EstadoPaso
 
-// Pantalla de diagnóstico: se abre desde el perfil y muestra, paso por paso, si la app llegó al
-// backend del PC. Sirve para separar "no hay red" de "el servicio está caído".
 @Composable
 fun PantallaConexion(onVolver: () -> Unit) {
     val vm: ConexionViewModel = viewModel()

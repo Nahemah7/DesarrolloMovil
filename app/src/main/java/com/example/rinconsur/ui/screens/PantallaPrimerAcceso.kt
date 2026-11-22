@@ -40,7 +40,6 @@ import com.example.rinconsur.ui.theme.Fondo
 import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.PrimerAccesoViewModel
 
-// Primer acceso obligatorio: nadie entra con el código temporal del administrador.
 @Composable
 fun PantallaPrimerAcceso(onListo: (PerfilUsuario) -> Unit) {
     val vm: PrimerAccesoViewModel = viewModel()

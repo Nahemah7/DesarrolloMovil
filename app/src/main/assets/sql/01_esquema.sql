@@ -1,6 +1,3 @@
--- Rincón Sur · script de la base local
--- Se ejecuta al crear la base (FlujoDbHelper.onCreate). Es SQL estándar de SQLite,
--- así que también se puede correr con cualquier cliente para revisarlo.
 
 CREATE TABLE rol (
     id_rol      INT          NOT NULL,
@@ -20,14 +17,11 @@ CREATE TABLE usuario (
     nombres        VARCHAR(60)  NOT NULL,
     apellido_paterno VARCHAR(40) NOT NULL,
     apellido_materno VARCHAR(40) NULL,
-    -- El cargo se escribe según la persona (jefa o jefe), así que se guarda el género.
     genero         CHAR(1)      NOT NULL DEFAULT 'F',
     cargo          VARCHAR(60)  NOT NULL,
     correo         VARCHAR(100) NOT NULL,
     telefono       VARCHAR(20)  NULL,
     password_hash  VARCHAR(255) NOT NULL,
-    -- La cuenta nace con un código temporal del administrador: mientras esté en 1,
-    -- el login no deja pasar sin cambiar la clave y definir su pregunta.
     debe_cambiar_clave BOOLEAN  NOT NULL DEFAULT 0,
     codigo_vence   DATETIME     NULL,
     activo         BOOLEAN      NOT NULL DEFAULT 1,
@@ -60,7 +54,6 @@ CREATE TABLE bloque_horario (
 
 CREATE TABLE conteo_ingreso (
     id_conteo INTEGER PRIMARY KEY AUTOINCREMENT,
-    -- Nulo = el bloque se cargó como total del local, sin repartir entre accesos.
     id_acceso            INT      NULL,
     fecha                DATE     NOT NULL,
     id_bloque            INT      NOT NULL,
@@ -115,8 +108,6 @@ CREATE TABLE sesion_observacion (
     id_revisor      INT          NULL,
     fecha_revision  DATETIME     NULL,
     motivo_rechazo  VARCHAR(200) NULL,
-    -- Identificador de la misma sesión en el servidor. Nulo mientras la sesión exista solo en el
-    -- teléfono: sin este número, los registros no tienen a qué sesión del servidor apuntar.
     id_remoto       INT          NULL,
     CONSTRAINT uq_sesion_codigo UNIQUE (codigo),
     CONSTRAINT ck_sesion_orden CHECK (hora_fin_prog > hora_inicio_prog),
@@ -168,8 +159,6 @@ CREATE TABLE registro_observacion (
     id_usuario_anula    INT          NULL,
     fecha_anulacion     DATETIME     NULL,
     motivo_anulacion    VARCHAR(200) NULL,
-    -- Un registro se guarda en el teléfono primero. Mientras 'enviado' esté en 0 espera su turno
-    -- para subir al servidor; cuando llega, se guarda el identificador que le dio el servicio.
     enviado             BOOLEAN      NOT NULL DEFAULT 0,
     id_remoto           INT          NULL,
     CONSTRAINT ck_registro_anulacion CHECK (anulado = 0 OR (id_usuario_anula IS NOT NULL AND motivo_anulacion IS NOT NULL)),
@@ -238,14 +227,12 @@ CREATE TABLE respuesta_seguridad (
     CONSTRAINT fk_respuesta_pregunta FOREIGN KEY (id_pregunta) REFERENCES pregunta_seguridad (id_pregunta)
 );;
 
--- Un bloque se carga de una sola forma: repartido entre accesos, o como total sin detalle.
 CREATE UNIQUE INDEX ux_conteo_con_detalle
     ON conteo_ingreso (id_acceso, fecha, id_bloque) WHERE id_acceso IS NOT NULL;;
 
 CREATE UNIQUE INDEX ux_conteo_sin_detalle
     ON conteo_ingreso (fecha, id_bloque) WHERE id_acceso IS NULL;;
 
--- Una sola fila por clave: guarda si la app todavía trae los datos de ejemplo.
 CREATE TABLE configuracion (
     clave          VARCHAR(40)  NOT NULL PRIMARY KEY,
     valor          VARCHAR(120) NOT NULL,

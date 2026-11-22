@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-// Carga de ingresos y boletas del día: once bloques, con el reparto por acceso opcional.
 class CargaDiaViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = FlujoRepository(application)
@@ -51,8 +50,7 @@ class CargaDiaViewModel(application: Application) : AndroidViewModel(application
             _aviso.tryEmit("Escribe el total del bloque antes de repartirlo por acceso.")
             return
         }
-        // Se abre el reparto con el total puesto en el primer acceso: el resto se completa a mano
-        // y la suma tiene que cuadrar antes de guardar.
+
         val primero = actual.accesos.firstOrNull() ?: return
         _carga.value = actual
             .alternarDetalle(idBloque)

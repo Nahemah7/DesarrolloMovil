@@ -52,9 +52,6 @@ class ReporteViewModel(application: Application) : AndroidViewModel(application)
         cargarDelServicio()
     }
 
-    // El reporte se calcula en el servicio con las vistas de siempre. Se pide en segundo plano y,
-    // si contesta, reemplaza al del teléfono; si no hay red, queda la copia local y se dice que es
-    // local. Los nombres de rangos y compañías se ponen acá: el servicio manda identificadores.
     private fun cargarDelServicio() {
         val token = tokens.leer() ?: return
         TrabajoDeFondo.alcance.launch {

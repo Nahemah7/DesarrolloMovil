@@ -41,14 +41,13 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
                     telefono = p.telefono,
                     foto = repositorio.fotoDe(p.id),
                     catalogo = repositorio.preguntas(),
-                    // La app usa una sola pregunta: si venia con dos guardadas se toma la primera.
+
                     elegidas = guardadas.take(1).map { q -> q.id },
                     tienePreguntas = guardadas.isNotEmpty()
                 )
             }
         }
     }
-
 
     fun onNombreCambia(valor: String) {
         _uiState.update { it.copy(nombre = valor, errorNombre = null, avisoNombre = null) }
@@ -95,7 +94,6 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
     private fun textoDeNombreValido(texto: String): Boolean =
         texto.length in 2..40 && texto.all { it.isLetter() || it == ' ' || it == '-' || it == '\'' }
 
-
     fun guardarFoto(bytes: ByteArray?) {
         val p = persona ?: return
         if (repositorio.guardarFoto(p.id, bytes)) {
@@ -110,7 +108,6 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun limpiarAvisoFoto() { _uiState.update { it.copy(avisoFoto = null) } }
-
 
     fun onClaveActualCambia(v: String) { _uiState.update { it.copy(claveActual = v, errorActual = null, avisoClave = null) } }
     fun onClaveNuevaCambia(v: String) { _uiState.update { it.copy(claveNueva = v, errorNueva = null, avisoClave = null) } }
@@ -145,7 +142,6 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
         }
         return true
     }
-
 
     fun onElegirPregunta(idPregunta: Long) {
         _uiState.update {

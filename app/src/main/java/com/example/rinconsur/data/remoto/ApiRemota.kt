@@ -6,8 +6,6 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 
-// Las tres interfaces del cliente, tal como las expone el gateway. Los nombres de campo son los
-// del JSON del backend, así que no hay traducciones escondidas entre la app y los servicios.
 interface ApiAutenticacion {
 
     @POST("api/auth/login")
@@ -55,9 +53,6 @@ interface ApiMedicion {
         @retrofit2.http.Header("Authorization") autorizacion: String
     ): Response<List<SesionRemota>>
 
-    // Retrofit exige un cuerpo en PATCH: esta llamada manda un objeto vacío que el servicio
-    // ignora, porque el revisor sale del token. Sin el cuerpo, la petición falla en el cliente
-    // y la app se cae al respaldo local sin que se note.
     @retrofit2.http.PATCH("api/sesiones/{id}/validar")
     suspend fun validar(
         @retrofit2.http.Header("Authorization") autorizacion: String,
@@ -99,8 +94,6 @@ interface ApiMedicion {
         @Path("fecha") fecha: String
     ): Response<IndicadorRemoto>
 }
-
-// ---------- cuerpos ----------
 
 data class PeticionLogin(val rut: String, val clave: String)
 
@@ -159,8 +152,6 @@ data class IndicadorRemoto(
     val sinInformacion: Int?
 )
 
-// Una puerta del desglose. El código y el nombre (A1, "Acceso principal") no viajan: la app los
-// tiene en sus catálogos.
 data class AccesoMedidoRemoto(
     val idAcceso: Int = 0,
     val ingresos: Long = 0,

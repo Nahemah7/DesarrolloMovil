@@ -26,4 +26,3 @@ object EstilosTarjeta {
     @Composable
     fun borde(): BorderStroke = BorderStroke(1.dp, Linea)
 }
-

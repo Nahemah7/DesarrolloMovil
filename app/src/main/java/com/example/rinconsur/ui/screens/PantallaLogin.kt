@@ -161,8 +161,7 @@ fun PantallaLogin(onEntrar: (PerfilUsuario, Boolean) -> Unit) {
                         icono = Icons.Filled.Login,
                         onClick = {
                             val rol = vm.entrar()
-                            // La bandera se lee del mismo ViewModel que acaba de entrar: el
-                            // contenedor de navegación tiene otra instancia.
+
                             if (rol != null) onEntrar(rol, vm.usuario.value?.debeCambiarClave == true)
                         }
                     )

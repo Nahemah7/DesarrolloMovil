@@ -1,6 +1,3 @@
--- Rincón Sur · script de la base local
--- Se ejecuta al crear la base (FlujoDbHelper.onCreate). Es SQL estándar de SQLite,
--- así que también se puede correr con cualquier cliente para revisarlo.
 
 DELETE FROM registro_observacion WHERE id_sesion IN (21, 22);;
 
@@ -85,6 +82,4 @@ SELECT 22, datetime('2026-10-24 13:04:00', '+' || (n * 40) || ' seconds'),
        (n % 5) + 1, (n % 4) + 1, n % 2, NULL, 0
 FROM (WITH RECURSIVE c(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM c WHERE n < 32) SELECT n FROM c);;
 
--- Los registros del anexo son historia, no cola de salida: se marcan como ya enviados para que
--- la sincronización no los vuelva a subir al servidor (que tiene su propia copia).
 UPDATE registro_observacion SET enviado = 1;;

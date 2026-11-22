@@ -33,7 +33,6 @@ class ColaboradoresViewModel(application: Application) : AndroidViewModel(applic
         _deEjemplo.value = repositorio.datosDeEjemplo()
     }
 
-    // Deja la aplicación con las personas y los catálogos, sin las mediciones del caso.
     fun empezarDeCero(): Boolean {
         val borrado = repositorio.borrarDatosDeEjemplo()
         cargar()
@@ -44,7 +43,6 @@ class ColaboradoresViewModel(application: Application) : AndroidViewModel(applic
         return borrado
     }
 
-    // Sirve cuando el código temporal venció o la persona lo perdió sin haber entrado nunca.
     fun regenerarCodigo(colaborador: Colaborador) {
         if (!colaborador.debeCambiarClave) {
             _aviso.tryEmit("Esa persona ya definió su clave: no corresponde un código temporal.")

@@ -80,8 +80,7 @@ fun PantallaProgramar(onIrA: (String) -> Unit) {
             Seccion("Acceso")
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 estado.accesos.forEach { a ->
-                    // Etiqueta corta (A1..A4): los nombres completos no caben los cuatro y el ultimo
-                    // quedaba fuera de la pantalla.
+
                     Filtro(a.codigo, estado.idAcceso == a.id) { vm.onAcceso(a.id) }
                 }
             }

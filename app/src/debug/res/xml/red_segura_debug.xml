@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Solo en las compilaciones de depuración: el backend del equipo corre en el PC, sin
-     certificado y con la IP que toque ese día (red local, tailnet o el PC visto desde el
-     emulador). En release se mantiene la configuración estricta del manifiesto principal. -->
 <network-security-config>
     <base-config cleartextTrafficPermitted="true" />
 </network-security-config>

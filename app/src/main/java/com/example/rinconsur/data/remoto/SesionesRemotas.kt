@@ -3,9 +3,6 @@ package com.example.rinconsur.data.remoto
 import com.example.rinconsur.model.EstadoSesion
 import com.example.rinconsur.model.SesionResumen
 
-// Traduce lo que devuelve el servicio de medición al modelo que ya usan las pantallas.
-// El estado llega como texto ("Validada") y la app trabaja con su enum, así que la conversión
-// vive acá y no se repite en cada pantalla.
 fun SesionRemota.aResumen(): SesionResumen = SesionResumen(
     id = id?.toLong() ?: 0L,
     codigo = codigo.orEmpty(),

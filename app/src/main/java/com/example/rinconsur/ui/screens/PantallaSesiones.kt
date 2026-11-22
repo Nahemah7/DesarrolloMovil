@@ -182,7 +182,7 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit, onAbri
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Seccion(titulo)
                 Spacer(Modifier.weight(1f))
-                // De dónde salieron las sesiones: del servidor o de la copia del teléfono.
+
                 EtiquetaFuente(estado.fuente)
             }
 

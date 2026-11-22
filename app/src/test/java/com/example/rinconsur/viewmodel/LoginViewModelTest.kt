@@ -12,8 +12,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-// El login es la primera puerta de la app: si deja pasar un RUT mal escrito o la clave de otra
-// persona, todo lo que sigue queda mal atribuido.
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class LoginViewModelTest {

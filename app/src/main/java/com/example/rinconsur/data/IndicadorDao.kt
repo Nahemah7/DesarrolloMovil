@@ -68,7 +68,6 @@ internal class IndicadorDao(private val helper: FlujoDbHelper) {
             )
         }
 
-    // Personas medidas en un día: registros válidos de las sesiones finalizadas o validadas.
     fun medicionDeFecha(fecha: String): MedicionPeriodo =
         helper.readableDatabase.rawQuery(
             "SELECT COUNT(*) AS personas, COUNT(DISTINCT s.id_acceso || '#' || s.hora_inicio_prog) AS bloques, " +
@@ -78,7 +77,6 @@ internal class IndicadorDao(private val helper: FlujoDbHelper) {
             arrayOf(fecha)
         ).use { c -> leerMedicion(c) }
 
-    // Lo mismo para un tipo de día (hábiles o fin de semana), opcionalmente dentro de una semana.
     fun medicionDeTipo(tipo: String, desde: String? = null, hasta: String? = null): MedicionPeriodo =
         helper.readableDatabase.rawQuery(
             "SELECT COUNT(*) AS personas, COUNT(DISTINCT s.id_acceso || '#' || s.hora_inicio_prog) AS bloques, " +
@@ -91,7 +89,7 @@ internal class IndicadorDao(private val helper: FlujoDbHelper) {
         ).use { c -> leerMedicion(c) }
 
     private fun leerMedicion(c: android.database.Cursor): MedicionPeriodo {
-        // El agregado siempre devuelve una fila, aunque no haya registros.
+
         return if (c.moveToNext()) {
             MedicionPeriodo(
                 personas = c.entero("personas"),
@@ -177,8 +175,6 @@ internal class IndicadorDao(private val helper: FlujoDbHelper) {
         }
         return lista
     }
-
-    // ==================== reporte de jefatura ====================
 
     fun reporteJefatura(hoy: String): ReporteJefatura {
         val db = helper.readableDatabase

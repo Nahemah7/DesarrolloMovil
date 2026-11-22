@@ -5,8 +5,6 @@ import com.example.rinconsur.model.Acceso
 import com.example.rinconsur.model.BloqueCarga
 import com.example.rinconsur.model.CargaDia
 
-// Carga diaria de ingresos y boletas: once bloques, con el reparto por acceso como detalle
-// opcional. Es la única parte de la aplicación que escribe los números de la tienda.
 internal class CargaDao(private val helper: FlujoDbHelper) {
 
     fun cargaDeFecha(fecha: String): CargaDia {
@@ -29,7 +27,6 @@ internal class CargaDao(private val helper: FlujoDbHelper) {
             }
         }
 
-        // Detalle ya cargado, para poder corregirlo desde la misma pantalla.
         val detalle = mutableMapOf<Long, MutableMap<Long, String>>()
         db.rawQuery(
             "SELECT id_bloque, id_acceso, cantidad FROM conteo_ingreso " +
@@ -70,8 +67,6 @@ internal class CargaDao(private val helper: FlujoDbHelper) {
         return CargaDia(fecha = fecha, accesos = accesos, bloques = bloques)
     }
 
-    // Reemplaza la carga de la fecha. Si el bloque ya tenía datos, la fila nueva queda marcada
-    // como corrección con quién y cuándo, en vez de borrar el rastro sin dejar constancia.
     fun guardar(carga: CargaDia, idUsuario: Long, momento: String): Boolean {
         val db = helper.writableDatabase
         db.beginTransaction()

@@ -15,8 +15,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-// Edición de una cuenta desde el administrador: datos, perfil, género y estado.
-// El RUT no se toca: es con lo que la persona entra.
 class EditarPersonaViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = FlujoRepository(application)
@@ -75,7 +73,7 @@ class EditarPersonaViewModel(application: Application) : AndroidViewModel(applic
     fun guardar(): Boolean {
         val persona = original ?: return false
         val datos = _persona.value
-        // El RUT no se valida acá: viene de la cuenta creada y no se edita.
+
         val faltas = datos.errores.filterNot { it.startsWith("Revisa el RUT") }
         if (faltas.isNotEmpty()) {
             _errores.value = faltas

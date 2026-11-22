@@ -17,8 +17,6 @@ import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.Linea
 import com.example.rinconsur.ui.theme.Marino
 
-// Marca discreta de origen: cuando las cifras vienen del servidor se dice, y cuando son la copia
-// local también, para que nadie confunda datos sin sincronizar con datos reales.
 @Composable
 fun EtiquetaFuente(fuente: FuenteDatos) {
     val enLinea = fuente == FuenteDatos.EN_LINEA

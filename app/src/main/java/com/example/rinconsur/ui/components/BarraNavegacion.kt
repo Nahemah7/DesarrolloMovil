@@ -52,7 +52,6 @@ import com.example.rinconsur.ui.theme.Aqua
 import com.example.rinconsur.ui.theme.Marino
 import com.example.rinconsur.ui.theme.Superficie
 
-
 data class OpcionMenu(
     val etiqueta: String,
     val ruta: String,
@@ -73,21 +72,17 @@ fun menuDe(perfil: PerfilUsuario): List<OpcionMenu> = when (perfil) {
         OpcionMenu("Perfil", Ruta.Perfil.ruta, Icons.Outlined.Person, Icons.Filled.Person)
     )
 
-    // El administrador no mide ni opera: gestiona personas.
     PerfilUsuario.ADMINISTRADOR -> listOf(
         OpcionMenu("Colaboradores", Ruta.Colaboradores.ruta, Icons.Outlined.Person, Icons.Filled.Person),
         OpcionMenu("Perfil", Ruta.Perfil.ruta, Icons.Outlined.MoreHoriz, Icons.Filled.MoreHoriz)
     )
 
-    // La jefatura lee y decide: entra por el reporte (meta, comparación, horas punta y perfil
-    // del tránsito) y desde ahí baja a los indicadores del día.
     PerfilUsuario.JEFE_TIENDA -> listOf(
         OpcionMenu("Reporte", Ruta.Reporte.ruta, Icons.Outlined.Star, Icons.Filled.Star),
         OpcionMenu("Indicadores", Ruta.Indicadores.ruta, Icons.Outlined.BarChart, Icons.Filled.BarChart),
         OpcionMenu("Perfil", Ruta.Perfil.ruta, Icons.Outlined.Person, Icons.Filled.Person)
     )
 
-    // El subgerente carga los números del día y responde por el reporte operativo.
     PerfilUsuario.SUBGERENTE -> listOf(
         OpcionMenu("Carga", Ruta.Carga.ruta, Icons.Outlined.Edit, Icons.Filled.Edit),
         OpcionMenu("Indicadores", Ruta.Indicadores.ruta, Icons.Outlined.BarChart, Icons.Filled.BarChart),
@@ -115,8 +110,6 @@ private fun esLaActiva(opcion: OpcionMenu, rutaActual: String): Boolean {
     }
 }
 
-// Una pantalla es raíz si es una de las pestañas del perfil: así una pestaña nueva
-// no necesita acordarse de agregarse acá, que es como se colaba la flecha de retroceso.
 fun esRaiz(ruta: String, opciones: List<OpcionMenu>): Boolean =
     opciones.any { it.ruta == ruta }
 
@@ -135,7 +128,7 @@ fun BarraNavegacion(
             .then(
                 Modifier.drawBehind {
                     drawRect(Marino)
-                    // El corte diagonal del acceso se repite en la barra, mas discreto por la altura.
+
                     val ancho = size.width
                     val alto = size.height
                     val cuna = Path().apply {
