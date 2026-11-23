@@ -49,11 +49,17 @@ class SinSenalViewModel(application: Application) : AndroidViewModel(application
         }
         _mensaje.value = "Enviando los registros pendientes…"
         viewModelScope.launch {
+            val cierres = com.example.rinconsur.data.remoto.SincronizadorCierres(
+                com.example.rinconsur.data.remoto.CierresPendientes(getApplication()), tokens, direccion
+            ).enviarPendientes()
             val resultado = sincronizador.enviarPendientes()
             _porEnviar.value = porEnviar()
             _mensaje.value = when {
+                cierres > 0 && resultado.enviados == 0 && resultado.quedan == 0 ->
+                    "Se enviaron " + cierres + " cierres pendientes. Queda por validar el supervisor."
                 resultado.enviados > 0 && resultado.quedan == 0 ->
-                    "Se enviaron " + resultado.enviados + " registros. Queda por validar el supervisor."
+                    "Se enviaron " + resultado.enviados + " registros y " + cierres + " cierres. " +
+                        "Queda por validar el supervisor."
                 resultado.enviados > 0 ->
                     "Se enviaron " + resultado.enviados + " y quedan " + resultado.quedan + " en el teléfono."
                 resultado.quedan > 0 && resultado.motivo != null -> resultado.motivo

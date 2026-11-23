@@ -298,5 +298,10 @@ private fun publicarPendientesAlAbrir(contexto: android.content.Context) {
         runCatching {
             com.example.rinconsur.data.remoto.SincronizadorSesiones(repositorio, tokens, direccion).publicarPendientes()
         }
+        runCatching {
+            com.example.rinconsur.data.remoto.SincronizadorCierres(
+                com.example.rinconsur.data.remoto.CierresPendientes(contexto), tokens, direccion
+            ).enviarPendientes()
+        }
     }
 }

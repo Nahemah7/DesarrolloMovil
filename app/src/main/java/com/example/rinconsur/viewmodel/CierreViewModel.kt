@@ -22,6 +22,7 @@ class CierreViewModel(application: Application) : AndroidViewModel(application) 
     private val sesion = SesionPreferencias(application)
     private val tokens = TokenPreferencias(application)
     private val direccion = DireccionServidor(application)
+    private val cierresPendientes = com.example.rinconsur.data.remoto.CierresPendientes(application)
 
     private val idObservador = sesion.leer()
 
@@ -96,13 +97,19 @@ class CierreViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     private fun enviarCierre(idLocal: Long, hora: String) {
-        val guardado = tokens.leer() ?: return
         val idRemoto = repositorio.idRemotoDeSesion(idLocal) ?: return
+        val guardado = tokens.leer()
+        if (guardado == null) {
+            cierresPendientes.guardar(idRemoto, hora, idObservador)
+            return
+        }
         TrabajoDeFondo.alcance.launch {
             val enviado = RepositorioSesionesRemoto(direccion.leer(), guardado).cerrar(idRemoto, hora)
-            if (!enviado) {
-                _aviso.value = "Quedó cerrada en este teléfono: el servidor no respondió. " +
-                    "Vuelve a enviarla desde Sin señal."
+            if (enviado) {
+                cierresPendientes.olvidar(idRemoto)
+            } else {
+                cierresPendientes.guardar(idRemoto, hora, idObservador)
+                _aviso.value = "Quedó cerrada en este teléfono: se enviará sola cuando vuelva la conexión."
             }
         }
     }

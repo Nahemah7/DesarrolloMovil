@@ -53,8 +53,10 @@ class DetalleSesionViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
-    private fun localDe(idSesion: Long): Long =
-        repositorio.idLocalDeRemota(idSesion) ?: idSesion
+    private fun localDe(idSesion: Long): Long {
+        if (repositorio.detalleDeSesion(idSesion) != null) return idSesion
+        return repositorio.idLocalDeRemota(idSesion) ?: idSesion
+    }
 
     fun recargar(idSesion: Long) = cargar(idSesion)
 

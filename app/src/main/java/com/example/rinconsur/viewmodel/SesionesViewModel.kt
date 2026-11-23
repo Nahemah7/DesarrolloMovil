@@ -10,6 +10,7 @@ import com.example.rinconsur.data.remoto.RepositorioSesionesRemoto
 import com.example.rinconsur.data.remoto.SincronizadorSesiones
 import com.example.rinconsur.data.remoto.TokenPreferencias
 import com.example.rinconsur.model.FuenteDatos
+import com.example.rinconsur.model.SesionResumen
 import kotlinx.coroutines.launch
 import com.example.rinconsur.model.Acceso
 import com.example.rinconsur.model.Colaborador
@@ -75,6 +76,13 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
         sincronizar()
     }
 
+    private fun aLocal(lista: List<SesionResumen>): List<SesionResumen> =
+        lista.map { fila ->
+            val esRemota = fila.idRemoto != null && fila.idRemoto == fila.id
+            val local = if (esRemota) repositorio.idLocalDeRemota(fila.id) else null
+            if (local != null) fila.copy(id = local) else fila
+        }
+
     private fun sincronizar() {
         val guardado = token.leer()
         if (guardado == null) {
@@ -96,8 +104,8 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
             if (delDia == null || pendientes == null || fecha != fechaElegida) return@launch
             repositorio.espejarSesiones(delDia + pendientes)
             _uiState.value = _uiState.value.copy(
-                sesiones = delDia,
-                porValidar = pendientes,
+                sesiones = aLocal(delDia),
+                porValidar = aLocal(pendientes),
                 fuente = FuenteDatos.EN_LINEA
             )
         }
