@@ -54,6 +54,10 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
                 codigo = detalle.codigo,
                 editando = true,
                 idEditando = idSesion,
+                accesoOriginal = detalle.idAcceso,
+                observadorOriginal = detalle.idObservador,
+                inicioOriginal = detalle.horaInicioCorta,
+                finOriginal = detalle.horaFinCorta,
                 error = null
             )
         }
@@ -91,7 +95,7 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
                 "Cierra sesión y vuelve a entrar para enviarla."
         val observador = repositorio.colaboradorPorId(idObservador)
         val nombre = observador?.let { (it.nombre + " " + it.apellido).trim() }
-        viewModelScope.launch {
+        com.example.rinconsur.data.remoto.TrabajoDeFondo.alcance.launch {
             runCatching {
                 val cliente = ClienteRemoto(direccion.leer())
                 if (idEditando > 0) {

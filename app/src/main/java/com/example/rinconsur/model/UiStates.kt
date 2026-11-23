@@ -134,7 +134,11 @@ data class ProgramarUiState(
     val programada: String = "",
     val codigo: String = "",
     val editando: Boolean = false,
-    val idEditando: Long = 0L
+    val idEditando: Long = 0L,
+    val accesoOriginal: Long = 0L,
+    val observadorOriginal: Long = 0L,
+    val inicioOriginal: String = "",
+    val finOriginal: String = ""
 ) {
     val duracionMinutos: Int get() = minutos(horaFin) - minutos(horaInicio)
 
@@ -142,15 +146,18 @@ data class ProgramarUiState(
 
     val choque: SesionResumen? get() {
         if (idAcceso == null) return null
-        return sesionesDeLaFecha.firstOrNull { s ->
-            s.id != idEditando && s.idAcceso == idAcceso &&
-                seCruzan(s.horaInicioProg, s.horaFinProg, horaInicio, horaFin)
-        } ?: idObservador?.let { id ->
-            sesionesDeLaFecha.firstOrNull { s ->
-                s.id != idEditando && s.idObservador == id &&
-                    seCruzan(s.horaInicioProg, s.horaFinProg, horaInicio, horaFin)
+        val otras = sesionesDeLaFecha.filter { it.id != idEditando || idEditando == 0L }
+        fun cruce(acceso: Long?, observador: Long?, desde: String, hasta: String): SesionResumen? =
+            otras.firstOrNull { s ->
+                (s.idAcceso == acceso || (observador != null && s.idObservador == observador)) &&
+                    seCruzan(s.horaInicioProg, s.horaFinProg, desde, hasta)
             }
+        val ahora = cruce(idAcceso, idObservador, horaInicio, horaFin) ?: return null
+        if (idEditando > 0L) {
+            val antes = cruce(accesoOriginal, observadorOriginal, inicioOriginal, finOriginal)
+            if (antes != null && antes.id == ahora.id) return null
         }
+        return ahora
     }
 
     val sePuedeProgramar: Boolean
