@@ -30,10 +30,10 @@ class SesionesViewModelTest {
     }
 
     @Test
-    fun alternarSoloMias_prendeElFiltroDeMisSesiones() {
-        vm.alternarSoloMias()
+    fun buscar_enCondicionTexto_dejaLaBusquedaEscrita() {
+        vm.buscarObservador("tamara")
 
-        assertTrue(vm.uiState.value.soloMias)
+        assertEquals("tamara", vm.uiState.value.busquedaObservador)
     }
 
     @Test

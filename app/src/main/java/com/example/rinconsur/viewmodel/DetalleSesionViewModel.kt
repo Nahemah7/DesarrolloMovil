@@ -33,8 +33,28 @@ class DetalleSesionViewModel(application: Application) : AndroidViewModel(applic
     val aviso: SharedFlow<String> = _aviso.asSharedFlow()
 
     fun cargar(idSesion: Long) {
-        _detalle.value = repositorio.detalleDeSesion(idSesion)
+        val local = localDe(idSesion)
+        val encontrado = repositorio.detalleDeSesion(local)
+        _detalle.value = encontrado
+        val guardado = token.leer() ?: return
+        val idRemoto = repositorio.idRemotoDeSesion(local) ?: idSesion
+        viewModelScope.launch {
+            val remota = RepositorioSesionesRemoto(direccion.leer(), guardado).porId(idRemoto) ?: return@launch
+            val actual = _detalle.value ?: return@launch
+            _detalle.value = actual.copy(
+                sesion = actual.sesion.copy(
+                    estado = remota.estado,
+                    registrosValidos = remota.registrosValidos,
+                    inicioReal = remota.inicioReal,
+                    finReal = remota.finReal
+                ),
+                registrosValidos = remota.registrosValidos
+            )
+        }
     }
+
+    private fun localDe(idSesion: Long): Long =
+        repositorio.idLocalDeRemota(idSesion) ?: idSesion
 
     fun recargar(idSesion: Long) = cargar(idSesion)
 

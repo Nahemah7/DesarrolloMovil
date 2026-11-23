@@ -45,6 +45,19 @@ interface ApiMedicion {
         @retrofit2.http.Header("Authorization") autorizacion: String
     ): Response<List<PersonalRemoto>>
 
+    @retrofit2.http.PATCH("api/sesiones/{id}/cerrar")
+    suspend fun cerrar(
+        @retrofit2.http.Header("Authorization") autorizacion: String,
+        @Path("id") idSesion: Int,
+        @Body cuerpo: Map<String, String> = emptyMap()
+    ): Response<SesionRemota>
+
+    @GET("api/sesiones/{id}")
+    suspend fun porId(
+        @retrofit2.http.Header("Authorization") autorizacion: String,
+        @Path("id") idSesion: Int
+    ): Response<SesionRemota>
+
     @retrofit2.http.PATCH("api/sesiones/{id}")
     suspend fun editar(
         @retrofit2.http.Header("Authorization") autorizacion: String,

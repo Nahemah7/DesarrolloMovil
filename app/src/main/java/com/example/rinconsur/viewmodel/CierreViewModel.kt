@@ -4,6 +4,12 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.example.rinconsur.data.FlujoRepository
 import com.example.rinconsur.data.SesionPreferencias
+import com.example.rinconsur.data.remoto.DireccionServidor
+import com.example.rinconsur.data.remoto.RepositorioSesionesRemoto
+import com.example.rinconsur.data.remoto.TokenPreferencias
+import com.example.rinconsur.data.remoto.TrabajoDeFondo
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import com.example.rinconsur.model.ResumenSesion
 import com.example.rinconsur.model.SesionResumen
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +20,8 @@ class CierreViewModel(application: Application) : AndroidViewModel(application) 
 
     private val repositorio = FlujoRepository(application)
     private val sesion = SesionPreferencias(application)
+    private val tokens = TokenPreferencias(application)
+    private val direccion = DireccionServidor(application)
 
     private val idObservador = sesion.leer()
 
@@ -69,7 +77,8 @@ class CierreViewModel(application: Application) : AndroidViewModel(application) 
                 " y faltan " + (FlujoRepository.MINIMO_REGISTROS - registros) + ". Los datos no se pierden."
             return false
         }
-        val filas = repositorio.cerrarSesion(enCurso.id, java.time.LocalTime.now().toString().take(8))
+        val hora = java.time.LocalTime.now().toString().take(8)
+        val filas = repositorio.cerrarSesion(enCurso.id, hora)
         if (filas == 0) {
             _yaEnviada.value = true
             _aviso.value = "Esta sesión ya fue enviada a validación."
@@ -77,11 +86,24 @@ class CierreViewModel(application: Application) : AndroidViewModel(application) 
         }
         _yaEnviada.value = true
         _aviso.value = null
+        enviarCierre(enCurso.id, hora)
         return true
     }
 
     override fun onCleared() {
         repositorio.cerrar()
         super.onCleared()
+    }
+
+    private fun enviarCierre(idLocal: Long, hora: String) {
+        val guardado = tokens.leer() ?: return
+        val idRemoto = repositorio.idRemotoDeSesion(idLocal) ?: return
+        TrabajoDeFondo.alcance.launch {
+            val enviado = RepositorioSesionesRemoto(direccion.leer(), guardado).cerrar(idRemoto, hora)
+            if (!enviado) {
+                _aviso.value = "Quedó cerrada en este teléfono: el servidor no respondió. " +
+                    "Vuelve a enviarla desde Sin señal."
+            }
+        }
     }
 }

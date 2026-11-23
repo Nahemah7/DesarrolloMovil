@@ -217,6 +217,12 @@ internal class SesionDao(private val helper: FlujoDbHelper) {
         }
     }
 
+    fun idLocalDeRemota(idRemoto: Long): Long? =
+        helper.readableDatabase.rawQuery(
+            "SELECT id_sesion FROM sesion_observacion WHERE id_remoto = ? LIMIT 1",
+            arrayOf(idRemoto.toString())
+        ).use { if (it.moveToFirst()) it.getLong(0) else null }
+
     fun idRemotoDe(idLocal: Long): Long? =
         helper.readableDatabase.rawQuery(
             "SELECT id_remoto FROM sesion_observacion WHERE id_sesion = ?", arrayOf(idLocal.toString())

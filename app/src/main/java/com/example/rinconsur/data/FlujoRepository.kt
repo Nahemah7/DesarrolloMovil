@@ -148,9 +148,14 @@ class FlujoRepository(context: Context) {
     fun actualizarSesionProgramada(idLocal: Long, idAcceso: Long, inicio: String, fin: String, idObservador: Long): Int =
         sesionDao.actualizarProgramada(idLocal, idAcceso, inicio, fin, idObservador)
 
+    fun pendientesDeSesion(idSesion: Long): Int =
+        colaDao.contarPendientesDeSesion(idSesion)
+
     fun rendimientoDelPersonal(): List<PersonalRendimiento> = indicadorDao.rendimientoPersonal()
 
     fun rendimientoDeLosSupervisores(): List<RendimientoSupervisor> = indicadorDao.rendimientoSupervisores()
+
+    fun idLocalDeRemota(idRemoto: Long): Long? = sesionDao.idLocalDeRemota(idRemoto)
 
     fun idRemotoDeSesion(idLocal: Long): Long? = sesionDao.idRemotoDe(idLocal)
 

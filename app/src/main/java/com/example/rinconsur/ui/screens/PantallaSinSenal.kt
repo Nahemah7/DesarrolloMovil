@@ -86,7 +86,11 @@ fun PantallaSinSenal(onVolver: () -> Unit) {
                                     color = Apagado
                                 )
                             }
-                            EtiquetaEstado("Por enviar", "info")
+                            val pendientes = vm.pendientesDe(sesion.id)
+                            EtiquetaEstado(
+                                texto = if (pendientes > 0) "Por enviar (" + pendientes + ")" else "Enviada",
+                                tipo = if (pendientes > 0) "info" else "ok"
+                            )
                         }
                     }
                 }

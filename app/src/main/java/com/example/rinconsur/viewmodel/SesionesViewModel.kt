@@ -53,16 +53,21 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
     fun recargar() {
         val pendientes = repositorio.bloquesPendientes(fechaElegida)
         val anterior = _uiState.value
+        val haySesion = token.leer() != null
         _uiState.value = SesionesUiState(
-            sesiones = repositorio.sesionesDeFecha(fechaElegida),
-            porValidar = repositorio.sesionesPorValidar(),
+            sesiones = when {
+                !haySesion -> repositorio.sesionesDeFecha(fechaElegida)
+                anterior.fecha == fechaElegida -> anterior.sesiones
+                else -> emptyList()
+            },
+            porValidar = if (haySesion) anterior.porValidar else repositorio.sesionesPorValidar(),
+            fuente = if (haySesion) anterior.fuente else FuenteDatos.LOCAL,
             deLaSemana = repositorio.sesionesDeLosUltimosDias(fechaElegida, 7),
             bloquesPendientes = pendientes.size,
             pendienteMasAtrasado = pendientes.firstOrNull() ?: "",
             filtro = anterior.filtro,
             idAcceso = anterior.idAcceso,
             busquedaObservador = anterior.busquedaObservador,
-            soloMias = anterior.soloMias,
             miId = idRevisor,
             fecha = fechaElegida,
             fechaLarga = fechaLarga(fechaElegida)
@@ -137,12 +142,9 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
         _uiState.value = _uiState.value.copy(busquedaObservador = texto)
     }
 
-    fun alternarSoloMias() {
-        _uiState.value = _uiState.value.copy(soloMias = !_uiState.value.soloMias)
-    }
 
     fun limpiarFiltros() {
-        _uiState.value = _uiState.value.copy(idAcceso = null, busquedaObservador = "", soloMias = false)
+        _uiState.value = _uiState.value.copy(idAcceso = null, busquedaObservador = "")
     }
 
     fun validar(idSesion: Long, codigo: String) {

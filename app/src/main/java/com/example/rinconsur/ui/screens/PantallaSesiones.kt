@@ -153,7 +153,6 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit, onAbri
                 }
                 Spacer(Modifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Filtro(texto = "Solo las mías", activo = estado.soloMias, onClick = vm::alternarSoloMias)
                     if (estado.hayFiltrosActivos) {
                         TextButton(onClick = vm::limpiarFiltros) {
                             Text("Limpiar", style = MaterialTheme.typography.labelMedium, color = Apagado)

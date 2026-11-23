@@ -19,6 +19,12 @@ internal class ColaDao(private val helper: FlujoDbHelper) {
         return lista
     }
 
+    fun contarPendientesDeSesion(idSesion: Long): Int =
+        helper.readableDatabase.rawQuery(
+            "SELECT COUNT(*) FROM registro_observacion WHERE id_sesion = ? AND enviado = 0",
+            arrayOf(idSesion.toString())
+        ).use { if (it.moveToFirst()) it.getInt(0) else 0 }
+
     fun contarPendientes(): Int =
         helper.readableDatabase.rawQuery(
             "SELECT COUNT(*) FROM registro_observacion WHERE enviado = 0 AND anulado = 0", arrayOf()

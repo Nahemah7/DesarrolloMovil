@@ -47,8 +47,22 @@ class RepositorioSesionesRemoto(
         false
     }
 
+    suspend fun porId(idSesionRemota: Long): SesionResumen? = try {
+        val respuesta = cliente.medicion.porId(autorizacion, idSesionRemota.toInt())
+        if (respuesta.isSuccessful) respuesta.body()?.aResumen() else null
+    } catch (e: Exception) {
+        null
+    }
+
     suspend fun iniciar(idSesionRemota: Long): Boolean = try {
         val respuesta = cliente.medicion.iniciar(autorizacion, idSesionRemota.toInt())
+        respuesta.isSuccessful || respuesta.code() == 409
+    } catch (e: Exception) {
+        false
+    }
+
+    suspend fun cerrar(idSesionRemota: Long, hora: String): Boolean = try {
+        val respuesta = cliente.medicion.cerrar(autorizacion, idSesionRemota.toInt(), mapOf("hora" to hora))
         respuesta.isSuccessful || respuesta.code() == 409
     } catch (e: Exception) {
         false
