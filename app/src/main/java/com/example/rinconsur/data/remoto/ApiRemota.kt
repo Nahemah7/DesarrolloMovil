@@ -10,6 +10,9 @@ interface ApiAutenticacion {
 
     @POST("api/auth/login")
     suspend fun entrar(@Body peticion: PeticionLogin): Response<RespuestaLogin>
+
+    @GET("api/auth/preguntas")
+    suspend fun preguntas(): Response<List<String>>
 }
 
 interface ApiCatalogos {

@@ -29,6 +29,7 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
     private val sesion = SesionPreferencias(application)
     private val token = TokenPreferencias(application)
     private val direccion = DireccionServidor(application)
+    private val reloj = com.example.rinconsur.data.remoto.RelojDelServidor(application)
 
     private var fechaElegida: String = repositorio.fechaHoy()
 
@@ -65,6 +66,7 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
             fuente = if (haySesion) anterior.fuente else FuenteDatos.LOCAL,
             deLaSemana = repositorio.sesionesDeLosUltimosDias(fechaElegida, 7),
             abiertas = repositorio.sesionesAbiertasAntesDe(fechaElegida, repositorio.horaHaceHoras(2)),
+            desfaseReloj = reloj.medir(),
             bloquesPendientes = pendientes.size,
             pendienteMasAtrasado = pendientes.firstOrNull() ?: "",
             filtro = anterior.filtro,

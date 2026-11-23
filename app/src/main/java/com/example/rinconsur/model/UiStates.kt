@@ -39,6 +39,7 @@ data class SesionesUiState(
     val bloquesPendientes: Int = 0,
     val pendienteMasAtrasado: String = "",
     val abiertas: List<SesionResumen> = emptyList(),
+    val desfaseReloj: Int = 0,
     val filtro: String = "Por validar",
     val idAcceso: Long? = null,
     val busquedaObservador: String = "",

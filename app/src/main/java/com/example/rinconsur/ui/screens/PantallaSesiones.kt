@@ -66,6 +66,12 @@ import com.example.rinconsur.ui.theme.Fondo
 import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.SesionesViewModel
 
+private fun textoDesfase(minutos: Int): String {
+    val absoluto = kotlin.math.abs(minutos)
+    val cuanto = if (absoluto < 60) absoluto.toString() + " min" else (absoluto / 60).toString() + " h"
+    return if (minutos > 0) cuanto + " adelantada" else cuanto + " atrasada"
+}
+
 private fun tiempoAbierta(fecha: String, inicioReal: String): String {
     val formato = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US)
     val texto = if (inicioReal.length > 8) inicioReal else fecha + " " + inicioReal
@@ -123,6 +129,24 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit, onAbri
 
             if (estado.fuente != FuenteDatos.EN_LINEA) {
                 EtiquetaFuente(estado.fuente)
+            }
+
+            if (kotlin.math.abs(estado.desfaseReloj) >= 10) {
+                Spacer(Modifier.height(8.dp))
+                TarjetaSeccion {
+                    Text(
+                        text = "Reloj del teléfono",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Apagado
+                    )
+                    Text(
+                        text = "La hora del equipo va " + textoDesfase(estado.desfaseReloj) +
+                            " respecto a la hora de la tienda. Las sesiones se guardan con la hora de la tienda.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Tinta
+                    )
+                }
             }
 
             if (estado.abiertas.isNotEmpty()) {
