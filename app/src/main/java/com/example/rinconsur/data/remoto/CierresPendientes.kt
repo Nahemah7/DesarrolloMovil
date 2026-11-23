@@ -8,7 +8,7 @@ class CierresPendientes(contexto: Context) {
 
     fun guardar(idRemoto: Long, hora: String, idUsuario: Long) {
         val actuales = leer().toMutableMap()
-        actuales[idRemoto] = hora + "|" + idUsuario
+        actuales[idRemoto] = hora + SEPARADOR + idUsuario
         prefs.edit().putString(CLAVE, escribir(actuales)).apply()
     }
 
@@ -22,9 +22,9 @@ class CierresPendientes(contexto: Context) {
     fun leer(): Map<Long, String> {
         val crudo = prefs.getString(CLAVE, "").orEmpty()
         if (crudo.isBlank()) return emptyMap()
-        return crudo.split(";")
+        return crudo.split(FIN)
             .mapNotNull { trozo ->
-                val partes = trozo.split(":")
+                val partes = trozo.split(SEPARADOR)
                 val id = partes.getOrNull(0)?.toLongOrNull() ?: return@mapNotNull null
                 id to partes.getOrNull(1).orEmpty()
             }
@@ -34,9 +34,11 @@ class CierresPendientes(contexto: Context) {
     fun cantidad(): Int = leer().size
 
     private fun escribir(mapa: Map<Long, String>): String =
-        mapa.entries.joinToString(";") { it.key.toString() + ":" + it.value }
+        mapa.entries.joinToString(FIN) { it.key.toString() + SEPARADOR + it.value }
 
     private companion object {
         const val CLAVE = "cierres"
+        const val FIN = ";"
+        const val SEPARADOR = "|"
     }
 }
