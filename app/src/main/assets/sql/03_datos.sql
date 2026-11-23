@@ -9,11 +9,11 @@ INSERT INTO rol (id_rol, codigo, nombre, descripcion) VALUES
 INSERT INTO usuario (id_usuario, id_rol, rut, nombres, apellido_paterno, apellido_materno, genero, cargo, correo, telefono, password_hash, activo) VALUES
   (1, 1, '15.234.871-1', 'Carolina', 'Fuentes', 'Araya', 'F', 'Jefa de tienda', 'carolina.fuentes@rinconsur-ficticio.ejemplo', '+56 9 0000 0011', '$2a$10$semilla.demo.no.usar.en.produccion', 1),
   (2, 2, '13.987.442-0', 'Rodrigo', 'Saavedra', 'Munoz', 'M', 'Subgerente comercial', 'rodrigo.saavedra@rinconsur-ficticio.ejemplo', '+56 9 0000 0012', '$2a$10$semilla.demo.no.usar.en.produccion', 1),
-  (3, 3, '17.654.320-5', 'Daniela', 'Pizarro', 'Toro', 'F', 'Supervisora de piso (turno manana)', 'daniela.pizarro@rinconsur-ficticio.ejemplo', '+56 9 0000 0013', '$2a$10$semilla.demo.no.usar.en.produccion', 1),
-  (4, 3, '16.443.019-7', 'Matias', 'Contreras', 'Vidal', 'M', 'Supervisor de piso (turno tarde)', 'matias.contreras@rinconsur-ficticio.ejemplo', '+56 9 0000 0014', '$2a$10$semilla.demo.no.usar.en.produccion', 1),
-  (5, 4, '19.876.345-4', 'Tamara', 'Rojas', 'Espinoza', 'F', 'Vendedora, Vestuario Mujer', 'tamara.rojas@rinconsur-ficticio.ejemplo', '+56 9 0000 0015', '$2a$10$semilla.demo.no.usar.en.produccion', 1),
-  (6, 4, '20.145.678-9', 'Felipe', 'Ibarra', 'Soto', 'M', 'Vendedor, Hogar y Deco', 'felipe.ibarra@rinconsur-ficticio.ejemplo', '+56 9 0000 0016', '$2a$10$semilla.demo.no.usar.en.produccion', 1),
-  (7, 4, '18.322.904-4', 'Javiera', 'Morales', 'Caceres', 'F', 'Cajera, Cajas Centrales', 'javiera.morales@rinconsur-ficticio.ejemplo', '+56 9 0000 0017', '$2a$10$semilla.demo.no.usar.en.produccion', 1),
+  (3, 3, '17.654.320-5', 'Daniela', 'Pizarro', 'Toro', 'F', 'Supervisora de piso', 'daniela.pizarro@rinconsur-ficticio.ejemplo', '+56 9 0000 0013', '$2a$10$semilla.demo.no.usar.en.produccion', 1),
+  (4, 3, '16.443.019-7', 'Matias', 'Contreras', 'Vidal', 'M', 'Supervisor de piso', 'matias.contreras@rinconsur-ficticio.ejemplo', '+56 9 0000 0014', '$2a$10$semilla.demo.no.usar.en.produccion', 1),
+  (5, 4, '19.876.345-4', 'Tamara', 'Rojas', 'Espinoza', 'F', 'Colaboradora observadora', 'tamara.rojas@rinconsur-ficticio.ejemplo', '+56 9 0000 0015', '$2a$10$semilla.demo.no.usar.en.produccion', 1),
+  (6, 4, '20.145.678-9', 'Felipe', 'Ibarra', 'Soto', 'M', 'Colaborador observador', 'felipe.ibarra@rinconsur-ficticio.ejemplo', '+56 9 0000 0016', '$2a$10$semilla.demo.no.usar.en.produccion', 1),
+  (7, 4, '18.322.904-4', 'Javiera', 'Morales', 'Caceres', 'F', 'Colaboradora observadora', 'javiera.morales@rinconsur-ficticio.ejemplo', '+56 9 0000 0017', '$2a$10$semilla.demo.no.usar.en.produccion', 1),
   (8, 5, '20.543.219-1', 'Paula', 'Contreras', 'Silva', 'F', 'Administradora', 'paula.contreras@rinconsur-ficticio.ejemplo', '+56 9 0000 0018', '$2a$10$semilla.demo.no.usar.en.produccion', 1);;
 
 INSERT INTO acceso (id_acceso, codigo, nombre, ubicacion, observacion) VALUES

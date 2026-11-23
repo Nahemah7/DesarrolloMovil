@@ -147,7 +147,7 @@ fun PantallaProgramar(
                 }
                 Column(Modifier.heightIn(max = 280.dp).verticalScroll(rememberScrollState())) {
                     visibles.forEach { o ->
-                        FilaObservador(o.nombre, o.cargo, estado.idObservador == o.id) { vm.onObservador(o.id) }
+                        FilaObservador(o.nombre, estado.idObservador == o.id) { vm.onObservador(o.id) }
                     }
                     if (visibles.isEmpty()) {
                         Nota("No hay colaboradores que coincidan con la búsqueda.")
@@ -264,7 +264,6 @@ private fun BloqueHora(
 @Composable
 private fun FilaObservador(
     nombre: String,
-    cargo: String,
     elegido: Boolean,
     onElegir: () -> Unit
 ) {
@@ -284,7 +283,6 @@ private fun FilaObservador(
                 fontWeight = if (elegido) FontWeight.Bold else FontWeight.Normal,
                 color = Tinta
             )
-            Text(cargo, style = MaterialTheme.typography.bodySmall, color = Apagado)
         }
         Box(
             Modifier
