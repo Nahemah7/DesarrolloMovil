@@ -184,6 +184,21 @@ internal class SesionDao(private val helper: FlujoDbHelper) {
                     }
                 }
             }
+            val fechas = sesiones.map { it.fecha }.filter { it.isNotEmpty() }.distinct()
+            val ids = sesiones.mapNotNull { it.idRemoto }
+            if (fechas.isNotEmpty() && ids.isNotEmpty()) {
+                val marcas = fechas.joinToString(",") { "?" }
+                val lista = ids.joinToString(",")
+                val filtro = "id_remoto IS NOT NULL AND id_remoto NOT IN (" + lista + ") " +
+                    "AND fecha IN (" + marcas + ") AND id_sesion NOT IN (" +
+                    "SELECT r.id_sesion FROM registro_observacion r " +
+                    "WHERE r.enviado = 0 AND r.id_sesion IS NOT NULL)"
+                runCatching {
+                    db.execSQL("DELETE FROM registro_observacion WHERE id_sesion IN " +
+                        "(SELECT id_sesion FROM sesion_observacion WHERE " + filtro + ")", fechas.toTypedArray<Any>())
+                    db.execSQL("DELETE FROM sesion_observacion WHERE " + filtro, fechas.toTypedArray<Any>())
+                }
+            }
             db.setTransactionSuccessful()
         } finally {
             db.endTransaction()

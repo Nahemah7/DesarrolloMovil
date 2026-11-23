@@ -13,10 +13,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 
 class RechazarViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = FlujoRepository(application)
+    private val tokens = com.example.rinconsur.data.remoto.TokenPreferencias(application)
+    private val direccion = com.example.rinconsur.data.remoto.DireccionServidor(application)
     private val catalogoMotivos: List<MotivoRechazo> = MotivoRechazo.entries
 
     private val _uiState = MutableStateFlow(RechazarUiState())
@@ -34,6 +38,18 @@ class RechazarViewModel(application: Application) : AndroidViewModel(application
             registros = sesion.registrosValidos,
             pctTransito = sesion.pctTransito
         )
+        val idRemoto = repositorio.idRemotoDeSesion(idSesion) ?: return
+        val guardado = tokens.leer() ?: return
+        viewModelScope.launch {
+            val delServicio = com.example.rinconsur.data.remoto.RepositorioSesionesRemoto(direccion.leer(), guardado)
+                .porId(idRemoto) ?: return@launch
+            _uiState.update {
+                it.copy(
+                    registros = if (delServicio.registrosValidos > 0) delServicio.registrosValidos else it.registros,
+                    pctTransito = delServicio.pctTransito ?: it.pctTransito
+                )
+            }
+        }
     }
 
     fun onMotivo(motivo: MotivoRechazo) {
@@ -70,6 +86,15 @@ class RechazarViewModel(application: Application) : AndroidViewModel(application
         }
 
         repositorio.revisarSesion(idSesion, EstadoSesion.RECHAZADA, idRevisor, motivo)
+        val idRemoto = repositorio.idRemotoDeSesion(idSesion)
+        val guardado = tokens.leer()
+        if (idRemoto != null && guardado != null) {
+            com.example.rinconsur.data.remoto.TrabajoDeFondo.alcance.launch {
+                repositorio.cerrar()
+                com.example.rinconsur.data.remoto.RepositorioSesionesRemoto(direccion.leer(), guardado)
+                    .rechazar(idRemoto, motivo)
+            }
+        }
         _uiState.update { it.copy(rechazada = true) }
         return true
     }

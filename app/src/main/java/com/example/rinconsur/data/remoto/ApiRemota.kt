@@ -90,6 +90,13 @@ interface ApiMedicion {
         @Body cuerpo: Map<String, String> = emptyMap()
     ): Response<SesionRemota>
 
+    @retrofit2.http.PATCH("api/sesiones/{id}/rechazar")
+    suspend fun rechazar(
+        @retrofit2.http.Header("Authorization") autorizacion: String,
+        @Path("id") idSesion: Int,
+        @Body cuerpo: Map<String, String>
+    ): Response<SesionRemota>
+
     @GET("api/indicadores/reporte/{fecha}")
     suspend fun reporte(
         @retrofit2.http.Header("Authorization") autorizacion: String,

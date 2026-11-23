@@ -68,6 +68,13 @@ class RepositorioSesionesRemoto(
         false
     }
 
+    suspend fun rechazar(idSesion: Long, motivo: String): Boolean = try {
+        val respuesta = cliente.medicion.rechazar(autorizacion, idSesion.toInt(), mapOf("motivo" to motivo, "detalle" to ""))
+        respuesta.isSuccessful || respuesta.code() == 409
+    } catch (e: Exception) {
+        false
+    }
+
     suspend fun validar(idSesion: Long): Boolean = try {
         val respuesta = cliente.medicion.validar(autorizacion, idSesion.toInt())
         respuesta.isSuccessful
