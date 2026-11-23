@@ -98,7 +98,10 @@ class MiSesionViewModel(application: Application) : AndroidViewModel(application
                 val remotas = RepositorioSesionesRemoto(direccion.leer(), guardado).sesionesDeFecha(fecha)
                     ?: return@launch
                 repositorio.espejarSesiones(remotas)
-                val propias = remotas.filter { it.idObservador == id }
+                val propias = remotas.filter { it.idObservador == id }.map { remota ->
+                    val local = repositorio.idLocalDeRemota(remota.id)
+                    if (local != null) remota.copy(id = local) else remota
+                }
                 val elegida = propias.firstOrNull { it.estado == EstadoSesion.EN_CURSO }
                     ?: propias.firstOrNull { it.estado == EstadoSesion.PROGRAMADA }
                     ?: propias.firstOrNull { it.estado == EstadoSesion.FINALIZADA }
