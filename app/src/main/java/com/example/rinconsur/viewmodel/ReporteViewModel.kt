@@ -18,6 +18,7 @@ import com.example.rinconsur.model.GrupoConteo
 import com.example.rinconsur.model.HoraPunta
 import com.example.rinconsur.model.MetaDelMes
 import com.example.rinconsur.model.RangoEtario
+import com.example.rinconsur.model.PersonalRendimiento
 import com.example.rinconsur.model.ReporteJefatura
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -39,6 +40,9 @@ class ReporteViewModel(application: Application) : AndroidViewModel(application)
     private val _reporte = MutableStateFlow<ReporteJefatura?>(null)
     val reporte: StateFlow<ReporteJefatura?> = _reporte.asStateFlow()
 
+    private val _personal = MutableStateFlow<List<PersonalRendimiento>>(emptyList())
+    val personal: StateFlow<List<PersonalRendimiento>> = _personal.asStateFlow()
+
     private val _fuente = MutableStateFlow(FuenteDatos.LOCAL)
     val fuente: StateFlow<FuenteDatos> = _fuente.asStateFlow()
 
@@ -50,6 +54,7 @@ class ReporteViewModel(application: Application) : AndroidViewModel(application)
 
     fun cargar() {
         _reporte.value = repositorio.reporteJefatura()
+        _personal.value = repositorio.rendimientoDelPersonal()
         cargarDelServicio()
     }
 
@@ -57,7 +62,9 @@ class ReporteViewModel(application: Application) : AndroidViewModel(application)
         val token = tokens.leer() ?: return
         TrabajoDeFondo.alcance.launch {
             val fecha = repositorio.fechaHoy()
-            val remoto = RepositorioIndicadoresRemoto(direccion.leer(), token).reporte(fecha) ?: return@launch
+            val cliente = RepositorioIndicadoresRemoto(direccion.leer(), token)
+            cliente.personal()?.let { _personal.value = it }
+            val remoto = cliente.reporte(fecha) ?: return@launch
             _reporte.value = remoto.aReporteJefatura(repositorio.bloques())
             _fuente.value = FuenteDatos.EN_LINEA
         }

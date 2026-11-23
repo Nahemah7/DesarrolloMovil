@@ -58,6 +58,12 @@ data class CargaDia(
                 if (bloque.boletas.isNotBlank() && bloque.boletasNumero == null) {
                     add(bloque.hora + ": las boletas tienen que ser un número.")
                 }
+                if (bloque.conIngresos && !bloque.conBoletas) {
+                    add(bloque.hora + ": falta el número de boletas del bloque.")
+                }
+                if (bloque.conBoletas && !bloque.conIngresos) {
+                    add(bloque.hora + ": falta el total de ingresos del bloque.")
+                }
                 if (bloque.detallado && !bloque.detalleCuadra) {
                     add(bloque.hora + ": el reparto por acceso suma " + bloque.sumaDetalle +
                         " y el total del bloque es " + (bloque.ingresosNumero ?: 0) + ".")

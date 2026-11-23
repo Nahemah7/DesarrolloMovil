@@ -91,3 +91,18 @@ LEFT JOIN (SELECT s.id_acceso, CAST(strftime('%H', s.hora_inicio_prog) AS INTEGE
 WHERE NOT EXISTS (SELECT 1 FROM sesion_observacion s2 JOIN estado_sesion e2 ON e2.id_estado = s2.id_estado
                   WHERE s2.id_acceso = ci.id_acceso AND s2.fecha = ci.fecha
                     AND CAST(strftime('%H', s2.hora_inicio_prog) AS INTEGER) = CAST(strftime('%H', bh.hora_inicio) AS INTEGER) AND e2.nombre = 'Validada');;
+
+CREATE VIEW v_rendimiento_personal AS
+SELECT u.id_usuario,
+       u.nombres || ' ' || u.apellido_paterno AS observador,
+       COUNT(DISTINCT s.id_sesion) AS sesiones,
+       COUNT(DISTINCT CASE WHEN s.id_estado IN (3, 4) THEN s.id_sesion END) AS cerradas,
+       COUNT(DISTINCT CASE WHEN s.id_estado = 4 THEN s.id_sesion END) AS validadas,
+       COUNT(DISTINCT CASE WHEN s.id_estado = 5 THEN s.id_sesion END) AS rechazadas,
+       COALESCE(SUM(CASE WHEN r.anulado = 0 THEN 1 ELSE 0 END), 0) AS registros,
+       COALESCE(SUM(CASE WHEN r.anulado = 0 AND r.id_clasificacion = 1 THEN 1 ELSE 0 END), 0) AS transito,
+       MAX(s.fecha) AS ultima_fecha
+FROM sesion_observacion s
+JOIN usuario u ON u.id_usuario = s.id_observador
+LEFT JOIN registro_observacion r ON r.id_sesion = s.id_sesion
+GROUP BY u.id_usuario, u.nombres, u.apellido_paterno

@@ -68,6 +68,7 @@ fun PantallaReporte() {
     val vm: ReporteViewModel = viewModel()
     val reporte by vm.reporte.collectAsStateWithLifecycle()
     val fuente by vm.fuente.collectAsStateWithLifecycle()
+    val personal by vm.personal.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) { vm.cargar() }
     val ciclo = LocalLifecycleOwner.current
@@ -209,6 +210,48 @@ fun PantallaReporte() {
                 }
             }
 
+            if (personal.isNotEmpty()) {
+                Seccion("Rendimiento del personal")
+                TarjetaSeccion {
+                    personal.forEachIndexed { indice, persona ->
+                        if (indice > 0) {
+                            Spacer(Modifier.height(10.dp))
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                Text(
+                                    persona.observador,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Tinta
+                                )
+                                Text(
+                                    plural(persona.sesiones, "sesión", "sesiones") + " · " +
+                                        plural(persona.registros, "registro", "registros"),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Apagado
+                                )
+                            }
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    persona.pctTransitoTexto,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Tinta
+                                )
+                                Text(
+                                    plural(persona.validadas, "validada", "validadas") +
+                                        if (persona.rechazadas > 0)
+                                            " · " + plural(persona.rechazadas, "rechazada", "rechazadas") else "",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Apagado
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
             Seccion("Perfil del tránsito")
             TarjetaSeccion {
                 val total = r.porRango.sumOf { it.cantidad }
@@ -290,3 +333,6 @@ private fun nombreCorto(mes: String): String {
     val indice = (mes.split("-").getOrNull(1)?.toIntOrNull() ?: 1) - 1
     return nombres.getOrNull(indice) ?: mes
 }
+
+private fun plural(cantidad: Int, singular: String, plural: String): String =
+    cantidad.toString() + " " + if (cantidad == 1) singular else plural

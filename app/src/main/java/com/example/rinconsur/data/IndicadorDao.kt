@@ -1,6 +1,7 @@
 package com.example.rinconsur.data
 
 import android.content.ContentValues
+import com.example.rinconsur.model.PersonalRendimiento
 import com.example.rinconsur.model.ConversionMes
 import com.example.rinconsur.model.GrupoConteo
 import com.example.rinconsur.model.HoraPunta
@@ -287,4 +288,28 @@ internal class IndicadorDao(private val helper: FlujoDbHelper) {
             "meta_conversion", null, valores, android.database.sqlite.SQLiteDatabase.CONFLICT_REPLACE
         ) > 0
     }
+
+    fun rendimientoPersonal(): List<PersonalRendimiento> =
+        helper.readableDatabase.rawQuery(
+            "SELECT * FROM v_rendimiento_personal ORDER BY registros DESC, observador",
+            null
+        ).use { c ->
+            val filas = mutableListOf<PersonalRendimiento>()
+            while (c.moveToNext()) {
+                filas.add(
+                    PersonalRendimiento(
+                        idObservador = c.long("id_usuario"),
+                        observador = c.texto("observador"),
+                        sesiones = c.entero("sesiones"),
+                        cerradas = c.entero("cerradas"),
+                        validadas = c.entero("validadas"),
+                        rechazadas = c.entero("rechazadas"),
+                        registros = c.entero("registros"),
+                        transito = c.entero("transito"),
+                        ultimaFecha = c.texto("ultima_fecha")
+                    )
+                )
+            }
+            filas
+        }
 }

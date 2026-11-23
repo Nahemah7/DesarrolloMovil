@@ -7,6 +7,7 @@ import com.example.rinconsur.model.GrupoConteo
 import com.example.rinconsur.model.HoraPunta
 import com.example.rinconsur.model.MetaDelMes
 import com.example.rinconsur.model.RangoEtario
+import com.example.rinconsur.model.PersonalRendimiento
 import com.example.rinconsur.model.ReporteJefatura
 
 fun ReporteRemoto.aReporteJefatura(bloques: List<BloqueHorario>): ReporteJefatura {
@@ -45,3 +46,15 @@ fun ReporteRemoto.aReporteJefatura(bloques: List<BloqueHorario>): ReporteJefatur
         }
     )
 }
+
+fun PersonalRemoto.aRendimiento(): PersonalRendimiento = PersonalRendimiento(
+    idObservador = idObservador?.toLong() ?: 0L,
+    observador = observador.orEmpty(),
+    sesiones = (sesiones ?: 0L).toInt(),
+    cerradas = (cerradas ?: 0L).toInt(),
+    validadas = (validadas ?: 0L).toInt(),
+    rechazadas = (rechazadas ?: 0L).toInt(),
+    registros = (registros ?: 0L).toInt(),
+    transito = (transito ?: 0L).toInt(),
+    ultimaFecha = ultimaFecha
+)

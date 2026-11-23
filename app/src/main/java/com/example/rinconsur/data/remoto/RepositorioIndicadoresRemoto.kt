@@ -1,5 +1,6 @@
 package com.example.rinconsur.data.remoto
 
+import com.example.rinconsur.model.PersonalRendimiento
 import com.example.rinconsur.model.IndicadoresDia
 import com.example.rinconsur.model.OrigenTransito
 import com.example.rinconsur.model.TransitoPorAcceso
@@ -81,5 +82,12 @@ class RepositorioIndicadoresRemoto(
         (java.time.temporal.ChronoUnit.DAYS.between(a, b) + 1).toInt()
     } catch (e: Exception) {
         1
+    }
+
+    suspend fun personal(): List<PersonalRendimiento>? = try {
+        val respuesta = cliente.medicion.personal(autorizacion)
+        if (respuesta.isSuccessful) respuesta.body()?.map { it.aRendimiento() } else null
+    } catch (e: Exception) {
+        null
     }
 }
