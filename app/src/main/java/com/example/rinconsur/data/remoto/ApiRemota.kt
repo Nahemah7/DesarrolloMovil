@@ -12,7 +12,7 @@ interface ApiAutenticacion {
     suspend fun entrar(@Body peticion: PeticionLogin): Response<RespuestaLogin>
 
     @GET("api/auth/preguntas")
-    suspend fun preguntas(): Response<List<String>>
+    suspend fun preguntas(): Response<okhttp3.ResponseBody>
 }
 
 interface ApiCatalogos {

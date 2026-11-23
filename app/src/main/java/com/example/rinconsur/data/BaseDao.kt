@@ -5,11 +5,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-internal fun ahora(): String {
-    val formato = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US)
-    formato.timeZone = java.util.TimeZone.getTimeZone("America/Santiago")
-    return formato.format(java.util.Date())
-}
+internal fun ahora(): String = FechaTienda.ahora()
 
 internal fun Cursor.texto(columna: String): String = getString(getColumnIndexOrThrow(columna)) ?: ""
 

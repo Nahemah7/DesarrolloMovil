@@ -36,7 +36,7 @@ data class SesionResumen(
 
     fun horasEsperando(ahora: Long = System.currentTimeMillis()): Long? {
         val marca = finReal ?: return null
-        val formato = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US)
+        val formato = com.example.rinconsur.data.FechaTienda.formato("yyyy-MM-dd HH:mm:ss")
         val cuando = runCatching { formato.parse(marca) }.getOrNull() ?: return null
         val horas = (ahora - cuando.time) / 3_600_000L
         return if (horas < 0) 0 else horas

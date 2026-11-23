@@ -41,8 +41,7 @@ internal class CatalogoDao(private val helper: FlujoDbHelper) {
 
     fun listarCompanias(): List<Compania> = Compania.entries
 
-    fun fechaHoy(): String =
-        java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
+    fun fechaHoy(): String = FechaTienda.hoy()
 
     fun fechaDeTrabajo(): String =
         helper.readableDatabase.rawQuery("SELECT MAX(fecha) AS fecha FROM conteo_ingreso", null).use { c ->

@@ -48,6 +48,7 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
     val observadores: List<Colaborador> = repositorio.observadores()
 
     init {
+        reloj.aplicar()
         recargar()
         sincronizar()
     }
@@ -66,7 +67,7 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
             fuente = if (haySesion) anterior.fuente else FuenteDatos.LOCAL,
             deLaSemana = repositorio.sesionesDeLosUltimosDias(fechaElegida, 7),
             abiertas = repositorio.sesionesAbiertasAntesDe(fechaElegida, repositorio.horaHaceHoras(2)),
-            desfaseReloj = reloj.medir(),
+            desfaseReloj = reloj.desfaseMinutos(),
             bloquesPendientes = pendientes.size,
             pendienteMasAtrasado = pendientes.firstOrNull() ?: "",
             filtro = anterior.filtro,
@@ -94,6 +95,7 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
         }
         val fecha = fechaElegida
         viewModelScope.launch {
+            val desfase = reloj.sincronizar(direccion.leer())
             val publicadas = SincronizadorSesiones(repositorio, token, direccion).publicarPendientes()
             if (publicadas > 0) {
                 _uiState.value = _uiState.value.copy(
@@ -111,6 +113,7 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
                 porValidar = aLocal(pendientes),
                 deLaSemana = repositorio.sesionesDeLosUltimosDias(fechaElegida, 7),
                 abiertas = repositorio.sesionesAbiertasAntesDe(fechaElegida, repositorio.horaHaceHoras(2)),
+                desfaseReloj = desfase,
                 fuente = FuenteDatos.EN_LINEA
             )
         }

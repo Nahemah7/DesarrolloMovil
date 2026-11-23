@@ -10,12 +10,35 @@ class RelojDelServidor(contexto: Context) {
 
     fun desfaseMinutos(): Int = prefs.getInt(DESFASE, 0)
 
-    fun medir(): Int {
+    fun aplicar() {
+        val guardado = prefs.getLong(DESFASE_MS, 0L)
+        com.example.rinconsur.data.FechaTienda.desfaseMilisegundos = guardado
+    }
+
+    suspend fun sincronizar(direccion: String): Int {
         val equipo = minutosDelDia(TimeZone.getDefault())
         val tienda = minutosDelDia(TimeZone.getTimeZone(TIENDA))
         val minutos = equipo - tienda
         prefs.edit().putInt(DESFASE, minutos).apply()
+        val delServidor = instanteDelServidor(direccion)
+        if (delServidor != null) {
+            val desfase = delServidor - System.currentTimeMillis()
+            prefs.edit().putLong(DESFASE_MS, desfase).apply()
+            com.example.rinconsur.data.FechaTienda.desfaseMilisegundos = desfase
+        }
         return minutos
+    }
+
+    private suspend fun instanteDelServidor(direccion: String): Long? {
+        val respuesta = runCatching {
+            ClienteRemoto(direccion).autenticacion.preguntas()
+        }.getOrNull() ?: return null
+        val cabecera = respuesta.headers()["Date"] ?: return null
+        return runCatching {
+            val formato = java.text.SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US)
+            formato.timeZone = TimeZone.getTimeZone("GMT")
+            formato.parse(cabecera)?.time
+        }.getOrNull()
     }
 
     private fun minutosDelDia(zona: TimeZone): Int {
@@ -27,6 +50,7 @@ class RelojDelServidor(contexto: Context) {
 
     private companion object {
         const val DESFASE = "desfase_minutos"
+        const val DESFASE_MS = "desfase_milisegundos"
         const val TIENDA = "America/Santiago"
     }
 }

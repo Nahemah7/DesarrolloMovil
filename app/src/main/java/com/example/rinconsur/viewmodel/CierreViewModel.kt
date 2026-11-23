@@ -78,7 +78,7 @@ class CierreViewModel(application: Application) : AndroidViewModel(application) 
                 " y faltan " + (FlujoRepository.MINIMO_REGISTROS - registros) + ". Los datos no se pierden."
             return false
         }
-        val hora = java.time.LocalTime.now().toString().take(8)
+        val hora = com.example.rinconsur.data.FechaTienda.hora()
         val filas = repositorio.cerrarSesion(enCurso.id, hora)
         if (filas == 0) {
             _yaEnviada.value = true

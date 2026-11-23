@@ -73,7 +73,7 @@ private fun textoDesfase(minutos: Int): String {
 }
 
 private fun tiempoAbierta(fecha: String, inicioReal: String): String {
-    val formato = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US)
+    val formato = com.example.rinconsur.data.FechaTienda.formato("yyyy-MM-dd HH:mm:ss")
     val texto = if (inicioReal.length > 8) inicioReal else fecha + " " + inicioReal
     val inicio = runCatching { formato.parse(texto)?.time }.getOrNull() ?: return "sin hora"
     val minutos = (System.currentTimeMillis() - inicio) / 60_000L

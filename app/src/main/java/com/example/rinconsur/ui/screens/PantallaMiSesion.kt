@@ -38,6 +38,12 @@ import com.example.rinconsur.ui.theme.Tinta
 private fun accesoDe(accesos: List<Acceso>, sesion: SesionResumen): String =
     accesos.firstOrNull { it.id == sesion.idAcceso }?.let { it.codigo + " · " + it.nombre } ?: "Acceso sin asignar"
 
+private fun textoDesfase(minutos: Int): String {
+    val absoluto = kotlin.math.abs(minutos)
+    val cuanto = if (absoluto < 60) absoluto.toString() + " min" else (absoluto / 60).toString() + " h"
+    return if (minutos > 0) cuanto + " adelantada" else cuanto + " atrasada"
+}
+
 private fun tipoDe(estado: EstadoSesion): String = when (estado) {
     EstadoSesion.EN_CURSO -> "ok"
     EstadoSesion.PROGRAMADA -> "info"
@@ -50,6 +56,7 @@ fun PantallaMiSesion(onIniciar: () -> Unit, onIrA: (String) -> Unit) {
     val usuario by vm.usuario.collectAsStateWithLifecycle()
     val sesiones by vm.sesionesDeHoy.collectAsStateWithLifecycle()
     val accesos by vm.accesos.collectAsStateWithLifecycle()
+    val desfaseReloj by vm.desfaseReloj.collectAsStateWithLifecycle()
 
     val opcionesFiltro = listOf("Todas", "Programadas", "En curso", "Cerradas")
     var filtroSeleccionado by remember { mutableStateOf("Todas") }
@@ -82,6 +89,23 @@ fun PantallaMiSesion(onIniciar: () -> Unit, onIrA: (String) -> Unit) {
         },
     ) { pad ->
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
+
+            if (kotlin.math.abs(desfaseReloj) >= 10) {
+                TarjetaSeccion {
+                    Text(
+                        "Reloj del teléfono",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Apagado
+                    )
+                    Text(
+                        "La hora del equipo va " + textoDesfase(desfaseReloj) +
+                            " respecto a la hora de la tienda. Los registros se guardan con la hora de la tienda.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Tinta
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
+            }
 
             if (sesiones.isEmpty()) {
                 Seccion("Hoy")

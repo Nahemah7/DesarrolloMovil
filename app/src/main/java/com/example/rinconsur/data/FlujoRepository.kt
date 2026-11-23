@@ -78,8 +78,7 @@ class FlujoRepository(context: Context) {
         sesionDao.abiertasAntesDe(fechaHoy, horaMarca)
 
     fun horaHaceHoras(horas: Long): String =
-        java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.US)
-            .format(java.util.Date(System.currentTimeMillis() - horas * 3600_000L))
+        FechaTienda.formato("HH:mm:ss").format(java.util.Date(System.currentTimeMillis() - horas * 3600_000L))
 
     fun sesionesDeLosUltimosDias(desde: String, dias: Int): List<SesionResumen> =
         sesionDao.sesionesDeLosUltimosDias(desde, dias)
@@ -223,7 +222,7 @@ class FlujoRepository(context: Context) {
     }
 
     private fun vencimientoDeCodigo(): String =
-        java.time.LocalDate.now().plusDays(7).toString()
+        java.time.LocalDate.now(java.time.ZoneId.of(FechaTienda.ZONA)).plusDays(7).toString()
     fun preguntasDe(idUsuario: Long): List<PreguntaSeguridad> = usuarioDao.listarPreguntasDe(idUsuario)
     fun tienePreguntas(idUsuario: Long): Boolean = usuarioDao.tienePreguntas(idUsuario)
     fun guardarRespuestas(idUsuario: Long, rut: String, respuestas: List<Pair<Long, String>>) =

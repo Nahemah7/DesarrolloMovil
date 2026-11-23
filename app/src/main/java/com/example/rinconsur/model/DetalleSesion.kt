@@ -33,7 +33,7 @@ data class DetalleSesion(
         get() {
             val desde = primeraMarca ?: return null
             val hasta = ultimaMarca ?: return null
-            val formato = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US)
+            val formato = com.example.rinconsur.data.FechaTienda.formato("yyyy-MM-dd HH:mm:ss")
             val inicio = formato.parse(desde) ?: return null
             val fin = formato.parse(hasta) ?: return null
             return ((fin.time - inicio.time) / 60000L).toInt()

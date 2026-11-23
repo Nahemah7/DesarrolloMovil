@@ -17,5 +17,5 @@ data class Colaborador(
 ) {
     val codigoVencido: Boolean
         get() = debeCambiarClave && codigoVence != null &&
-            codigoVence.substringBefore(' ') < java.time.LocalDate.now().toString()
+            codigoVence.substringBefore(' ') < com.example.rinconsur.data.FechaTienda.hoy()
 }

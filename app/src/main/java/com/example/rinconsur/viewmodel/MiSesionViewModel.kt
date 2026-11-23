@@ -40,10 +40,17 @@ class MiSesionViewModel(application: Application) : AndroidViewModel(application
     private val _sesionesDeHoy = MutableStateFlow<List<SesionResumen>>(emptyList())
     val sesionesDeHoy: StateFlow<List<SesionResumen>> = _sesionesDeHoy.asStateFlow()
 
+    private val reloj = com.example.rinconsur.data.remoto.RelojDelServidor(application)
+
+    private val _desfaseReloj = MutableStateFlow(0)
+    val desfaseReloj: StateFlow<Int> = _desfaseReloj.asStateFlow()
+
     private val _accesos = MutableStateFlow<List<Acceso>>(emptyList())
     val accesos: StateFlow<List<Acceso>> = _accesos.asStateFlow()
 
     init {
+        reloj.aplicar()
+        _desfaseReloj.value = reloj.desfaseMinutos()
         val id = sesion.leer()
         if (id > 0) {
             _usuario.value = repositorio.colaboradorPorId(id)
@@ -82,8 +89,7 @@ class MiSesionViewModel(application: Application) : AndroidViewModel(application
         return true
     }
 
-    private fun ahora(): String =
-        java.time.LocalTime.now().toString().let { if (it.length >= 8) it.take(8) else "$it:00" }
+    private fun ahora(): String = com.example.rinconsur.data.FechaTienda.hora()
 
     override fun onCleared() {
         repositorio.cerrar()
@@ -94,6 +100,8 @@ class MiSesionViewModel(application: Application) : AndroidViewModel(application
         val guardado = tokens.leer() ?: return
         viewModelScope.launch {
             runCatching {
+                val desfase = reloj.sincronizar(direccion.leer())
+                _desfaseReloj.value = desfase
                 SincronizadorSesiones(repositorio, tokens, direccion).publicarPendientes()
                 val remotas = RepositorioSesionesRemoto(direccion.leer(), guardado).sesionesDeFecha(fecha)
                     ?: return@launch
