@@ -40,6 +40,25 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
+    fun cargarParaEditar(idSesion: Long) {
+        val detalle = repositorio.detalleDeSesion(idSesion)?.sesion ?: return
+        if (detalle.estado != com.example.rinconsur.model.EstadoSesion.PROGRAMADA) return
+        _uiState.update {
+            it.copy(
+                fecha = detalle.fecha,
+                idAcceso = detalle.idAcceso,
+                horaInicio = detalle.horaInicioCorta,
+                horaFin = detalle.horaFinCorta,
+                idObservador = detalle.idObservador,
+                sesionesDeLaFecha = repositorio.sesionesDeFecha(detalle.fecha),
+                codigo = detalle.codigo,
+                editando = true,
+                idEditando = idSesion,
+                error = null
+            )
+        }
+    }
+
     fun onAcceso(id: Long) = _uiState.update { it.copy(idAcceso = id, error = null, programada = "", codigo = "") }
 
     fun onObservador(id: Long) = _uiState.update { it.copy(idObservador = id, error = null, programada = "", codigo = "") }
@@ -64,7 +83,8 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
         fecha: String,
         horaInicio: String,
         horaFin: String,
-        idObservador: Long
+        idObservador: Long,
+        idEditando: Long = 0L
     ): String {
         val token = tokens.leer()
             ?: return "Quedó guardada en este teléfono: no hay sesión iniciada en el servidor. " +
@@ -74,6 +94,24 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch {
             runCatching {
                 val cliente = ClienteRemoto(direccion.leer())
+                if (idEditando > 0) {
+                    val idRemoto = repositorio.idRemotoDeSesion(idEditando)
+                    if (idRemoto == null) {
+                        _uiState.update {
+                            it.copy(error = "Cambio guardado en este teléfono: la sesión aún no está en el servidor.")
+                        }
+                        return@launch
+                    }
+                    val cambiado = com.example.rinconsur.data.remoto.RepositorioSesionesRemoto(direccion.leer(), token)
+                        .editar(idRemoto, idAcceso, horaInicio, horaFin, idObservador, nombre)
+                    _uiState.update {
+                        it.copy(
+                            error = if (cambiado) null else "Cambio guardado en este teléfono: el servidor no respondió.",
+                            sesionesDeLaFecha = repositorio.sesionesDeFecha(fecha)
+                        )
+                    }
+                    return@launch
+                }
                 val respuesta = cliente.medicion.programar(
                     "Bearer " + token,
                     PeticionSesionNueva(
@@ -126,8 +164,14 @@ class ProgramarViewModel(application: Application) : AndroidViewModel(applicatio
         }
         val idAcceso = e.idAcceso!!
         val idObservador = e.idObservador!!
-        val codigo = repositorio.programarSesion(idAcceso, e.fecha, e.horaInicio, e.horaFin, idObservador, idProgramador)
-        val aviso = publicarEnServidor(codigo, idAcceso, e.fecha, e.horaInicio, e.horaFin, idObservador)
+        val editando = e.idEditando
+        val codigo = if (editando > 0) {
+            repositorio.actualizarSesionProgramada(editando, idAcceso, e.horaInicio, e.horaFin, idObservador)
+            e.codigo
+        } else {
+            repositorio.programarSesion(idAcceso, e.fecha, e.horaInicio, e.horaFin, idObservador, idProgramador)
+        }
+        val aviso = publicarEnServidor(codigo, idAcceso, e.fecha, e.horaInicio, e.horaFin, idObservador, editando)
         _uiState.update {
             it.copy(
                 error = aviso,

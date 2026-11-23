@@ -132,7 +132,9 @@ data class ProgramarUiState(
     val idObservador: Long? = null,
     val error: String? = null,
     val programada: String = "",
-    val codigo: String = ""
+    val codigo: String = "",
+    val editando: Boolean = false,
+    val idEditando: Long = 0L
 ) {
     val duracionMinutos: Int get() = minutos(horaFin) - minutos(horaInicio)
 
@@ -141,10 +143,12 @@ data class ProgramarUiState(
     val choque: SesionResumen? get() {
         if (idAcceso == null) return null
         return sesionesDeLaFecha.firstOrNull { s ->
-            s.idAcceso == idAcceso && seCruzan(s.horaInicioProg, s.horaFinProg, horaInicio, horaFin)
+            s.id != idEditando && s.idAcceso == idAcceso &&
+                seCruzan(s.horaInicioProg, s.horaFinProg, horaInicio, horaFin)
         } ?: idObservador?.let { id ->
             sesionesDeLaFecha.firstOrNull { s ->
-                s.idObservador == id && seCruzan(s.horaInicioProg, s.horaFinProg, horaInicio, horaFin)
+                s.id != idEditando && s.idObservador == id &&
+                    seCruzan(s.horaInicioProg, s.horaFinProg, horaInicio, horaFin)
             }
         }
     }

@@ -195,7 +195,17 @@ fun AppNavegacion() {
                     onAbrir = { idSesion -> navController.navigate(rutaDeDetalleSesion(idSesion)) }
                 )
             }
-            composable(Ruta.Programar.ruta) { PantallaProgramar(onIrA = { navController.navegar(it) }) }
+            composable(Ruta.Programar.ruta) {
+                PantallaProgramar(onIrA = { navController.navegar(it) })
+            }
+
+            composable(Ruta.EditarSesion.ruta) { entrada ->
+                PantallaProgramar(
+                    idSesionEditar = entrada.arguments?.getString("idSesion")?.toLongOrNull() ?: 0L,
+                    onIrA = { navController.navegar(it) },
+                    onVolver = { navController.navigateUp() }
+                )
+            }
             composable(Ruta.Evento.ruta) { PantallaEvento(onVolver = { navController.navigateUp() }) }
             composable(Ruta.Rechazar.ruta) { entrada ->
                 PantallaRechazar(
@@ -235,7 +245,8 @@ fun AppNavegacion() {
             composable(Ruta.SesionDetalle.ruta) { entrada ->
                 PantallaDetalleSesion(
                     idSesion = entrada.arguments?.getString("idSesion")?.toLongOrNull() ?: 0L,
-                    onRechazar = { idSesion -> navController.navigate(rutaDeRechazar(idSesion)) }
+                    onRechazar = { idSesion -> navController.navigate(rutaDeRechazar(idSesion)) },
+                    onEditar = { idSesion -> navController.navigate(rutaDeEditarSesion(idSesion)) }
                 )
             }
 

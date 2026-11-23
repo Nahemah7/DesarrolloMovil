@@ -66,6 +66,7 @@ class EncabezadoViewModel(application: Application) : AndroidViewModel(applicati
             ruta.startsWith("colaborador/") -> "Editar persona" to "Datos, perfil y estado"
             ruta.startsWith("colaboradores") -> "Colaboradores" to "Personas de la tienda"
 
+            ruta.startsWith("programar/editar") -> "Cambiar sesión" to "Mismos datos, mismo código"
             ruta.startsWith("programar") -> "Programar sesión" to "Nueva sesión de conteo"
 
             ruta.startsWith("evento") -> "Evento del día" to repositorio.fechaHoy()

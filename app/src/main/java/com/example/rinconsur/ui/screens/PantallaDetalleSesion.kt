@@ -11,15 +11,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -42,8 +37,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.rinconsur.model.Acceso
-import com.example.rinconsur.model.Colaborador
 import com.example.rinconsur.model.DetalleSesion
 import com.example.rinconsur.model.EstadoSesion
 import com.example.rinconsur.model.GrupoConteo
@@ -53,7 +46,6 @@ import com.example.rinconsur.ui.components.BotonSecundario
 import com.example.rinconsur.ui.components.EtiquetaEstado
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
-import com.example.rinconsur.ui.components.SelectorHora
 import com.example.rinconsur.ui.components.TarjetaSeccion
 import com.example.rinconsur.ui.theme.Aqua
 import com.example.rinconsur.ui.theme.Apagado
@@ -65,7 +57,7 @@ import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.DetalleSesionViewModel
 
 @Composable
-fun PantallaDetalleSesion(idSesion: Long, onRechazar: (Long) -> Unit) {
+fun PantallaDetalleSesion(idSesion: Long, onRechazar: (Long) -> Unit, onEditar: (Long) -> Unit) {
     val vm: DetalleSesionViewModel = viewModel()
     val detalle by vm.detalle.collectAsStateWithLifecycle()
 
@@ -80,7 +72,6 @@ fun PantallaDetalleSesion(idSesion: Long, onRechazar: (Long) -> Unit) {
     }
 
     var confirmar by remember { mutableStateOf(false) }
-    var editando by remember { mutableStateOf(false) }
     val host = remember { SnackbarHostState() }
     LaunchedEffect(Unit) { vm.aviso.collect { host.showSnackbar(it) } }
 
@@ -188,7 +179,7 @@ fun PantallaDetalleSesion(idSesion: Long, onRechazar: (Long) -> Unit) {
                     if (d.sesion.estado == EstadoSesion.PROGRAMADA) {
                         BotonPrincipal(
                             texto = "Cambiar horario o responsable",
-                            onClick = { editando = true },
+                            onClick = { onEditar(d.sesion.id) },
                             modifier = Modifier.fillMaxWidth()
                         )
                     } else if (vm.puedeRevisar()) {
@@ -215,19 +206,6 @@ fun PantallaDetalleSesion(idSesion: Long, onRechazar: (Long) -> Unit) {
                 }
             }
         }
-    }
-
-    if (editando && d != null) {
-        EditarSesion(
-            sesion = d.sesion,
-            accesos = vm.accesos,
-            observadores = vm.observadores,
-            onCerrar = { editando = false },
-            onGuardar = { acceso, inicio, fin, observador ->
-                vm.editar(d.sesion.id, acceso, inicio, fin, observador)
-                editando = false
-            }
-        )
     }
 
     if (confirmar && d != null) {
@@ -260,58 +238,4 @@ private fun FilaDato(etiqueta: String, valor: String) {
             color = Tinta
         )
     }
-}
-
-@Composable
-private fun EditarSesion(
-    sesion: com.example.rinconsur.model.SesionResumen,
-    accesos: List<Acceso>,
-    observadores: List<Colaborador>,
-    onCerrar: () -> Unit,
-    onGuardar: (Long, String, String, Long) -> Unit
-) {
-    var acceso by remember { mutableStateOf(sesion.idAcceso) }
-    var inicio by remember { mutableStateOf(sesion.horaInicioCorta) }
-    var fin by remember { mutableStateOf(sesion.horaFinCorta) }
-    var observador by remember { mutableStateOf(sesion.idObservador) }
-
-    AlertDialog(
-        onDismissRequest = onCerrar,
-        title = { Text("Cambiar " + sesion.codigo) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("Acceso", style = MaterialTheme.typography.labelSmall, color = Apagado)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    accesos.forEach { a ->
-                        FilterChip(
-                            selected = a.id == acceso,
-                            onClick = { acceso = a.id },
-                            label = { Text(a.etiquetaCorta) }
-                        )
-                    }
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    SelectorHora("Desde", inicio, { inicio = it }, Modifier.weight(1f))
-                    SelectorHora("Hasta", fin, { fin = it }, Modifier.weight(1f))
-                }
-                Text("Observador", style = MaterialTheme.typography.labelSmall, color = Apagado)
-                Row(
-                    Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    observadores.forEach { o ->
-                        FilterChip(
-                            selected = o.id == observador,
-                            onClick = { observador = o.id },
-                            label = { Text(o.nombre) }
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onGuardar(acceso, inicio, fin, observador) }) { Text("Guardar") }
-        },
-        dismissButton = { TextButton(onClick = onCerrar) { Text("Cancelar") } }
-    )
 }

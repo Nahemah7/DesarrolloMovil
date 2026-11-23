@@ -51,7 +51,6 @@ import com.example.rinconsur.ui.components.MensajeFlotante
 import com.example.rinconsur.ui.components.NavInferior
 import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
-import com.example.rinconsur.ui.components.SelectorHora
 import com.example.rinconsur.ui.components.TarjetaSeccion
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.rinconsur.viewmodel.ProgramarViewModel
@@ -70,9 +69,17 @@ private fun fechaLarga(fecha: String): String {
 }
 
 @Composable
-fun PantallaProgramar(onIrA: (String) -> Unit) {
+fun PantallaProgramar(
+    onIrA: (String) -> Unit,
+    idSesionEditar: Long = 0L,
+    onVolver: () -> Unit = {}
+) {
     val vm: ProgramarViewModel = viewModel()
     val estado by vm.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(idSesionEditar) {
+        if (idSesionEditar > 0) vm.cargarParaEditar(idSesionEditar)
+    }
 
     LaunchedEffect(estado.error) {
         if (estado.error != null) { delay(3500); vm.limpiarError() }
@@ -105,8 +112,8 @@ fun PantallaProgramar(onIrA: (String) -> Unit) {
                 Modifier.fillMaxWidth().padding(top = 2.dp, bottom = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                ColumnaHora("Desde", estado.horaInicio, Modifier.weight(1f)) { vm.onHoraInicio(it) }
-                ColumnaHora("Hasta", estado.horaFin, Modifier.weight(1f)) { vm.onHoraFin(it) }
+                BloqueHora("Desde", estado.horaInicio, vm.horas, Modifier.weight(1f)) { vm.onHoraInicio(it) }
+                BloqueHora("Hasta", estado.horaFin, vm.horas, Modifier.weight(1f)) { vm.onHoraFin(it) }
             }
             Spacer(Modifier.height(10.dp))
             TarjetaSeccion {
@@ -173,7 +180,15 @@ fun PantallaProgramar(onIrA: (String) -> Unit) {
             }
 
             Spacer(Modifier.height(14.dp))
-            BotonPrincipal("Programar sesión", onClick = { vm.programar() })
+            BotonPrincipal(
+                if (estado.editando) "Guardar cambios" else "Programar sesión",
+                onClick = {
+                    val guardado = vm.programar()
+                    if (guardado) {
+                        if (estado.editando) onVolver() else vm.limpiarError()
+                    }
+                }
+            )
             Spacer(Modifier.height(20.dp))
         }
         MensajeFlotante(estado.error)
@@ -278,14 +293,5 @@ private fun FilaObservador(
                 .clip(RoundedCornerShape(9.dp))
                 .background(if (elegido) Aqua else Linea)
         )
-    }
-}
-
-@Composable
-private fun ColumnaHora(etiqueta: String, hora: String, modifier: Modifier = Modifier, onCambiar: (String) -> Unit) {
-    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(etiqueta, style = MaterialTheme.typography.labelMedium, color = Apagado)
-        Spacer(Modifier.height(4.dp))
-        SelectorHora(etiqueta, hora, onCambiar, Modifier.fillMaxWidth())
     }
 }
