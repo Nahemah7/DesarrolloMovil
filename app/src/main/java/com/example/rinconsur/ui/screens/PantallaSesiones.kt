@@ -22,6 +22,7 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -136,19 +137,19 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit, onAbri
                     color = Apagado
                 )
                 Spacer(Modifier.height(6.dp))
+                OutlinedTextField(
+                    value = estado.busquedaObservador,
+                    onValueChange = vm::buscarObservador,
+                    singleLine = true,
+                    label = { Text("Buscar por observador o sesión") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(8.dp))
                 FilaFiltros(
                     opciones = listOf("Todos") + vm.accesos.map { it.codigo },
                     elegido = vm.accesos.firstOrNull { it.id == estado.idAcceso }?.codigo ?: "Todos"
                 ) { elegido ->
                     vm.filtrarAcceso(vm.accesos.firstOrNull { it.codigo == elegido }?.id)
-                }
-                Spacer(Modifier.height(6.dp))
-                FilaFiltros(
-                    opciones = listOf("Todos") + vm.observadores.map { it.nombre.substringBefore(" ") },
-                    elegido = vm.observadores.firstOrNull { it.id == estado.idObservador }?.nombre?.substringBefore(" ")
-                        ?: "Todos"
-                ) { elegido ->
-                    vm.filtrarObservador(vm.observadores.firstOrNull { it.nombre.substringBefore(" ") == elegido }?.id)
                 }
                 Spacer(Modifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {

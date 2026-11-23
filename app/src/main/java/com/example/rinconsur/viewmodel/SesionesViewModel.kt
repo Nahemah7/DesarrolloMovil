@@ -61,7 +61,7 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
             pendienteMasAtrasado = pendientes.firstOrNull() ?: "",
             filtro = anterior.filtro,
             idAcceso = anterior.idAcceso,
-            idObservador = anterior.idObservador,
+            busquedaObservador = anterior.busquedaObservador,
             soloMias = anterior.soloMias,
             miId = idRevisor,
             fecha = fechaElegida,
@@ -133,9 +133,8 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
         _uiState.value = _uiState.value.copy(idAcceso = if (actual == idAcceso) null else idAcceso)
     }
 
-    fun filtrarObservador(idObservador: Long?) {
-        val actual = _uiState.value.idObservador
-        _uiState.value = _uiState.value.copy(idObservador = if (actual == idObservador) null else idObservador)
+    fun buscarObservador(texto: String) {
+        _uiState.value = _uiState.value.copy(busquedaObservador = texto)
     }
 
     fun alternarSoloMias() {
@@ -143,7 +142,7 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun limpiarFiltros() {
-        _uiState.value = _uiState.value.copy(idAcceso = null, idObservador = null, soloMias = false)
+        _uiState.value = _uiState.value.copy(idAcceso = null, busquedaObservador = "", soloMias = false)
     }
 
     fun validar(idSesion: Long, codigo: String) {

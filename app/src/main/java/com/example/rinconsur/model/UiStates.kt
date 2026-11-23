@@ -40,7 +40,7 @@ data class SesionesUiState(
     val pendienteMasAtrasado: String = "",
     val filtro: String = "Por validar",
     val idAcceso: Long? = null,
-    val idObservador: Long? = null,
+    val busquedaObservador: String = "",
     val soloMias: Boolean = false,
     val miId: Long = 0,
     val fecha: String = "",
@@ -57,13 +57,14 @@ data class SesionesUiState(
     val visibles: List<SesionResumen>
         get() = base.filter { s ->
             (idAcceso == null || s.idAcceso == idAcceso) &&
-                    (idObservador == null || s.idObservador == idObservador) &&
-
+                    (busquedaObservador.isBlank() ||
+                        s.nombreObservador.contains(busquedaObservador.trim(), ignoreCase = true) ||
+                        s.codigo.contains(busquedaObservador.trim(), ignoreCase = true)) &&
                     (!soloMias || s.idObservador == miId)
         }
 
     val hayFiltrosActivos: Boolean
-        get() = idAcceso != null || idObservador != null || soloMias
+        get() = idAcceso != null || busquedaObservador.isNotBlank() || soloMias
 }
 
 data class IndicadoresUiState(
