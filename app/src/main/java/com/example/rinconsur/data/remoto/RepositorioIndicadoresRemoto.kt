@@ -90,4 +90,11 @@ class RepositorioIndicadoresRemoto(
     } catch (e: Exception) {
         null
     }
+
+    suspend fun supervisores(): List<com.example.rinconsur.model.RendimientoSupervisor>? = try {
+        val respuesta = cliente.medicion.supervisores(autorizacion)
+        if (respuesta.isSuccessful) respuesta.body()?.map { it.aSupervisor() } else null
+    } catch (e: Exception) {
+        null
+    }
 }

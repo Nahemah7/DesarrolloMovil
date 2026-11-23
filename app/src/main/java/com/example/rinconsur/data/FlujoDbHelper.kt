@@ -9,7 +9,7 @@ class FlujoDbHelper(private val contexto: Context) :
 
     companion object {
         private const val NOMBRE_BD = "rinconsur.db"
-        private const val VERSION_BD = 16
+        private const val VERSION_BD = 17
 
         private const val CARPETA = "sql"
         private const val SCRIPT_ESQUEMA = "01_esquema.sql"
@@ -40,7 +40,7 @@ internal const val SQL_SESIONES =
 
         private val VISTAS = listOf(
             "v_conversion_dia", "v_transito_bloque", "v_pendiente_medir",
-            "v_perfil_transito", "v_tipo_dia", "v_sesion_proporcion", "v_rendimiento_personal"
+            "v_perfil_transito", "v_tipo_dia", "v_sesion_proporcion", "v_rendimiento_personal", "v_rendimiento_supervisor"
         )
 
         private val TABLAS = listOf(

@@ -2,6 +2,7 @@ package com.example.rinconsur.data
 
 import android.content.ContentValues
 import com.example.rinconsur.model.PersonalRendimiento
+import com.example.rinconsur.model.RendimientoSupervisor
 import com.example.rinconsur.model.ConversionMes
 import com.example.rinconsur.model.GrupoConteo
 import com.example.rinconsur.model.HoraPunta
@@ -307,6 +308,26 @@ internal class IndicadorDao(private val helper: FlujoDbHelper) {
                         registros = c.entero("registros"),
                         transito = c.entero("transito"),
                         ultimaFecha = c.texto("ultima_fecha")
+                    )
+                )
+            }
+            filas
+        }
+
+    fun rendimientoSupervisores(): List<RendimientoSupervisor> =
+        helper.readableDatabase.rawQuery(
+            "SELECT * FROM v_rendimiento_supervisor ORDER BY validadas DESC, programadas DESC",
+            null
+        ).use { c ->
+            val filas = mutableListOf<RendimientoSupervisor>()
+            while (c.moveToNext()) {
+                filas.add(
+                    RendimientoSupervisor(
+                        idSupervisor = c.long("id_usuario"),
+                        programadas = c.entero("programadas"),
+                        pendientes = c.entero("pendientes"),
+                        validadas = c.entero("validadas"),
+                        rechazadas = c.entero("rechazadas")
                     )
                 )
             }

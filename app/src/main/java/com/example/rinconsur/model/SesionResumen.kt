@@ -34,5 +34,25 @@ data class SesionResumen(
 
     val sePuedeValidar: Boolean get() = registrosValidos >= 30
 
+    fun horasEsperando(ahora: Long = System.currentTimeMillis()): Long? {
+        val marca = finReal ?: return null
+        val formato = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US)
+        val cuando = runCatching { formato.parse(marca) }.getOrNull() ?: return null
+        val horas = (ahora - cuando.time) / 3_600_000L
+        return if (horas < 0) 0 else horas
+    }
+
+    fun esperaTexto(ahora: Long = System.currentTimeMillis()): String? {
+        val horas = horasEsperando(ahora) ?: return null
+        return when {
+            horas < 1 -> "hace menos de una hora"
+            horas < 24 -> "hace " + horas + if (horas == 1L) " hora" else " horas"
+            else -> {
+                val dias = horas / 24
+                "hace " + dias + if (dias == 1L) " día" else " días"
+            }
+        }
+    }
+
     val sinPublicar: Boolean get() = idRemoto == null && estado == EstadoSesion.PROGRAMADA
 }

@@ -56,6 +56,7 @@ import com.example.rinconsur.ui.components.Nota
 import com.example.rinconsur.ui.components.Seccion
 import com.example.rinconsur.ui.components.TarjetaSeccion
 import com.example.rinconsur.ui.theme.Apagado
+import com.example.rinconsur.ui.theme.Aviso
 import com.example.rinconsur.ui.theme.AquaSuave
 import com.example.rinconsur.ui.theme.Dimens
 import com.example.rinconsur.ui.theme.Linea
@@ -160,12 +161,42 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit, onAbri
                 }
             }
 
-            if (estado.porValidar.isNotEmpty() && estado.filtro != "Por validar") {
-                Nota(
-                    "Hay " + estado.porValidar.size +
-                        if (estado.porValidar.size == 1) " sesión esperando revisión."
-                        else " sesiones esperando revisión."
-                )
+            if (estado.porValidar.isNotEmpty()) {
+                val ordenadas = estado.porValidar.sortedByDescending { it.horasEsperando() ?: 0L }
+                Seccion("Recordatorios")
+                TarjetaSeccion {
+                    Text(
+                        ordenadas.size.toString() + if (ordenadas.size == 1) " sesión espera revisión"
+                        else " sesiones esperan revisión",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Tinta
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    ordenadas.take(3).forEach { pendiente ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable { onAbrir(pendiente.id) }
+                                .padding(vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(Modifier.weight(1f)) {
+                                Text(pendiente.codigo, style = MaterialTheme.typography.bodyMedium, color = Tinta)
+                                Text(
+                                    pendiente.nombreObservador,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Apagado
+                                )
+                            }
+                            Text(
+                                pendiente.esperaTexto() ?: "",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Aviso
+                            )
+                        }
+                    }
+                }
             }
 
             if (estado.bloquesPendientes > 0) {
@@ -284,6 +315,11 @@ private fun TarjetaSesion(
                     style = MaterialTheme.typography.bodySmall,
                     color = Apagado
                 )
+            }
+            if (sesion.estado == EstadoSesion.FINALIZADA && sesion.registrosValidos >= 30) {
+                sesion.esperaTexto()?.let { espera ->
+                    EtiquetaEstado("Esperando validación " + espera, "aviso")
+                }
             }
             if (sesion.sinPublicar) {
                 EtiquetaEstado("Sin publicar", "aviso")

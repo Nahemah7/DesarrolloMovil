@@ -58,3 +58,12 @@ fun PersonalRemoto.aRendimiento(): PersonalRendimiento = PersonalRendimiento(
     transito = (transito ?: 0L).toInt(),
     ultimaFecha = ultimaFecha
 )
+
+fun SupervisorRemoto.aSupervisor(): com.example.rinconsur.model.RendimientoSupervisor =
+    com.example.rinconsur.model.RendimientoSupervisor(
+        idSupervisor = idSupervisor?.toLong() ?: 0L,
+        programadas = (programadas ?: 0L).toInt(),
+        pendientes = (pendientes ?: 0L).toInt(),
+        validadas = (validadas ?: 0L).toInt(),
+        rechazadas = (rechazadas ?: 0L).toInt()
+    )

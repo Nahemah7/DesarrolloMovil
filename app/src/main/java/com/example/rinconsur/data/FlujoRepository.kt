@@ -2,6 +2,7 @@ package com.example.rinconsur.data
 
 import android.content.Context
 import com.example.rinconsur.model.PersonalRendimiento
+import com.example.rinconsur.model.RendimientoSupervisor
 import com.example.rinconsur.model.MedicionPeriodo
 import com.example.rinconsur.model.RegistroPendiente
 import com.example.rinconsur.model.NuevaPersona
@@ -148,6 +149,8 @@ class FlujoRepository(context: Context) {
         sesionDao.actualizarProgramada(idLocal, idAcceso, inicio, fin, idObservador)
 
     fun rendimientoDelPersonal(): List<PersonalRendimiento> = indicadorDao.rendimientoPersonal()
+
+    fun rendimientoDeLosSupervisores(): List<RendimientoSupervisor> = indicadorDao.rendimientoSupervisores()
 
     fun idRemotoDeSesion(idLocal: Long): Long? = sesionDao.idRemotoDe(idLocal)
 

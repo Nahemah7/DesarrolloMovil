@@ -105,4 +105,24 @@ SELECT u.id_usuario,
 FROM sesion_observacion s
 JOIN usuario u ON u.id_usuario = s.id_observador
 LEFT JOIN registro_observacion r ON r.id_sesion = s.id_sesion
-GROUP BY u.id_usuario, u.nombres, u.apellido_paterno
+GROUP BY u.id_usuario, u.nombres, u.apellido_paterno;;
+
+CREATE VIEW v_rendimiento_supervisor AS
+SELECT x.id_usuario,
+       SUM(x.programadas) AS programadas,
+       SUM(x.pendientes) AS pendientes,
+       SUM(x.validadas) AS validadas,
+       SUM(x.rechazadas) AS rechazadas
+FROM (
+    SELECT id_programador AS id_usuario, 1 AS programadas,
+           CASE WHEN id_estado IN (1, 2, 3) THEN 1 ELSE 0 END AS pendientes,
+           0 AS validadas, 0 AS rechazadas
+    FROM sesion_observacion
+    UNION ALL
+    SELECT id_revisor, 0, 0,
+           CASE WHEN id_estado = 4 THEN 1 ELSE 0 END,
+           CASE WHEN id_estado = 5 THEN 1 ELSE 0 END
+    FROM sesion_observacion
+    WHERE id_revisor IS NOT NULL
+) x
+GROUP BY x.id_usuario;;

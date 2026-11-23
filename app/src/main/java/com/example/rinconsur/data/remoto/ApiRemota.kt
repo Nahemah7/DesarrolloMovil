@@ -35,6 +35,11 @@ interface ApiMedicion {
         @Body peticion: PeticionSesionNueva
     ): Response<SesionRemota>
 
+    @GET("api/indicadores/supervisores")
+    suspend fun supervisores(
+        @retrofit2.http.Header("Authorization") autorizacion: String
+    ): Response<List<SupervisorRemoto>>
+
     @GET("api/indicadores/personal")
     suspend fun personal(
         @retrofit2.http.Header("Authorization") autorizacion: String
@@ -144,6 +149,14 @@ data class PeticionEditarSesion(
     val horaFin: String,
     val idObservador: Int,
     val observadorNombre: String?
+)
+
+data class SupervisorRemoto(
+    val idSupervisor: Int?,
+    val programadas: Long?,
+    val pendientes: Long?,
+    val validadas: Long?,
+    val rechazadas: Long?
 )
 
 data class PersonalRemoto(

@@ -69,6 +69,7 @@ fun PantallaReporte() {
     val reporte by vm.reporte.collectAsStateWithLifecycle()
     val fuente by vm.fuente.collectAsStateWithLifecycle()
     val personal by vm.personal.collectAsStateWithLifecycle()
+    val supervisores by vm.supervisores.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) { vm.cargar() }
     val ciclo = LocalLifecycleOwner.current
@@ -211,7 +212,7 @@ fun PantallaReporte() {
             }
 
             if (personal.isNotEmpty()) {
-                Seccion("Rendimiento del personal")
+                Seccion("Rendimiento observador")
                 TarjetaSeccion {
                     personal.forEachIndexed { indice, persona ->
                         if (indice > 0) {
@@ -246,6 +247,49 @@ fun PantallaReporte() {
                                     style = MaterialTheme.typography.labelSmall,
                                     color = Apagado
                                 )
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (supervisores.isNotEmpty()) {
+                Seccion("Rendimiento supervisor")
+                TarjetaSeccion {
+                    supervisores.forEachIndexed { indice, jefe ->
+                        if (indice > 0) {
+                            Spacer(Modifier.height(10.dp))
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                Text(
+                                    jefe.nombre.ifEmpty { "Supervisor " + jefe.idSupervisor },
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Tinta
+                                )
+                                Text(
+                                    plural(jefe.programadas, "programada", "programadas") +
+                                        if (jefe.pendientes > 0)
+                                            " · " + plural(jefe.pendientes, "pendiente", "pendientes") else "",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Apagado
+                                )
+                            }
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    plural(jefe.validadas, "validada", "validadas"),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Tinta
+                                )
+                                if (jefe.rechazadas > 0) {
+                                    Text(
+                                        plural(jefe.rechazadas, "rechazada", "rechazadas"),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Apagado
+                                    )
+                                }
                             }
                         }
                     }
