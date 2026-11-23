@@ -66,6 +66,17 @@ import com.example.rinconsur.ui.theme.Fondo
 import com.example.rinconsur.ui.theme.Tinta
 import com.example.rinconsur.viewmodel.SesionesViewModel
 
+private fun tiempoAbierta(fecha: String, inicioReal: String): String {
+    val formato = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US)
+    val texto = if (inicioReal.length > 8) inicioReal else fecha + " " + inicioReal
+    val inicio = runCatching { formato.parse(texto)?.time }.getOrNull() ?: return "sin hora"
+    val minutos = (System.currentTimeMillis() - inicio) / 60_000L
+    if (minutos < 60) return minutos.toString() + " min"
+    val horas = minutos / 60
+    if (horas < 24) return horas.toString() + " h"
+    return (horas / 24).toString() + " días"
+}
+
 private fun fechaDiaMes(fecha: String): String {
     val p = fecha.split("-")
     return if (p.size == 3) p[2] + "-" + p[1] else fecha
@@ -112,6 +123,34 @@ fun PantallaSesiones(onRechazar: (Long) -> Unit, onProgramar: () -> Unit, onAbri
 
             if (estado.fuente != FuenteDatos.EN_LINEA) {
                 EtiquetaFuente(estado.fuente)
+            }
+
+            if (estado.abiertas.isNotEmpty()) {
+                Spacer(Modifier.height(8.dp))
+                TarjetaSeccion {
+                    Text(
+                        text = "Sesiones sin cerrar",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Apagado
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    estado.abiertas.take(3).forEach { abierta ->
+                        Text(
+                            text = abierta.codigo + " · " + abierta.nombreObservador +
+                                " · abierta hace " + tiempoAbierta(abierta.fecha, abierta.inicioReal.orEmpty()),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Tinta
+                        )
+                    }
+                    if (estado.abiertas.size > 3) {
+                        Text(
+                            text = "y " + (estado.abiertas.size - 3) + " más",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Apagado
+                        )
+                    }
+                }
             }
 
             Row(

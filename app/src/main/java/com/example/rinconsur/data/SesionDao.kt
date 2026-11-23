@@ -60,6 +60,14 @@ internal class SesionDao(private val helper: FlujoDbHelper) {
             arrayOf(desde, desde, "-" + dias + " day")
         )
 
+    fun abiertasAntesDe(fechaHoy: String, horaMarca: String): List<SesionResumen> =
+        consultarSesiones(
+            FlujoDbHelper.SQL_SESIONES +
+                "WHERE s.id_estado = 2 AND s.inicio_real IS NOT NULL AND s.inicio_real <> '' " +
+                "AND (s.fecha < ? OR (s.fecha = ? AND s.inicio_real <= ?)) ORDER BY s.inicio_real",
+            arrayOf(fechaHoy, fechaHoy, horaMarca)
+        )
+
     fun sesionesPorValidar(fecha: String): List<SesionResumen> =
         consultarSesiones(FlujoDbHelper.SQL_SESIONES + "WHERE s.fecha = ? AND s.id_estado = ?", arrayOf(fecha, FlujoDbHelper.ESTADO_FINALIZADA.toString()))
 

@@ -64,6 +64,7 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
             porValidar = if (haySesion) anterior.porValidar else repositorio.sesionesPorValidar(),
             fuente = if (haySesion) anterior.fuente else FuenteDatos.LOCAL,
             deLaSemana = repositorio.sesionesDeLosUltimosDias(fechaElegida, 7),
+            abiertas = repositorio.sesionesAbiertasAntesDe(fechaElegida, repositorio.horaHaceHoras(2)),
             bloquesPendientes = pendientes.size,
             pendienteMasAtrasado = pendientes.firstOrNull() ?: "",
             filtro = anterior.filtro,
@@ -106,6 +107,8 @@ class SesionesViewModel(application: Application) : AndroidViewModel(application
             _uiState.value = _uiState.value.copy(
                 sesiones = aLocal(delDia),
                 porValidar = aLocal(pendientes),
+                deLaSemana = repositorio.sesionesDeLosUltimosDias(fechaElegida, 7),
+                abiertas = repositorio.sesionesAbiertasAntesDe(fechaElegida, repositorio.horaHaceHoras(2)),
                 fuente = FuenteDatos.EN_LINEA
             )
         }

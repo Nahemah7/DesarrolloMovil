@@ -74,6 +74,13 @@ class FlujoRepository(context: Context) {
 
     fun sesionesPorValidar(fecha: String): List<SesionResumen> = sesionDao.sesionesPorValidar(fecha)
 
+    fun sesionesAbiertasAntesDe(fechaHoy: String, horaMarca: String): List<SesionResumen> =
+        sesionDao.abiertasAntesDe(fechaHoy, horaMarca)
+
+    fun horaHaceHoras(horas: Long): String =
+        java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.US)
+            .format(java.util.Date(System.currentTimeMillis() - horas * 3600_000L))
+
     fun sesionesDeLosUltimosDias(desde: String, dias: Int): List<SesionResumen> =
         sesionDao.sesionesDeLosUltimosDias(desde, dias)
 
