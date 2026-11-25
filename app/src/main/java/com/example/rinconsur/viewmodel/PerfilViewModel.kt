@@ -7,18 +7,30 @@ import com.example.rinconsur.data.FlujoRepository
 import com.example.rinconsur.model.PerfilUsuario
 import com.example.rinconsur.data.SesionPreferencias
 import com.example.rinconsur.data.mensajeDeClave
+import com.example.rinconsur.data.remoto.ClienteRemoto
+import com.example.rinconsur.data.remoto.DireccionServidor
+import com.example.rinconsur.data.remoto.PeticionCambioClave
+import com.example.rinconsur.data.remoto.TokenPreferencias
+import com.example.rinconsur.data.remoto.TrabajoDeFondo
 import com.example.rinconsur.model.Colaborador
 import com.example.rinconsur.model.PerfilUiState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class PerfilViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = FlujoRepository(application)
     private val sesion = SesionPreferencias(application)
+    private val tokens = TokenPreferencias(application)
+    private val direccion = DireccionServidor(application)
     private val persona: Colaborador? = repositorio.colaboradorPorId(sesion.leer())
+
+    private var cambiandoClave = false
 
     private var nombreOriginal: String = persona?.nombre ?: ""
     private var apellidoOriginal: String = persona?.apellido ?: ""
@@ -118,33 +130,73 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
     fun onRepetirCambia(v: String) { _uiState.update { it.copy(repetirNueva = v, errorRepetir = null, avisoClave = null) } }
     fun onAlternarClave() { _uiState.update { it.copy(claveVisible = !it.claveVisible) } }
 
-    fun cambiarClave(): Boolean {
+    fun cambiarClave(onListo: (Boolean) -> Unit) {
+        if (cambiandoClave) return
         val p = persona
         if (p == null) {
             _uiState.update { it.copy(errorActual = "No se pudo leer tu sesión. Vuelve a entrar.") }
-            return false
+            onListo(false)
+            return
         }
         val e = _uiState.value
         if (Clave.hash(p.rut, e.claveActual) != p.passwordHash) {
             _uiState.update { it.copy(errorActual = "La clave actual no coincide.") }
-            return false
+            onListo(false)
+            return
         }
         mensajeDeClave(e.claveNueva)?.let {
             _uiState.update { s -> s.copy(errorNueva = it) }
-            return false
+            onListo(false)
+            return
         }
         if (e.claveNueva != e.repetirNueva) {
             _uiState.update { it.copy(errorRepetir = "Las dos claves no coinciden.") }
-            return false
+            onListo(false)
+            return
         }
-        repositorio.cambiarClave(p.id, Clave.hash(p.rut, e.claveNueva))
-        _uiState.update {
-            it.copy(
-                claveActual = "", claveNueva = "", repetirNueva = "",
-                avisoClave = "Tu clave quedó cambiada."
-            )
+        val token = tokens.leer()
+        if (token.isNullOrBlank()) {
+            _uiState.update {
+                it.copy(avisoClave = "Necesitas conexión con el servidor para cambiar la clave.")
+            }
+            onListo(false)
+            return
         }
-        return true
+
+        cambiandoClave = true
+        TrabajoDeFondo.alcance.launch {
+            var aviso: String
+            var ok = false
+            try {
+                val respuesta = ClienteRemoto(direccion.leer()).autenticacion.cambiarClave(
+                    "Bearer " + token,
+                    PeticionCambioClave(e.claveNueva)
+                )
+                ok = respuesta.isSuccessful
+                aviso = when {
+                    ok -> "Tu clave quedó cambiada."
+                    respuesta.code() == 400 -> "La clave no cumple los requisitos: revísala."
+                    respuesta.code() == 401 -> "Tu sesión venció. Vuelve a entrar."
+                    else -> "El servidor respondió " + respuesta.code() + ": la clave no se cambió."
+                }
+            } catch (ex: Exception) {
+                aviso = "Sin conexión con el servidor: la clave no se cambió."
+            }
+            if (ok) {
+                repositorio.cambiarClave(p.id, Clave.hash(p.rut, e.claveNueva))
+            }
+            withContext(Dispatchers.Main) {
+                cambiandoClave = false
+                _uiState.update {
+                    if (ok) it.copy(
+                        claveActual = "", claveNueva = "", repetirNueva = "",
+                        errorActual = null, errorNueva = null, errorRepetir = null,
+                        avisoClave = aviso
+                    ) else it.copy(avisoClave = aviso)
+                }
+                onListo(ok)
+            }
+        }
     }
 
     fun onElegirPregunta(idPregunta: Long) {

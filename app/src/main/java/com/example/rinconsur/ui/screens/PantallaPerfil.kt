@@ -400,7 +400,7 @@ fun PantallaPerfil(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { if (vm.cambiarClave()) cambiandoClave = false }) {
+                TextButton(onClick = { vm.cambiarClave { ok -> if (ok) cambiandoClave = false } }) {
                     Text("Cambiar la clave")
                 }
             },

@@ -4,6 +4,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface ApiAutenticacion {
@@ -13,6 +14,12 @@ interface ApiAutenticacion {
 
     @GET("api/auth/preguntas")
     suspend fun preguntas(): Response<okhttp3.ResponseBody>
+
+    @retrofit2.http.PUT("api/auth/clave")
+    suspend fun cambiarClave(
+        @retrofit2.http.Header("Authorization") autorizacion: String,
+        @Body peticion: PeticionCambioClave
+    ): Response<okhttp3.ResponseBody>
 }
 
 interface ApiUsuarios {
@@ -145,6 +152,8 @@ interface ApiMedicion {
 }
 
 data class PeticionLogin(val rut: String, val clave: String)
+
+data class PeticionCambioClave(val claveNueva: String)
 
 data class RespuestaLogin(val token: String?, val usuario: UsuarioRemoto?)
 

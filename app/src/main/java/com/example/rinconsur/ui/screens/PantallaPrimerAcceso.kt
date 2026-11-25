@@ -137,7 +137,7 @@ fun PantallaPrimerAcceso(onListo: (PerfilUsuario) -> Unit) {
             Spacer(Modifier.height(Dimens.espacioMedio))
             BotonPrincipal(
                 texto = "Guardar y entrar",
-                onClick = { vm.guardar()?.let(onListo) },
+                onClick = { vm.guardar { perfil -> if (perfil != null) onListo(perfil) } },
                 habilitado = ui.puedeGuardar
             )
             Spacer(Modifier.height(Dimens.espacioGrande))
