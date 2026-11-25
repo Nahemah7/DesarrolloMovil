@@ -157,12 +157,13 @@ fun PantallaLogin(onEntrar: (PerfilUsuario, Boolean) -> Unit) {
                     Spacer(Modifier.height(Dimens.espacioGrande))
 
                     BotonPrincipal(
-                        texto = "Entrar",
+                        texto = if (estado.verificando) "Verificando…" else "Entrar",
                         icono = Icons.Filled.Login,
+                        habilitado = !estado.verificando,
                         onClick = {
-                            val rol = vm.entrar()
-
-                            if (rol != null) onEntrar(rol, vm.usuario.value?.debeCambiarClave == true)
+                            vm.entrar { rol, debeCambiarClave ->
+                                if (rol != null) onEntrar(rol, debeCambiarClave)
+                            }
                         }
                     )
 

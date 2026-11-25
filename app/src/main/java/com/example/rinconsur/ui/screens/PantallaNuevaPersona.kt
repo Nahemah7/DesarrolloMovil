@@ -45,6 +45,7 @@ fun PantallaNuevaPersona(onVolver: () -> Unit) {
     val persona by vm.persona.collectAsStateWithLifecycle()
     val errores by vm.errores.collectAsStateWithLifecycle()
     val codigo by vm.codigo.collectAsStateWithLifecycle()
+    val guardando by vm.guardando.collectAsStateWithLifecycle()
 
     Column(
         Modifier
@@ -147,7 +148,11 @@ fun PantallaNuevaPersona(onVolver: () -> Unit) {
         }
 
         Spacer(Modifier.height(Dimens.espacioMedio))
-        BotonPrincipal(texto = "Crear cuenta y generar código", onClick = { vm.crear() })
+        BotonPrincipal(
+            texto = if (guardando) "Creando la cuenta…" else "Crear cuenta y generar código",
+            habilitado = !guardando,
+            onClick = { vm.crear() }
+        )
         Spacer(Modifier.height(Dimens.espacioGrande))
     }
 

@@ -15,6 +15,15 @@ interface ApiAutenticacion {
     suspend fun preguntas(): Response<okhttp3.ResponseBody>
 }
 
+interface ApiUsuarios {
+
+    @POST("api/usuarios")
+    suspend fun crear(
+        @retrofit2.http.Header("Authorization") autorizacion: String,
+        @Body peticion: PeticionUsuarioNueva
+    ): Response<UsuarioCreadoRemoto>
+}
+
 interface ApiCatalogos {
 
     @GET("api/catalogos/accesos")
@@ -150,6 +159,22 @@ data class UsuarioRemoto(
     val genero: String?,
     val activo: Boolean?,
     val debeCambiarClave: Boolean?
+)
+
+data class PeticionUsuarioNueva(
+    val rut: String,
+    val nombres: String,
+    val apellidoPaterno: String,
+    val apellidoMaterno: String?,
+    val correo: String,
+    val telefono: String?,
+    val genero: String,
+    val rol: String
+)
+
+data class UsuarioCreadoRemoto(
+    val usuario: UsuarioRemoto?,
+    val codigoTemporal: String?
 )
 
 data class AccesoRemoto(

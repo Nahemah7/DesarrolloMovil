@@ -8,7 +8,8 @@ data class LoginUiState(
     val claveVisible: Boolean = false,
     val errorRut: String? = null,
     val errorClave: String? = null,
-    val errorGeneral: String? = null
+    val errorGeneral: String? = null,
+    val verificando: Boolean = false
 )
 
 data class RegistroUiState(

@@ -203,6 +203,34 @@ class FlujoRepository(context: Context) {
             vencimientoDeCodigo()
         )
 
+    fun guardarUsuarioDelServidor(
+        rut: String,
+        nombres: String,
+        apellidoPaterno: String,
+        apellidoMaterno: String?,
+        genero: Genero,
+        cargo: String,
+        correo: String,
+        telefono: String?,
+        perfil: PerfilUsuario,
+        clave: String,
+        debeCambiarClave: Boolean,
+        codigoVence: String?
+    ): Long? = usuarioDao.guardarDesdeServidor(
+        rut = rut,
+        nombres = nombres,
+        apellidoPaterno = apellidoPaterno,
+        apellidoMaterno = apellidoMaterno,
+        genero = genero,
+        cargo = cargo,
+        correo = correo,
+        telefono = telefono,
+        perfil = perfil,
+        claveHash = Clave.hash(Rut.formatear(rut), clave),
+        debeCambiarClave = debeCambiarClave,
+        codigoVence = codigoVence
+    )
+
     fun actualizarColaborador(
         idUsuario: Long,
         datos: NuevaPersona,
@@ -221,7 +249,7 @@ class FlujoRepository(context: Context) {
         return claveOk
     }
 
-    private fun vencimientoDeCodigo(): String =
+    fun vencimientoDeCodigo(): String =
         java.time.LocalDate.now(java.time.ZoneId.of(FechaTienda.ZONA)).plusDays(7).toString()
     fun preguntasDe(idUsuario: Long): List<PreguntaSeguridad> = usuarioDao.listarPreguntasDe(idUsuario)
     fun tienePreguntas(idUsuario: Long): Boolean = usuarioDao.tienePreguntas(idUsuario)

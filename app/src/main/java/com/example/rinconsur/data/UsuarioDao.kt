@@ -163,6 +163,46 @@ internal class UsuarioDao(private val helper: FlujoDbHelper) {
         return if (id > 0) id else null
     }
 
+    fun guardarDesdeServidor(
+        rut: String,
+        nombres: String,
+        apellidoPaterno: String,
+        apellidoMaterno: String?,
+        genero: Genero,
+        cargo: String,
+        correo: String,
+        telefono: String?,
+        perfil: PerfilUsuario,
+        claveHash: String,
+        debeCambiarClave: Boolean,
+        codigoVence: String?
+    ): Long? {
+        val idRol = idRolDe(perfil) ?: return null
+        val formateado = Rut.formatear(rut)
+        val valores = ContentValues().apply {
+            put("id_rol", idRol)
+            put("rut", formateado)
+            put("nombres", nombres.trim())
+            put("apellido_paterno", apellidoPaterno.trim())
+            put("apellido_materno", apellidoMaterno?.trim()?.ifBlank { null })
+            put("genero", genero.codigo)
+            put("cargo", cargo.trim().ifBlank { perfil.etiqueta(genero) })
+            put("correo", correo.trim().lowercase())
+            put("telefono", telefono?.trim()?.ifBlank { null })
+            put("password_hash", claveHash)
+            put("debe_cambiar_clave", if (debeCambiarClave) 1 else 0)
+            put("codigo_vence", codigoVence)
+            put("activo", 1)
+        }
+        val existente = buscarColaboradorPorRut(formateado)
+        if (existente != null) {
+            helper.writableDatabase.update("usuario", valores, "id_usuario = ?", arrayOf(existente.id.toString()))
+            return existente.id
+        }
+        val id = helper.writableDatabase.insert("usuario", null, valores)
+        return if (id > 0) id else null
+    }
+
     fun regenerarCodigo(idUsuario: Long, codigoHash: String, vence: String): Boolean {
         val valores = ContentValues().apply {
             put("password_hash", codigoHash)

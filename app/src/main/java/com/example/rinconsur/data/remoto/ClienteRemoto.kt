@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit
 class ClienteRemoto(direccion: String) {
 
     val autenticacion: ApiAutenticacion
+    val usuarios: ApiUsuarios
     val catalogos: ApiCatalogos
     val medicion: ApiMedicion
 
@@ -28,6 +29,7 @@ class ClienteRemoto(direccion: String) {
             .build()
 
         autenticacion = retrofit.create(ApiAutenticacion::class.java)
+        usuarios = retrofit.create(ApiUsuarios::class.java)
         catalogos = retrofit.create(ApiCatalogos::class.java)
         medicion = retrofit.create(ApiMedicion::class.java)
     }
